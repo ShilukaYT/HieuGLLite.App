@@ -7,6 +7,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/HieuGLLite.App/Webview-Frontend/',
+  
   plugins: [
     vue(),
     vueJsx(),
