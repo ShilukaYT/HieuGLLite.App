@@ -7,10 +7,10 @@
 
           <div class="video-container mb-6">
             <video v-if="isDark" autoplay muted loop playsinline class="loading-video">
-              <source src="./assets/videos/LoadingScreen_dark.mp4" type="video/mp4">
+              <source :src=videoPathDark type="video/mp4">
             </video>
             <video v-else autoplay muted loop playsinline class="loading-video">
-              <source src="./assets/videos/LoadingScreen_light.mp4" type="video/mp4">
+              <source :src=videoPathLight type="video/mp4">
             </video>
 
           </div>
@@ -135,6 +135,8 @@ const manifest = ref([
 ])
 
 const isLoading = ref(true);
+const videoPathDark = ref('http://app.local/videos/LoadingScreen_dark.mp4');
+const videoPathLight = ref('http://app.local/videos/LoadingScreen_light.mp4');
 
 onMounted(() => {
   // 1. Lấy tùy chọn từ localStorage
@@ -150,10 +152,13 @@ onMounted(() => {
 
 
 
+
   if (!window.chrome || !window.chrome.webview) {
     // Nếu mở bằng Chrome/Edge thường -> Bật cảnh báo
     isNotInWebView.value = true;
     console.warn("Đang chạy trên trình duyệt web thông thường!");
+    videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
+    videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
     // Đếm ngược 5 giây tắt Loading
   setTimeout(() => {
     isLoading.value = false; // 1. Tắt lớp video che màn hình đi

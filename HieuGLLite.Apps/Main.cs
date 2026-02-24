@@ -62,9 +62,14 @@ namespace HieuGLLite.Apps
 
 			await webView21.EnsureCoreWebView2Async(env);
 
+			webView21.CoreWebView2.SetVirtualHostNameToFolderMapping(
+	"app.local",
+	System.IO.Path.Combine(Application.StartupPath, "Assets"),
+	CoreWebView2HostResourceAccessKind.Allow
+);
 
 
-			webView21.Source = new Uri("http://localhost:5173");
+			webView21.Source = new Uri("https://shilukayt.github.io/HieuGLLite.App/Webview-Frontend/dist/");
 
 		}
 		private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
