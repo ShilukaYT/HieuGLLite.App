@@ -57,13 +57,20 @@ import { Icon } from '@iconify/vue';
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 
-const requestOpenURL = (url) =>
-{
-  if (window.chrome?.webview)
-{
-  
-}
-}
+const openExternal = (url) => {
+  if (window.chrome?.webview) {
+    // Gửi yêu cầu mở link ra trình duyệt ngoài lên C#
+    const features = 'width=500,height=700,left=100,top=100,menubar=no,status=no';
+    window.chrome.webview.postMessage({
+      type: "OPEN_URL",
+      url: url
+    });
+  } else {
+    // Nếu chạy trên trình duyệt thường thì vẫn mở tab mới
+    window.open(url, '_blank');
+  }
+
+};
 </script>
 
 <style scoped>

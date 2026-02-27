@@ -61,6 +61,10 @@
 
             <div class="text-h6 font-weight-bold mb-4">Khởi động</div>
             <v-switch label="Tự động chạy cùng Windows" color="warning" hide-details inset></v-switch>
+            <br>
+            <div class="text-h6 font-weight-bold mb-4">Cài đặt ứng dụng</div>
+            <v-switch label="Giữ lại tệp sau khi cài đặt (chỉ áp dụng cho giả lập công khai)" color="warning"
+              hide-details inset></v-switch>
           </v-window-item>
 
           <!-- Tab update -->
@@ -72,11 +76,15 @@
                 <div>
                   <div class="text-subtitle-2 text-grey mb-1">
                     Phiên bản UI/UX:
-                    <span class="text-white font-weight-bold ml-1">{{ props.app[0]?.FE_version }}</span>
+                    <span class="font-weight-bold ml-1" :class="isDark ? 'text-white' : 'text-black'">
+                      {{ props.app[0]?.FE_version }}
+                    </span>
                   </div>
                   <div class="text-subtitle-2 text-grey">
                     Phiên bản Client:
-                    <span class="text-white font-weight-bold ml-1">{{ props.app[0]?.BE_version || 'Không xác định' }}</span>
+                    <span class="font-weight-bold ml-1" :class="isDark ? 'text-white' : 'text-black'">
+                      {{ props.app[0]?.BE_version || 'Không xác định' }}
+                    </span>
                   </div>
                 </div>
 
@@ -93,7 +101,7 @@
               <div class="px-2">
                 <div class="text-body-1 font-weight-bold mb-3 d-flex align-center">
                   <v-icon icon="mdi-text-box-outline" start color="primary" size="small"></v-icon>
-                  Chi tiết bản cập nhật mới nhất (Phiên bản: {{ props.app[0]?.BE_version_latest }})
+                  Chi tiết bản cập nhật mới nhất (Phiên bản: {{ props.app[0]?.FE_version }})
                 </div>
 
                 <v-card variant="flat" :color="isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'"

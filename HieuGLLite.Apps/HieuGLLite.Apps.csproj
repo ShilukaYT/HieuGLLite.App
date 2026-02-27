@@ -12,6 +12,22 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyTitle>Hieu GL Lite</AssemblyTitle>
     <ApplicationIcon>rounded-in-photoretrica.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PackageIcon>rounded-in-photoretrica (Custom).png</PackageIcon>
+    <Copyright>Hieu GL Lite</Copyright>
+    <Description>Hieu GL Lite's App
+Emulator Launcher</Description>
+    <Authors>Hieu GL Lite</Authors>
+    <Version>26.3.0</Version>
+    <Product>Hieu GL Lite's App</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +41,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.3" />
     <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref.CsWinRT3.Windows" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="F:\Logo kênh\rounded-in-photoretrica (Custom).png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

@@ -13,7 +13,7 @@
         <v-avatar size="48" class="mr-4 rounded-lg elevation-4" color="transparent">
           <v-img :src="app.icon"></v-img>
         </v-avatar>
-        <span class="text-h5 font-weight-black">Cài đặt {{ app.name }}</span>
+        <span class="text-h5 font-weight-bold">Cài đặt {{ app.name }}</span>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" size="small" @click="closeModal"></v-btn>
       </v-card-title>
@@ -65,7 +65,7 @@
           prepend-inner-icon="mdi-folder-open"
         >
           <template v-slot:append-inner>
-            <v-btn color="warning" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
+            <v-btn color="blue" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
               DUYỆT
             </v-btn>
           </template>
@@ -76,9 +76,9 @@
         <v-spacer></v-spacer>
         <v-btn variant="text" class="px-6 font-weight-bold" @click="closeModal">HỦY BỎ</v-btn>
         <v-btn 
-          color="warning" 
+          color="blue" 
           variant="elevated" 
-          class="px-8 font-weight-black" 
+          class="px-8 font-weight-bold" 
           :class="isDark ? 'text-black' : 'text-white'"
           rounded="pill" 
           elevation="6"

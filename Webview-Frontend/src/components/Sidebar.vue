@@ -47,91 +47,134 @@
 
             <v-divider class="my-2"></v-divider>
 
-            <v-list-subheader class="text-uppercase font-weight-bold text-caption">Ủng hộ</v-list-subheader>
+            <v-list-subheader class="text-uppercase font-weight-bold text-caption">Ủng hộ tôi</v-list-subheader>
 
             <v-list-item @click="openPopup('https://img.vietqr.io/image/MB-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
               <template v-slot:prepend>
-                <v-icon icon="mdi-coffee"></v-icon>
+                <Icon icon="arcticons:mb-bank" width="25px" :color="isDark ? 'white' : 'black'" />
               </template>
-              <v-list-item-title class="font-weight-bold">Ủng hộ tôi qua MB</v-list-item-title>
+              <v-list-item-title class="font-weight-bold">MBBank</v-list-item-title>
             </v-list-item>
             <v-list-item @click="openPopup('https://img.vietqr.io/image/Momo-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
               <template v-slot:prepend>
-                <v-icon icon="mdi-coffee"></v-icon>
+                <Icon icon="arcticons:momo" width="25px" :color="isDark ? 'white' : 'black'" />
               </template>
-              <v-list-item-title class="font-weight-bold">Ủng hộ tôi qua Momo</v-list-item-title>
+              <v-list-item-title class="font-weight-bold">Momo</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
       </div>
 
       <v-list density="compact" class="flex-grow-1 bg-transparent px-2" nav>
-        <v-list-item v-for="app in apps" :key="app.id" :value="app.id" :active="activeId === app.id"
-          active-color="yellow" class="mb-3 rounded-xl py-2" @click="$emit('change-app', app)">
-          <template v-slot:default>
-            <div class="d-flex justify-center w-100">
-              <v-avatar size="52" :class="activeId === app.id ? 'elevation-8' : 'elevation-2'" rounded="lg"
-                style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
-                <v-img :src="app.icon" :alt="app.name"></v-img>
-              </v-avatar>
-            </div>
-          </template>
-        </v-list-item>
+  <v-list-item 
+    v-for="app in apps" 
+    :key="app.id" 
+    :value="app.id"
+    class="mb-3 rounded-xl py-2 custom-list-item"
+    @click="$emit('change-app', app)"
+  >
+    <template v-slot:default>
+      <div class="d-flex justify-center w-100 position-relative" style="overflow: visible !important;">
+        
+        <div class="position-relative" style="overflow: visible !important;">
+          <v-avatar size="52" class="pa-1 elevation-2" rounded="lg">
+            <v-img :src="app.icon"></v-img>
+          </v-avatar>
+
+          <img 
+            v-if="app.badge" 
+            :src="app.badge" 
+            class="app-badge-icon"
+          />
+        </div>
+
+      </div>
+    </template>
+  </v-list-item>
       </v-list>
 
       <div class="d-flex flex-column align-center mt-auto">
         <v-btn icon="mdi-cog" variant="text" :color="isDark ? 'grey-lighten-1' : 'grey-darken-1'" size="large"
           class="mb-4" @click="$emit('open-settings')"></v-btn>
 
-       <div class="d-flex flex-column align-center mt-auto pb-4">
-  
-  <v-menu location="right bottom" transition="slide-x-transition" :close-on-content-click="false">
-    
-    <template v-slot:activator="{ props }">
-      <v-badge :dot="!user" :color="user ? 'success' : 'grey'" location="bottom right" offset-x="3" offset-y="3">
-        <v-avatar 
-          v-bind="props" 
-          size="44" 
-          class="elevation-4 cursor-pointer" 
-          :style="{ border: user ? '2px solid #5865F2' : '2px solid #444' }"
-        >
-          <v-img :src="user ? user.avatar : defaultAvt" draggable="false"></v-img>
-        </v-avatar>
-      </v-badge>
-    </template>
+        <div class="d-flex flex-column align-center mt-auto pb-4">
 
-    <v-card :color="isDark ? '#1e1e1e' : 'white'" min-width="250" class="rounded-xl ml-4">
-      
-      <template v-if="user">
-        <v-list bg-transparent>
-          <v-list-item :prepend-avatar="user.avatar" :title="user.name" :subtitle="user.email">
-            <template v-slot:append>
-              <v-icon icon="mdi-discord" color="#5865F2"></v-icon>
+          <v-menu location="right bottom" transition="slide-x-transition" :close-on-content-click="false">
+
+            <template v-slot:activator="{ props }">
+
+              <v-badge :dot="!user" :color="user ? 'success' : 'grey'" location="bottom right" offset-x="3"
+                offset-y="3">
+                <v-avatar v-bind="props" size="44" class="elevation-4 cursor-pointer d-flex align-center justify-center"
+                  :color="!user ? (isDark ? 'grey-darken-3' : 'grey-lighten-2') : 'transparent'"
+                  :style="{ border: user ? '2px solid #5865F2' : '2px solid #444' }">
+
+                  <Icon v-if="!user" icon="solar:user-bold" width="24" height="24"
+                    :class="isDark ? 'text-grey-lighten-1' : 'text-grey-darken-1'" />
+
+                  <v-img v-else :src="userAvatarUrl" alt="Avatar" draggable="false"></v-img>
+
+                </v-avatar>
+              </v-badge>
+
             </template>
-          </v-list-item>
-        </v-list>
-        <v-divider class="mx-4"></v-divider>
-        <v-list density="compact" nav bg-transparent class="pa-2">
-          <v-list-item @click="handleLogout" prepend-icon="mdi-logout" title="Đăng xuất" color="error"></v-list-item>
-        </v-list>
-      </template>
 
-      <template v-else>
-        <div class="pa-6 text-center">
-          <v-icon icon="mdi-account-circle-outline" size="48" class="mb-2 opacity-20"></v-icon>
-          <div class="text-body-2 mb-4">Đăng nhập để đồng bộ dữ liệu</div>
-          
-          <v-btn block color="#5865F2" prepend-icon="mdi-discord" class="rounded-lg" @click="handleLogin">
-            Đăng nhập với Discord
-          </v-btn>
+            <v-card :color="isDark ? '#1e1e1e' : 'white'" min-width="250" class="rounded-xl ml-4">
+
+              <template v-if="user">
+                <v-list bg-transparent>
+
+                  <v-list-item>
+
+                    <template v-slot:prepend>
+                      <v-avatar size="56" :image="user.avatar" class="mr-2"></v-avatar>
+                    </template>
+
+                    <template v-slot:title>
+                      <div class="font-weight-bold text-body-1">{{ user.name }}</div>
+                    </template>
+
+                    <template v-slot:subtitle>
+                      <div class="text-caption d-flex align-center mt-1">
+                        <span style="opacity: 1;">@{{ user.username }}</span>
+                      </div>
+                      <div class="text-caption text-truncate mt-1" style="opacity: 1;">
+                        {{ user.email }}
+                      </div>
+                    </template>
+
+                    <template v-slot:append>
+                      <v-icon icon="mdi-discord" color="#5865F2" size="large"></v-icon>
+                    </template>
+
+                  </v-list-item>
+
+                </v-list>
+
+                <v-divider class="mx-4 my-2"></v-divider>
+
+                <v-list density="compact" nav bg-transparent class="pa-2">
+                  <v-list-item @click="handleLogout" prepend-icon="mdi-logout" title="Đăng xuất"
+                    color="error"></v-list-item>
+                </v-list>
+              </template>
+
+              <template v-else>
+                <div class="pa-6 text-center">
+                  <v-icon icon="mdi-account-circle-outline" size="48" class="mb-2 opacity-20"></v-icon>
+                  <div class="text-body-2 mb-4">Đăng nhập để đồng bộ dữ liệu</div>
+
+                  <v-btn block color="#5865F2" prepend-icon="mdi-discord" class="rounded-lg" @click="handleLogin">
+                    Đăng nhập với Discord
+                  </v-btn>
+                </div>
+              </template>
+
+            </v-card>
+          </v-menu>
         </div>
-      </template>
-
-    </v-card>
-  </v-menu>
-</div>
       </div>
 
     </div>
@@ -145,7 +188,30 @@ import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
 
-import defaultAvt from '@/assets/images/avtDefault.jpg'; // Ảnh mặc định
+import defaultAvt from '@/assets/images/avtDefault.jpg';
+const userAvatarUrl = computed(() => {
+  // 1. Chưa đăng nhập -> Không làm gì cả
+  if (!user.value) return '';
+
+  // 2. Đã đăng nhập và CÓ avatar tự up -> Trả về link avatar
+  if (user.value.avatar) {
+    return user.value.avatar;
+  }
+
+  // 3. Đã đăng nhập nhưng KHÔNG CÓ avatar (avatar = null)
+  try {
+    // Ưu tiên 1: Lấy avatar mặc định của Discord (tính theo ID để ra màu ngẫu nhiên)
+    if (user.value.id) {
+      const defaultAvatarIndex = Number(BigInt(user.value.id) >> 22n) % 6;
+      return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarIndex}.png`;
+    }
+    // Nếu không có ID luôn -> Dùng ảnh local của bạn
+    return defaultAvt;
+  } catch (error) {
+    // Nếu có lỗi gì đó xảy ra trong lúc tính toán -> Ép về ảnh local của bạn cho an toàn
+    return defaultAvt;
+  }
+});
 
 
 const theme = useTheme();
@@ -165,7 +231,7 @@ const openExternal = (url) => {
     // Nếu chạy trên trình duyệt thường thì vẫn mở tab mới
     window.open(url, '_blank');
   }
-  
+
 };
 
 onMounted(() => {
@@ -176,6 +242,7 @@ onMounted(() => {
     // 2. Lắng nghe C# trả lời
     window.chrome.webview.addEventListener('message', (event) => {
       if (event.data.type === 'USER_LOGGED_IN') {
+        // alert("Dữ liệu Vue nhận được từ C#:\n" + JSON.stringify(event.data.data));
         user.value = event.data.data;
       }
     });
@@ -218,5 +285,25 @@ const handleLogout = () => {
 
 .cursor-pointer {
   cursor: pointer;
+}
+</style>
+<style scoped>
+/* Lệnh quan trọng nhất: Ép tất cả các lớp của Vuetify phải hiện overflow */
+:deep(.v-list-item__content),
+:deep(.v-list-item__spacer),
+.custom-list-item {
+  overflow: visible !important;
+}
+
+.app-badge-icon {
+  position: absolute;
+  width: 26px; /* Tăng size một chút cho đẹp */
+  height: 26px;
+  bottom: -6px; /* Cho thò hẳn ra ngoài viền */
+  right: -6px;  /* Cho thò hẳn ra ngoài viền */
+  z-index: 100;
+  object-fit: contain;
+  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));
+  pointer-events: none;
 }
 </style>

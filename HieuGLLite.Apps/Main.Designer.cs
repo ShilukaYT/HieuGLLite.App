@@ -56,6 +56,7 @@
             BackColor = SystemColors.ButtonFace;
             Controls.Add(webView21);
             Name = "Main";
+            FormClosing += Main_FormClosing;
             Load += Main_Load;
             ((System.ComponentModel.ISupportInitialize)webView21).EndInit();
             ResumeLayout(false);

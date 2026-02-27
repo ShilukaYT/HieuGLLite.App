@@ -21,12 +21,13 @@
         </div>
       </div>
     </v-fade-transition>
-    <div id="app-container" :style="bgStyle">
+    <div id="app-container" :style="bgStyle"
+      :class="{ 'is-system-locked': isAppLocked || isMaintenance || isNotInWebView }">
       <div class="overlay"></div>
-      <MaintenanceModal v-if="isMaintenance" @close="manifest[0].isMaintenance = false" />
+      <MaintenanceModal v-if="isMaintenance" @close="isMaintenance = false; manifest[0].isMaintenance = false" />
       <WarningModal v-else-if="isNotInWebView" @close="isNotInWebView = false" />
-      
-      
+
+
 
       <div v-if="!isAppLocked">
 
@@ -35,25 +36,24 @@
           @open-settings="showSettings = true" />
 
         <v-main class="h-100 w-100">
-          <GamePage v-if="selectedApp || isMaintenance || isNotInWebView" :app="selectedApp" @play="handlePlay"
-            @open-install="showModal = true" />
+          <GamePage v-if="selectedApp || isMaintenance || isNotInWebView" :app="selectedApp" @play="handlePlayApp(selectedApp)"
+            @open-install="showModal = true" @kill-app="handleKillApp(selectedApp)" />
         </v-main>
 
         <InstallModal v-if="showModal && selectedApp" :app="selectedApp" @close="showModal = false"
           @confirm="handleInstall" />
         <SettingsModal v-if="showSettings" @close="showSettings = false" @check-update="handleManualUpdateCheck"
           :app="manifest" />
-        
-        <v-snackbar
-          v-model="showSnackbar" :timeout="3000" :color="isDark ? '#1e1e1e' : 'white'" location="top" rounded="pill"
-          class="mt-4">
+
+        <v-snackbar v-model="showSnackbar" :timeout="3000" :color="isDark ? '#1e1e1e' : 'white'" location="top"
+          rounded="pill" class="mt-4">
           <div class="text-body-1 font-weight-medium d-flex align-center" :class="isDark ? 'text-white' : 'text-black'">
             <v-icon start icon="mdi-check-circle" color="success"></v-icon>
             {{ snackbarText }}
           </div>
         </v-snackbar>
       </div>
-      <UpdateModal v-model="showUpdateModal" :update-data="updateData" @download="handleDownloadUpdate" /> 
+      <UpdateModal v-model="showUpdateModal" :update-data="updateData" @download="handleDownloadUpdate" />
     </div>
   </v-app>
 </template>
@@ -68,8 +68,12 @@ import SettingsModal from './components/SettingsModal.vue'; // Thêm dòng này
 import MaintenanceModal from './components/MaintenanceModal.vue';
 import UpdateModal from './components/UpdateModal.vue';
 const showSettings = ref(false); // Thêm dòng này
-const isAppLocked = ref(false);
-
+// Thay vì tự gán tay, chúng ta cho nó tự động nội suy
+const isAppLocked = computed(() => {
+  return isNotInWebView.value ||
+    isMaintenance.value ||
+    (showUpdateModal.value && updateData.value.isForceUpdate);
+});
 const isNotInWebView = ref(false);
 
 const showModal = ref(false);
@@ -95,31 +99,15 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
   // Sau đó báo ngược lên C# để đổi màu thanh Title như mình đã làm trước đó
 });
 
-const apps = ref([
-  {
-    id: 'bs5', name: 'BlueStacks 5', desc: 'Emulator Android số 1 thế giới. Tối ưu cho PC của bạn.', oem: 'BlueStacks_nxt',
-    icon: 'https://cdn-www.bluestacks.com/bs-images/logo-icon.png', background: 'https://support.bluestacks.com/hc/article_attachments/29496373485965',
-    isInstalled: false,
-    versions: [
-      { ver: '5.21.660', androids: [{ name: 'Android 11', code: 'Rvc64' }, { name: 'Android 9', code: 'Pie64' }] },
-      { ver: '5.10.0', androids: [{ name: 'Android 7', code: 'Nougat32' }] }
-    ]
-  },
-  {
-    id: 'ld9', name: 'LDPlayer 9', desc: 'Trải nghiệm mượt mà không độ trễ.', oem: 'LDPlayer9',
-    icon: 'https://img.icons8.com/color/96/ldplayer.png', background: 'https://cellphones.com.vn/sforum/wp-content/uploads/2023/04/tai-ldplayer-2.jpg',
-    isInstalled: false,
-    versions: [{ ver: '9.0', androids: [{ name: 'Android 9', code: 'P64' }] }]
-  }
-]);
+const apps = ref([]);
 
 //json chứa thông tin phiên bản app
 const isMaintenance = ref(false);
 
 const manifest = ref([
   {
-    FE_version: '26.2.0',
-    FE_versioncode: '260200',
+    FE_version: '26.3.0',
+    FE_versioncode: '260300',
     BE_version: null,
     BE_versioncode: null,
     BE_version_latest: '26.3.0',
@@ -159,20 +147,43 @@ onMounted(() => {
     console.warn("Đang chạy trên trình duyệt web thông thường!");
     videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
     videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
+    console.log("Video sử dụng: " + videoPathDark)
     // Đếm ngược 5 giây tắt Loading
-  setTimeout(() => {
-    isLoading.value = false; // 1. Tắt lớp video che màn hình đi
-  }, 5000);
+    setTimeout(() => {
+      isLoading.value = false; // 1. Tắt lớp video che màn hình đi
+    }, 5000);
   } else {
     window.chrome.webview.postMessage({ type: "GET_CLIENT_VERSION" });
-      window.chrome.webview.addEventListener('message', (event) => {
+    window.chrome.webview.postMessage({ type: "GET_APPS" });
+    window.chrome.webview.addEventListener('message', (event) => {
       const response = event.data;
       if (response.type === 'CLIENT_VERSION') {
         // Cập nhật vào mảng manifest (phần tử 0)
         // Lưu ý: Trong thực tế nên dùng emit, nhưng với cấu trúc hiện tại của bạn thì viết như sau:
-manifest.value[0].BE_version = response.version;
-manifest.value[0].BE_versioncode = response.versioncode;
+        manifest.value[0].BE_version = response.version;
+        manifest.value[0].BE_versioncode = response.versioncode;
       }
+      // HỨNG DANH SÁCH GAME (MỚI)
+      if (response.type === 'APPS_DATA') {
+        // Gán mảng data từ C# vào biến apps của Vue
+        apps.value = response.data;
+        
+        // Mặc định chọn app đầu tiên để hiển thị hình nền
+        if (apps.value.length > 0) {
+           selectedApp.value = apps.value[0];
+        }
+        
+        console.log("Đã tải xong danh sách Game từ C#!", apps.value);
+      }
+      // Hứng lệnh đổi trạng thái nút Play từ C#
+      if (response.type === 'APP_STATE_CHANGED') {
+        const targetApp = apps.value.find(a => a.id === response.appId);
+        if (targetApp) {
+          // Bơm thêm biến isRunning vào thẳng app hiện tại
+          targetApp.isRunning = response.isRunning; 
+        }
+      }
+
     });
     // Đã nằm trong WinForms
     console.log("Tuyệt vời! Đã kết nối với C# WebView2.");
@@ -183,20 +194,20 @@ manifest.value[0].BE_versioncode = response.versioncode;
         type: "THEME_CHANGED",
         mode: targetTheme
       });
-      
+
 
     }
 
     // Đếm ngược 5 giây tắt Loading
-  setTimeout(() => {
-    isLoading.value = false; // 1. Tắt lớp video che màn hình đi
-    
-    // 2. NGAY SAU KHI TẮT LOADING, MỚI GỌI HÀM KIỂM TRA
-    if (!isMaintenance.value) {
-      console.log("Đã tắt Loading -> Bắt đầu auto-check cập nhật!"); // Báo log để F12 dễ nhìn
-      checkForUpdates(false); 
-    }
-  }, 5000);
+    setTimeout(() => {
+      isLoading.value = false; // 1. Tắt lớp video che màn hình đi
+
+      // 2. NGAY SAU KHI TẮT LOADING, MỚI GỌI HÀM KIỂM TRA
+      if (!isMaintenance.value) {
+        console.log("Đã tắt Loading -> Bắt đầu auto-check cập nhật!"); // Báo log để F12 dễ nhìn
+        checkForUpdates(false);
+      }
+    }, 2000);
 
 
   }
@@ -211,15 +222,50 @@ manifest.value[0].BE_versioncode = response.versioncode;
 
 const selectedApp = ref(apps.value[0]);
 
-const bgStyle = computed(() => ({
-  backgroundImage: `url(${selectedApp.value?.background})`
-}));
+const bgStyle = computed(() => {
+  // 1. NẾU APP ĐANG BỊ KHÓA (Bảo trì, Bắt buộc cập nhật, hoặc Web ngoài)
+  if (isAppLocked.value || isMaintenance.value || isNotInWebView.value) {
+    return {
+      // Bạn có thể thay link này bằng một ảnh nền "System Warning/Hacker" tùy thích
+      backgroundImage: `url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920&auto=format')`
+      // Nếu dùng ảnh trong source: backgroundImage: `url('/src/assets/images/locked-bg.jpg')`
+    };
+  }
+
+  // 2. NẾU BÌNH THƯỜNG: Trả về ảnh nền của Game/App đang được chọn
+  return {
+    backgroundImage: `url(${selectedApp.value?.background})`
+  };
+});
 
 // Gửi lệnh CHƠI xuống WinForms C#
-const handlePlay = () => {
-  console.log("PLAY:", selectedApp.value.id);
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: "PLAY", id: selectedApp.value.id });
+const handlePlayApp = (app) => {
+  if (app && app.id) {
+    console.log(`Đang yêu cầu C# khởi động ứng dụng: ${app.name} (${app.id})`);
+    
+    // Bắn lệnh "PLAY" và ID của app xuống cho C#
+    window.chrome.webview.postMessage({
+      type: "PLAY",
+      appId: app.id
+    });
+  } else {
+    alert("Lỗi: Không xác định được ứng dụng cần mở!");
+  }
+};
+
+// Gửi lệnh ĐÓNG ỨNG DỤNG xuống WinForms C#
+const handleKillApp = (app) => {
+  if (app && app.id) {
+    console.log(`Đang yêu cầu C# đóng ứng dụng: ${app.name} (${
+app.id})`);
+    
+    // Bắn lệnh "KILL_APP" và ID của app xuống cho C#
+    window.chrome.webview.postMessage({
+      type: "KILL_APP",
+      appId: app.id
+    });
+  } else {
+    alert("Lỗi: Không xác định được ứng dụng cần đóng!");
   }
 };
 
@@ -245,7 +291,7 @@ const snackbarText = ref("");
 const updateData = ref({
   versionName: "",
   changelog: "",
-  isForceUpdate:""
+  isForceUpdate: ""
 });
 
 // --- HÀM KIỂM TRA CẬP NHẬT (Dùng chung) ---
@@ -265,9 +311,6 @@ const checkForUpdates = (isManual = false) => {
     };
     showUpdateModal.value = true;
     // NẾU BẢN MỚI NÀY LÀ BẮT BUỘC -> BẬT CÒNG TAY KHÓA APP LUÔN!
-    if (appInfo.isForceUpdate) {
-      isAppLocked.value = true; 
-    }
   } else if (isManual) {
     // Nếu bấm bằng tay mà KHÔNG có bản mới -> Hiện thông báo
     snackbarText.value = `Bạn đang sử dụng phiên bản mới nhất (${appInfo.FE_version})!`;
@@ -434,5 +477,14 @@ img {
   user-select: none;
   pointer-events: none;
   /* Cách này triệt để nhất, nhưng sẽ làm ảnh không click được */
+}
+
+.is-system-locked .overlay {
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(8px) grayscale(80%);
+  /* Làm nhòe và chuyển ảnh nền sang xám */
+  mix-blend-mode: normal !important;
+  z-index: 10;
+  /* Đẩy lớp phủ lên trên cùng, chỉ chừa lại các Modal */
 }
 </style>
