@@ -87,7 +87,7 @@ namespace HieuGLLite.Apps
 						if (!string.IsNullOrEmpty(discordUrl) && discordUrl.StartsWith("hieugllite://"))
 						{
 							// Đặt thông báo ở đây xem App 2 có thực sự chạy không
-							MessageBox.Show("App 2 đang chuẩn bị ném link: " + discordUrl); 
+							//MessageBox.Show("App 2 đang chuẩn bị ném link: " + discordUrl); 
 
 							COPYDATASTRUCT cds = new COPYDATASTRUCT();
 							cds.dwData = IntPtr.Zero;
@@ -110,6 +110,7 @@ namespace HieuGLLite.Apps
 			{
 				// Khi app sắp sập, nó sẽ hiện lên cái bảng này để bạn biết nguyên nhân thực sự
 				MessageBox.Show($"ỨNG DỤNG BỊ LỖI VÀ PHẢI ĐÓNG:\n\n{ex.Message}\n\nChi tiết: {ex.StackTrace}", "Hệ thống cứu hộ");
+				Application.Exit();
 			}
 		}
 

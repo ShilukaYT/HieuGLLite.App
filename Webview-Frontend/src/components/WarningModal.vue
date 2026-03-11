@@ -27,11 +27,9 @@
       <v-card-text class="text-body-1 text-medium-emphasis px-4 mb-6 pt-2">
         Hệ thống phát hiện bạn đang chạy ứng dụng trong môi trường khác, 
         vui lòng cài đặt ứng dụng để có trải nghiệm tốt nhất.
-        <br /><br />
-        Nếu bạn là nhà phát triển và muốn bỏ qua cảnh báo này, vui lòng nhấn nút bên dưới.
       </v-card-text>
 
-      <v-card-actions class="justify-center">
+      <!-- <v-card-actions class="justify-center">
         <v-btn
           color="error"
           variant="outlined"
@@ -42,7 +40,7 @@
         >
           TÔI LÀ DEV, BỎ QUA CẢNH BÁO
         </v-btn>
-      </v-card-actions>
+      </v-card-actions> -->
     </v-card>
   </v-dialog>
 </template>

@@ -79,7 +79,7 @@
           color="blue" 
           variant="elevated" 
           class="px-8 font-weight-bold" 
-          :class="isDark ? 'text-black' : 'text-white'"
+          :class="text-white"
           rounded="pill" 
           elevation="6"
           @click="confirmInstall"
@@ -121,29 +121,31 @@ watch(availableAndroids, (newVal) => {
 
 // Logic Path ban đầu
 const oem = computed(() => props.app?.oem || 'unknown');
-if (props.app.oem === 'BlueStacks_nxt'){
+//start with BlueStacks_*** like BlueStacks_nxt, then fallback to OEM name, finally fallback to 'unknown'
   emulatorPath.value = `C:\\ProgramData\\${props.app?.oem.replace(/\s/g, '')}`;
-}
-else {
-  emulatorPath.value = `C:\\${props.app?.oem}`;
-}
 
 const closeModal = () => {
   isOpen.value = false;
   setTimeout(() => emit('close'), 300);
 };
 
+// InstallModal.vue
 const confirmInstall = () => {
   emit('confirm', {
-    version: selectedVerObj.value?.ver,
-    codename: selectedAndroidObj.value?.code,
+    versionObj: selectedVerObj.value, // Nguyên cục Version
+    androidObj: selectedAndroidObj.value, // Nguyên cục Android
     path: emulatorPath.value
   });
 };
 
+// InstallModal.vue
 const handleMessage = (event) => {
   if (event.data?.type === "FOLDER_SELECTED") {
-    emulatorPath.value = event.data.path + `\\${oem.value}`;
+    // Regex /[\\/]+$/ sẽ tìm và xóa tất cả dấu \ hoặc / ở cuối chuỗi
+    const baseDir = event.data.path.replace(/[\\/]+$/, ''); 
+    
+    // Bây giờ nối chuỗi sẽ luôn chỉ có duy nhất 1 dấu gạch chéo
+    emulatorPath.value = `${baseDir}\\${oem.value}`;
   }
 };
 

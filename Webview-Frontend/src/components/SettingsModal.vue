@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="800" height="600" transition="dialog-bottom-transition"
+  <v-dialog v-model="isOpen" max-width="800" height="600" transition="dialog-bottom-transition" scrollable persistent
     @update:model-value="(val) => !val && closeModal()">
     <v-card class="rounded-xl overflow-hidden" :color="isDark ? '#121212' : '#FFFFFF'" :style="{
       backdropFilter: 'blur(20px)',
@@ -7,7 +7,8 @@
     }">
 
       <v-toolbar color="transparent" flat class="px-4 mt-2">
-        <v-toolbar-title class="text-h5 font-weight-bold">Cài đặt hệ thống</v-toolbar-title>
+        <v-toolbar-title class="text-h5 font-weight-bold"><v-icon icon="mdi-cog-outline"></v-icon> Cài đặt hệ
+          thống</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" @click="closeModal"></v-btn>
       </v-toolbar>
@@ -21,6 +22,9 @@
           <v-tab value="update" class="justify-start rounded-lg">
             <v-icon start icon="mdi-update"></v-icon>Cập nhật
           </v-tab>
+          <v-tab value="application" class="justify-start round-lg">
+            <v-icon start icon="mdi-application"></v-icon>Ứng dụng
+          </v-tab>
           <v-tab value="about" class="justify-start rounded-lg">
             <v-icon start icon="mdi-information-outline"></v-icon> Giới thiệu
           </v-tab>
@@ -33,7 +37,7 @@
         <v-window v-model="tab" class="flex-grow-1 pa-6">
           <!-- Tab General -->
           <v-window-item value="general">
-            <div class="text-h6 font-weight-bold mb-4">Giao diện</div>
+            <div class="text-h6 font-weight-bold mb-4"><v-icon icon="mdi-palette-outline"></v-icon> Giao diện</div>
 
             <v-list bg-transparent class="pa-0">
               <v-list-item class="px-0">
@@ -59,12 +63,12 @@
 
             <v-divider class="my-6 border-opacity-25"></v-divider>
 
-            <div class="text-h6 font-weight-bold mb-4">Khởi động</div>
+            <!-- <div class="text-h6 font-weight-bold mb-4">Khởi động</div>
             <v-switch label="Tự động chạy cùng Windows" color="warning" hide-details inset></v-switch>
             <br>
             <div class="text-h6 font-weight-bold mb-4">Cài đặt ứng dụng</div>
             <v-switch label="Giữ lại tệp sau khi cài đặt (chỉ áp dụng cho giả lập công khai)" color="warning"
-              hide-details inset></v-switch>
+              hide-details inset></v-switch> -->
           </v-window-item>
 
           <!-- Tab update -->
@@ -88,28 +92,94 @@
                   </div>
                 </div>
 
-                <v-btn color="primary" variant="tonal" class="rounded-lg update-btn px-5" height="48"
+                <v-btn color="primary" variant="tonal" :loading="loading" class="rounded-lg update-btn px-5" height="48"
                   @click="$emit('check-update')">
                   <v-icon start icon="mdi-refresh" size="24" class="update-icon"></v-icon>
                   Kiểm tra cập nhật
                 </v-btn>
 
               </div>
+              <v-divider class="mb-5 opacity-20"></v-divider>
+              <div class="d-flex align-center justify-space-between mb-6">
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold mb-0">Cập nhật danh sách ứng dụng</div>
+                  <div class="text-caption text-medium-emphasis">Tải lại dữ liệu ứng dụng sau khi mở rộng quyền truy cập
+                  </div>
+                </div>
+
+                <v-btn color="primary" variant="tonal" class="rounded-lg update-btn px-5" height="48"
+                  @click="$emit('get-apps')">
+                  <v-icon start icon="mdi-refresh" size="24" class="update-icon"></v-icon>
+                  Cập nhật ngay
+                </v-btn>
+              </div>
 
               <v-divider class="mb-5 opacity-20"></v-divider>
 
-              <div class="px-2">
+              <div class="px-2 mb-4">
                 <div class="text-body-1 font-weight-bold mb-3 d-flex align-center">
                   <v-icon icon="mdi-text-box-outline" start color="primary" size="small"></v-icon>
-                  Chi tiết bản cập nhật mới nhất (Phiên bản: {{ props.app[0]?.FE_version }})
+                  Chi tiết bản cập nhật (Phiên bản: {{ props.app[0]?.FE_version }})
                 </div>
 
                 <v-card variant="flat" :color="isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'"
-                  class="pa-4 rounded-lg text-body-2 text-grey-lighten-1"
+                  :class="isDark ? 'pa-4 rounded-lg text-body-2 text-grey-lighten-1' : 'pa-4 rounded-lg text-body-2 text-grey-darken-2'"
                   style="white-space: pre-line; max-height: 220px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05);">
                   {{ props.app[0]?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
                 </v-card>
               </div>
+
+
+              
+
+            </div>
+          </v-window-item>
+
+          <!-- Tab application -->
+          <v-window-item value="application">
+            <div class="mt-4 px-2">
+
+              <div class="px-2 pb-4">
+                <div class="text-h6 font-weight-bold mb-4">
+                  <v-icon icon="mdi-wrench-outline" start color="primary" size="small"></v-icon>
+                  
+                  Quản lý ứng dụng</div>
+
+                <v-row>
+                  <v-col cols="12" class="py-2">
+                    <div
+                      class="d-flex align-center justify-space-between bg-surface-variant-light pa-3 rounded-lg border">
+                      <div>
+                        <div class="text-body-2 font-weight-bold">Dọn dẹp bộ nhớ đệm</div>
+                        <div class="text-caption text-medium-emphasis">Giải phóng dữ liệu tạm (Sẽ khởi động chậm hơn vào lần sau)
+                        </div>
+                      </div>
+                      <v-btn color="success" variant="tonal" class="rounded-lg px-4"
+                        @click="$emit('clear-cache')">
+                        <v-icon start icon="mdi-broom" size="18"></v-icon>
+                        DỌN DẸP
+                      </v-btn>
+                    </div>
+                  </v-col>
+
+                  <v-col cols="12" class="py-2">
+                    <div
+                      class="d-flex align-center justify-space-between bg-surface-variant-light pa-3 rounded-lg border">
+                      <div>
+                        <div class="text-body-2 font-weight-bold text-error">Gỡ cài đặt</div>
+                        <div class="text-caption text-medium-emphasis">Xóa toàn bộ ứng dụng và dữ liệu liên quan</div>
+                      </div>
+                      <v-btn color="error" variant="tonal" class="rounded-lg px-4"
+                        @click="$emit('uninstall')">
+                        <v-icon start icon="mdi-delete-outline" size="18"></v-icon>
+                        GỠ BỎ
+                      </v-btn>
+                    </div>
+                  </v-col>
+                </v-row>
+              </div>
+
+              
 
             </div>
           </v-window-item>
@@ -152,7 +222,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 
 const props = defineProps(['app']);
-const emit = defineEmits(['close', 'check-update']);
+const emit = defineEmits(['close', 'check-update', 'get-apps','clear-cache','uninstall']);
 const theme = useTheme();
 
 const isDark = computed(() => theme.global.current.value.dark);
@@ -221,6 +291,7 @@ const applyThemePreference = (val) => {
     });
   }
 };
+
 </script>
 <style scoped>
 /* Hiệu ứng xoay mượt mà cho Icon khi lia chuột vào nút */

@@ -18,7 +18,7 @@
 
             <v-list-item @click="openExternal('https://facebook.com/hieushiluka')" rounded="lg" class="mb-1">
               <template v-slot:prepend>
-                <v-icon icon="mdi-facebook" color="isDark ? 'white':'black'"></v-icon>
+                <v-icon icon="mdi-facebook" :color="isDark ? 'white' : 'black'"></v-icon>
               </template>
               <v-list-item-title>Facebook</v-list-item-title>
             </v-list-item>
@@ -26,16 +26,27 @@
             <v-list-item @click="openExternal('http://youtube.com/channel/UCLd32LcLg-Tx6mbGPOqEbvQ?sub_confirmation=1')"
               rounded="lg" class="mb-1">
               <template v-slot:prepend>
-                <v-icon icon="mdi-youtube" color="isDark ? 'white':'black'"></v-icon>
+                <v-icon icon="mdi-youtube" :color="isDark ? 'white' : 'black'"></v-icon>
               </template>
               <v-list-item-title>Youtube</v-list-item-title>
             </v-list-item>
 
             <v-list-item @click="openExternal('http://tiktok.com/@hieushiluka')" rounded="lg" class="mb-1">
               <template v-slot:prepend>
-                <Icon icon="ic:round-tiktok" width="25px" :color="isDark ? 'white' : 'black'" />
+                <v-icon :color="isDark ? 'white' : 'black'">
+                  <font-awesome-icon :icon="['fab', 'tiktok']" />
+                </v-icon>
               </template>
               <v-list-item-title>TikTok</v-list-item-title>
+            </v-list-item>
+            <!-- Discord server -->
+            <v-list-item @click="openExternal('https://discord.gg/GnmKM9bqEf')" rounded="lg" class="mb-1">
+              <template v-slot:prepend>
+                <v-icon :color="isDark ? 'white' : 'black'">
+                  <font-awesome-icon icon="fa-brands fa-discord" />
+                </v-icon>
+              </template>
+              <v-list-item-title>Discord</v-list-item-title>
             </v-list-item>
 
             <v-list-item @click="openExternal('https://github.com/ShilukaYT')" rounded="lg" class="mb-1">
@@ -52,14 +63,19 @@
             <v-list-item @click="openPopup('https://img.vietqr.io/image/MB-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
               <template v-slot:prepend>
-                <Icon icon="arcticons:mb-bank" width="25px" :color="isDark ? 'white' : 'black'" />
+                <v-icon :color="isDark ? 'white' : 'black'">
+                  <Icon icon="arcticons:mb-bank" />
+                </v-icon>
               </template>
               <v-list-item-title class="font-weight-bold">MBBank</v-list-item-title>
             </v-list-item>
+
             <v-list-item @click="openPopup('https://img.vietqr.io/image/Momo-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
               <template v-slot:prepend>
-                <Icon icon="arcticons:momo" width="25px" :color="isDark ? 'white' : 'black'" />
+                <v-icon :color="isDark ? 'white' : 'black'">
+                  <Icon icon="arcticons:momo" />
+                </v-icon>
               </template>
               <v-list-item-title class="font-weight-bold">Momo</v-list-item-title>
             </v-list-item>
@@ -68,31 +84,22 @@
       </div>
 
       <v-list density="compact" class="flex-grow-1 bg-transparent px-2" nav>
-  <v-list-item 
-    v-for="app in apps" 
-    :key="app.id" 
-    :value="app.id"
-    class="mb-3 rounded-xl py-2 custom-list-item"
-    @click="$emit('change-app', app)"
-  >
-    <template v-slot:default>
-      <div class="d-flex justify-center w-100 position-relative" style="overflow: visible !important;">
-        
-        <div class="position-relative" style="overflow: visible !important;">
-          <v-avatar size="52" class="pa-1 elevation-2" rounded="lg">
-            <v-img :src="app.icon"></v-img>
-          </v-avatar>
+        <v-list-item v-for="app in apps" :key="app.id" :value="app.id" class="mb-3 rounded-xl py-2 custom-list-item"
+          @click="$emit('change-app', app)" :active="activeId === app.id">
+          <template v-slot:default>
+            <div class="d-flex justify-center w-100 position-relative" style="overflow: visible !important;">
 
-          <img 
-            v-if="app.badge" 
-            :src="app.badge" 
-            class="app-badge-icon"
-          />
-        </div>
+              <div class="position-relative" style="overflow: visible !important;">
+                <v-avatar size="52" class="pa-1 elevation-2" rounded="lg">
+                  <v-img :src="app.icon"></v-img>
+                </v-avatar>
 
-      </div>
-    </template>
-  </v-list-item>
+                <img v-if="app.badge" :src="app.badge" class="app-badge-icon" />
+              </div>
+
+            </div>
+          </template>
+        </v-list-item>
       </v-list>
 
       <div class="d-flex flex-column align-center mt-auto">
@@ -188,31 +195,54 @@ import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
 
-import defaultAvt from '@/assets/images/avtDefault.jpg';
-const userAvatarUrl = computed(() => {
-  // 1. Chưa đăng nhập -> Không làm gì cả
-  if (!user.value) return '';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faFacebook, faYoutube, faTiktok, faGithub, faDiscord } from '@fortawesome/free-brands-svg-icons'
 
-  // 2. Đã đăng nhập và CÓ avatar tự up -> Trả về link avatar
-  if (user.value.avatar) {
+// Thêm các icon bạn cần vào thư viện
+library.add(faFacebook, faYoutube, faTiktok, faGithub, faDiscord)
+
+// Đăng ký component toàn cục (trước dòng app.mount)
+
+import defaultAvt from '@/assets/images/avtDefault.jpg';
+const updateAppsList = computed(() => {
+  return props.apps.map(app => {
+    if (!app.icon) {
+      return { ...app, icon: defaultAvt };
+    }
+    return app;
+  });
+});
+
+const userAvatarUrl = computed(() => {
+  // 1. Nếu chưa có dữ liệu user -> Trả về ảnh mặc định xám để không bị "đen thui"
+  if (!user.value || !user.value.id) {
+    return '';
+  }
+
+  // 2. Nếu đã có avatar tùy chỉnh từ C# gửi lên
+  if (user.value.avatar && user.value.avatar !== 'null' && user.value.avatar !== '') {
     return user.value.avatar;
   }
 
-  // 3. Đã đăng nhập nhưng KHÔNG CÓ avatar (avatar = null)
+  // 3. Xử lý cho tài khoản "discriminator: 0" (Hệ thống mới)
   try {
-    // Ưu tiên 1: Lấy avatar mặc định của Discord (tính theo ID để ra màu ngẫu nhiên)
-    if (user.value.id) {
-      const defaultAvatarIndex = Number(BigInt(user.value.id) >> 22n) % 6;
-      return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarIndex}.png`;
+    const id = user.value.id;
+    const desc = user.value.discriminator;
+
+    if (desc === '0' || !desc) {
+      // Dùng BigInt để tính toán ID dài mà không bị sai số
+      const index = Number(BigInt(id) >> 22n) % 6;
+      return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
+    } else {
+      // Cho các tài khoản cũ có số #1234
+      return `https://cdn.discordapp.com/embed/avatars/${parseInt(desc) % 5}.png`;
     }
-    // Nếu không có ID luôn -> Dùng ảnh local của bạn
-    return defaultAvt;
-  } catch (error) {
-    // Nếu có lỗi gì đó xảy ra trong lúc tính toán -> Ép về ảnh local của bạn cho an toàn
-    return defaultAvt;
+  } catch (e) {
+    // Nếu có lỗi tính toán, trả về màu xám làm phương án dự phòng
+    return 'https://cdn.discordapp.com/embed/avatars/0.png';
   }
 });
-
 
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
@@ -235,6 +265,7 @@ const openExternal = (url) => {
 };
 
 onMounted(() => {
+
   if (window.chrome?.webview) {
     // 1. Vừa bật app lên là hối C# kiểm tra tự động liền!
     window.chrome.webview.postMessage({ type: "CHECK_AUTO_LOGIN" });
@@ -297,13 +328,13 @@ const handleLogout = () => {
 
 .app-badge-icon {
   position: absolute;
-  width: 26px; /* Tăng size một chút cho đẹp */
+  width: 26px;
   height: 26px;
-  bottom: -6px; /* Cho thò hẳn ra ngoài viền */
-  right: -6px;  /* Cho thò hẳn ra ngoài viền */
+  bottom: -6px;
+  right: -6px;
   z-index: 100;
   object-fit: contain;
-  filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.8));
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8));
   pointer-events: none;
 }
 </style>

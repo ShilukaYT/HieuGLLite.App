@@ -21,12 +21,22 @@ namespace HieuGLLite.Apps
 
 			public string badge { get; set; } = "";
 
+			public string rpc_large_key { get; set; }
+			public string rpc_small_key { get; set; }
+
+			public string requiredRoleID { get; set; } = ""; // Thêm requiredRoleID để xác định quyền truy cập
+
+
 			public List<TagItem> tags { get; set; } = new List<TagItem>();
 
 			// --- CÁC BIẾN TRẠNG THÁI (C# TỰ QUÉT VÀ BƠM VÀO) ---
 			public string programPath { get; set; } = "";
 			public string dataPath { get; set; } = "";
 			public bool isInstalled { get; set; } = false;
+
+			public bool isConflict { get; set; }     // CÓ XUNG ĐỘT HAY KHÔNG
+			public string conflictAppID { get; set; } // ID đang chiếm chỗ (VD: bs5)
+			public string conflictAppName { get; set; }
 			public bool isLauncherRequired { get; set; } = false;
 
 			// NHỮNG BIẾN ĐỌC THÊM TỪ REGISTRY
@@ -76,5 +86,24 @@ namespace HieuGLLite.Apps
 			public string id { get; set; }
 			public string name { get; set; }
 		}
+
+		public class LocalAppStatus
+		{
+			public string id { get; set; }
+			public bool isInstalled { get; set; }
+			public string programPath { get; set; }
+			public string dataPath { get; set; }
+			public string installedVersion { get; set; }
+		}
+
+		public class AppProgressState
+		{
+			public string AppId { get; set; }
+			public string Status { get; set; } // "DOWNLOADING", "VERIFYING", "INSTALLING"
+			public double Percent { get; set; }
+			public string Speed { get; set; }
+		}
+
+		// Khai báo Dictionary để lưu trữ (Bộ nhớ tạm của C#)
 	}
 }
