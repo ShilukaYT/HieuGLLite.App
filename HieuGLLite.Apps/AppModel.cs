@@ -46,6 +46,8 @@ namespace HieuGLLite.Apps
 
 			public List<int> runningProcessIds { get; set; } = new List<int>();
 
+			public List<InstanceInfo> instances { get; set; } = new List<InstanceInfo>();
+
 			public List<AppVersion> versions { get; set; }
 		}
 
@@ -76,6 +78,8 @@ namespace HieuGLLite.Apps
 			public string SHA256 { get; set; }
 			public string systemFile { get; set; }
 
+			public string zipPassword { get; set; }
+
 			// Các biến trạng thái C# tự bơm vào sau khi quét Registry / File .conf
 			public bool isDownloaded { get; set; } = false;
 			public List<AndroidInstance> instances { get; set; } = new List<AndroidInstance>();
@@ -104,6 +108,10 @@ namespace HieuGLLite.Apps
 			public string Speed { get; set; }
 		}
 
-		// Khai báo Dictionary để lưu trữ (Bộ nhớ tạm của C#)
+		public class InstanceInfo
+		{
+			public string name { get; set; }        // Tên mã hệ thống (VD: Pie64, Pie64_1)
+			public string displayName { get; set; } // Tên hiển thị (VD: BlueStacks App Player 1)
+		}
 	}
 }

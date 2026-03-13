@@ -24,8 +24,10 @@
     <div id="app-container" :style="bgStyle"
       :class="{ 'is-system-locked': isAppLocked || isMaintenance || isNotInWebView }">
       <div class="overlay"></div>
-      <MaintenanceModal v-if="isMaintenance" @close="isMaintenance = false; manifest[0].isMaintenance = false" />
+      <RegionBlockModal v-if="isRegionBlocked" />
+      <MaintenanceModal v-if="isMaintenance" @close="isMaintenance = false; manifest.isMaintenance = false" />
       <WarningModal v-else-if="isNotInWebView" @close="isNotInWebView = false" />
+
 
 
 
@@ -38,8 +40,9 @@
         <v-main class="h-100 w-100">
           <GamePage v-if="selectedApp && !isMaintenance && !isNotInWebView" :app="selectedApp"
             :downloading-apps="downloadingApps" :stage-config="stageConfig" @play="handlePlayApp(selectedApp)"
-            @open-install="showModal = true" @kill-app="handleKillApp(selectedApp)" @confirm-cancel="confirmCancel"
-            @toggle-pause="togglePause" @extra-action="handleExtraAction" />
+            @open-install="handleOpenInstallModal" @kill-app="handleKillApp(selectedApp)"
+            @confirm-cancel="confirmCancel" @toggle-pause="togglePause" @extra-action="handleExtraAction"
+            :manifest="manifest" />
         </v-main>
 
         <div class="download-notifier-container">
@@ -77,8 +80,8 @@
           </v-fade-transition>
         </div>
 
-        <InstallModal v-if="showModal && selectedApp" :app="selectedApp" @close="showModal = false"
-          @confirm="handleInstall" />
+        <InstallModal v-if="showModal && selectedApp" :app="selectedApp" :is-multi-instance="isMultiInstallMode"
+          @close="showModal = false" @confirm="handleInstall" />
         <SettingsModal v-if="showSettings" @close="showSettings = false" @check-update="handleManualUpdateCheck"
           @get-apps="handleGetApps" @clear-cache="handleClearCache" @uninstall="handleUninstall" :app="manifest" />
 
@@ -109,18 +112,22 @@ import WarningModal from './components/WarningModal.vue';
 import SettingsModal from './components/SettingsModal.vue'; // Thêm dòng này
 import MaintenanceModal from './components/MaintenanceModal.vue';
 import UpdateModal from './components/UpdateModal.vue';
+import RegionBlockModal from './components/RegionBlockModal.vue';
+const isRegionBlocked = ref(false); // Thêm cờ quản lý vùng
 const showSettings = ref(false); // Thêm dòng này
 // Thay vì tự gán tay, chúng ta cho nó tự động nội suy
+const isNotInWebView = ref(false);
 const isAppLocked = computed(() => {
   return isNotInWebView.value ||
     isMaintenance.value ||
+    isRegionBlocked.value || // <--- BỔ SUNG CỜ NÀY VÀO ĐÂY
     (showUpdateModal.value && updateData.value.isForceUpdate);
 });
-const isNotInWebView = ref(false);
 
 const showModal = ref(false);
 
 import { useTheme } from 'vuetify';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 
@@ -135,148 +142,213 @@ const overlayStyle = computed(() => ({
 const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 // Lắng nghe thay đổi từ hệ thống (không cần C# can thiệp)
+// Lắng nghe thay đổi từ hệ thống (CHỈ áp dụng nếu đang chọn chế độ "Hệ thống")
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-  const newColorScheme = event.matches ? "dark" : "light";
-  theme.global.name.value = newColorScheme; // Đổi theme Vuetify
-  // Sau đó báo ngược lên C# để đổi màu thanh Title như mình đã làm trước đó
+  const currentPref = localStorage.getItem('theme-preference') || 'system';
+  
+  if (currentPref === 'system') {
+    const newColorScheme = event.matches ? "dark" : "light";
+    theme.global.name.value = newColorScheme; // Đổi theme Vuetify
+    
+    // Báo cho C# đổi màu viền theo hệ thống
+    if (window.chrome?.webview) {
+      window.chrome.webview.postMessage({
+        type: "THEME_CHANGED",
+        mode: newColorScheme
+      });
+    }
+  }
 });
 
 const apps = ref([]);
 
 //json chứa thông tin phiên bản app
 const isMaintenance = ref(false);
-const manifest = ref([
-  {
-    FE_version: '26.3.9',
-    FE_versioncode: '260309',
+const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
+// Đổi thành Object (Dùng ngoặc nhọn {} thôi)
+const manifest = ref({
+    FE_version: '26.3.10',
+    FE_versioncode: '260310',
     BE_version: null,
     BE_versioncode: null,
-    BE_version_latest: '26.3.9',
-    BE_versioncode_latest: '260309',
-    release_date: '2026-03-11',
-    changelog: 'Yêu cầu phiên bản Client: 26.3.9\n\nThêm tab "Ứng dụng" trong cài đặt hệ thống\n - Cho phép xóa bộ nhớ đệm ứng dụng\n - Giờ đây có thể gỡ cài đặt ứng dụng\nSửa lỗi khi cài đặt giả lập trùng lặp\nSửa lỗi đồng bộ trạng thái ứng dụng trên sidebar',
+    BE_version_latest: '26.3.10',
+    BE_versioncode_latest: '260310',
+    release_date: '2026-03-13',
+    changelog: 'Yêu cầu phiên bản Client: 26.3.10 để có trải nghiệm tốt nhất\n\nTối ưu hóa thời gian khởi động ứng dụng\nCho phép thay đổi phiên bản của giả lập (sẽ cài mới giả lập)\nSửa lỗi chế độ sáng/tối luôn theo hệ thống\nTối ưu hóa luồng cập nhật phần mềm giúp cho trải nghiệm luôn liền mạch\nKhu vực thử nghiệm giới hạn đã được kích hoạt',
     isMaintenance: false,
-    isForceUpdate: false
-  }
-])
+    minRequiredVersionCode: '260309'
+});
 
 const isLoading = ref(true);
 const videoPathDark = ref('http://hieugllite.app/videos/LoadingScreen_dark.mp4');
 const videoPathLight = ref('http://hieugllite.app/videos/LoadingScreen_light.mp4');
 
-onMounted(() => {
-  // 1. Lấy tùy chọn từ localStorage
+onMounted(async () => {
+  // 1. Lấy tùy chọn Theme
   const savedPreference = localStorage.getItem('theme-preference') || 'system';
   let targetTheme = savedPreference;
-
   if (savedPreference === 'system') {
     targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-
-  // 2. Cập nhật giao diện Vue
   theme.global.name.value = targetTheme;
 
+  // 2. CHECK REGION (Khóa vùng bằng IP)
+  try {
+    const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
+    const ipData = await ipRes.json();
+    
+    if (ipData && ipData.country && ipData.country !== 'VN') {
+      isRegionBlocked.value = true;
+      console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
+    }
+  } catch (error) {
+    console.log("Không thể kiểm tra vùng, tạm thời bỏ qua.");
+  }
 
+  isMaintenance.value = manifest.value.isMaintenance;
 
-
+  // 3. KIỂM TRA MÔI TRƯỜNG CHẠY
   if (!window.chrome || !window.chrome.webview) {
-    // Nếu mở bằng Chrome/Edge thường -> Bật cảnh báo
     isNotInWebView.value = true;
     console.warn("Đang chạy trên trình duyệt web thông thường!");
     videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
     videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
-    console.log("Video sử dụng: " + videoPathDark)
-    // Đếm ngược 5 giây tắt Loading
-    setTimeout(() => {
-      isLoading.value = false; // 1. Tắt lớp video che màn hình đi
-    }, 5000);
+    
+    setTimeout(() => { isLoading.value = false; }, 5000);
   } else {
-    window.chrome.webview.postMessage({ type: "GET_CLIENT_VERSION" });
-    window.chrome.webview.postMessage({ type: "GET_APPS" });
+    // ---- MÔI TRƯỜNG CHUẨN (WEBVIEW2) ----
+
+    // A. GẮN ĐÚNG 1 CÁI "TAI NGHE" DUY NHẤT ĐỂ HỨNG MỌI TIN NHẮN TỪ C#
     window.chrome.webview.addEventListener('message', (event) => {
-      const response = event.data;
-      if (response.type === 'CLIENT_VERSION') {
-        // Cập nhật vào mảng manifest (phần tử 0)
-        // Lưu ý: Trong thực tế nên dùng emit, nhưng với cấu trúc hiện tại của bạn thì viết như sau:
-        manifest.value[0].BE_version = response.version;
-        manifest.value[0].BE_versioncode = response.versioncode;
+      const res = event.data;
+
+      switch (res.type) {
+        // --- NHÓM 1: DỮ LIỆU KHỞI TẠO TỪ C# ---
+        case 'CLIENT_VERSION':
+          manifest.value.BE_version = res.version;
+          manifest.value.BE_versioncode = res.versioncode;
+          break;
+
+        case 'APPS_DATA':
+          apps.value = res.data;
+          if (apps.value.length > 0) {
+            selectedApp.value = apps.value[0];
+          }
+          snackbarText.value = "Danh sách ứng dụng đã được cập nhật!";
+          showSnackbar.value = true;
+
+          // Báo ngược lên C# phiên bản của FE
+          window.chrome.webview.postMessage({
+            type: "PUSH_FE_VERSION",
+            version: manifest.value.FE_version
+          });
+          console.log("Đã tải xong danh sách Game từ C#!", apps.value);
+
+          // DATA NẠP XONG -> TẮT MÀN HÌNH LOADING NGAY LẬP TỨC
+          isLoading.value = false; 
+          
+          // SỬA Ở ĐÂY: Chỉ tự động check update nếu chưa từng check
+          if (!isMaintenance.value && !hasCheckedUpdate.value) {
+            checkForUpdates(false);
+            hasCheckedUpdate.value = true; // Đánh dấu là đã check rồi, lần sau không gọi nữa
+          }
+          break;
+
+        // --- NHÓM 2: CẬP NHẬT TRẠNG THÁI TẢI XUỐNG ---
+        case 'DOWNLOAD_PROGRESS':
+        case 'DOWNLOAD_STATUS':
+          downloadingApps.value[res.appId] = {
+            ...downloadingApps.value[res.appId],
+            percent: res.percent ?? downloadingApps.value[res.appId]?.percent ?? 0,
+            status: res.status,
+            speed: res.speed || '',
+            downloaded: res.downloaded || ''
+          };
+          break;
+
+        case 'DOWNLOAD_COMPLETED':
+          const targetApp = apps.value.find(a => a.id === res.appId);
+          if (targetApp) {
+            targetApp.isInstalled = true;
+            if (res.savedPath) targetApp.programPath = res.savedPath;
+          }
+          setTimeout(() => { delete downloadingApps.value[res.appId]; }, 3000);
+          break;
+
+        case 'DOWNLOAD_FAILED':
+          setTimeout(() => { delete downloadingApps.value[res.appId]; }, 5000);
+          break;
+
+        case 'DOWNLOAD_CANCELLED':
+          delete downloadingApps.value[res.appId];
+          break;
+
+        case 'DOWNLOAD_SYNC_DATA':
+          res.downloads.forEach(download => {
+            const app = apps.value.find(a => a.id === download.appId);
+            if (app) {
+              app.status = download.status;
+              app.percent = download.percent;
+              if (download.status === 'VERIFYING' || download.status === 'INSTALLING') {
+                app.loading = true;
+              }
+            }
+          });
+          break;
+
+        // --- NHÓM 3: TRẠNG THÁI APP & DỌN DẸP ---
+        case 'APP_STATE_CHANGED':
+          const runApp = apps.value.find(a => a.id === res.appId);
+          if (runApp) runApp.isRunning = res.isRunning;
+          break;
+
+        case 'APP_UNINSTALLED':
+          const uninstalledApp = apps.value.find(a => a.id === res.appId);
+          if (uninstalledApp) {
+            uninstalledApp.isInstalled = false;
+            uninstalledApp.programPath = null;
+            delete downloadingApps.value[res.appId];
+            snackbarText.value = `Đã gỡ cài đặt thành công ${uninstalledApp.name}`;
+            showSnackbar.value = true;
+          }
+          break;
+
+        case 'CLEANUP_COMPLETED':
+          snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
+          showSnackbar.value = true;
+          break;
       }
-      // HỨNG DANH SÁCH GAME (MỚI)
-
-      if (response.type === 'APPS_DATA') {
-        apps.value = response.data;
-        // Dòng này sẽ reset lựa chọn của người dùng về App số 0
-        if (apps.value.length > 0) {
-          selectedApp.value = apps.value[0];
-        }
-        snackbarText.value = "Danh sách ứng dụng đã được cập nhật!";
-        showSnackbar.value = true;
-
-
-
-        window.chrome.webview.postMessage({
-          type: "PUSH_FE_VERSION",
-          version: manifest.value[0].FE_version
-        });
-
-        console.log("Đã tải xong danh sách Game từ C#!", apps.value);
-      }
-      // Hứng lệnh đổi trạng thái nút Play từ C#
-      if (response.type === 'APP_STATE_CHANGED') {
-        const targetApp = apps.value.find(a => a.id === response.appId);
-        if (targetApp) {
-          // Bơm thêm biến isRunning vào thẳng app hiện tại
-          targetApp.isRunning = response.isRunning;
-        }
-      }
-
     });
-    // Đã nằm trong WinForms
-    console.log("Tuyệt vời! Đã kết nối với C# WebView2.");
 
-    // 3. QUAN TRỌNG: Gửi ngay thông báo cho C# để đổi màu Form
-    if (window.chrome?.webview) {
-      window.chrome.webview.postMessage({
-        type: "THEME_CHANGED",
-        mode: targetTheme
-      });
+    // B. GỬI LỆNH ĐỔI THEME
+    window.chrome.webview.postMessage({
+      type: "THEME_CHANGED",
+      mode: targetTheme
+    });
 
-
+    // C. CHỐT CHẶN BẢO MẬT: Chỉ yêu cầu nạp Game nếu KHÔNG BỊ KHÓA
+    if (!isMaintenance.value && !isRegionBlocked.value) {
+      console.log("App bình thường -> Bắt đầu Request Data từ C#");
+      window.chrome.webview.postMessage({ type: "GET_CLIENT_VERSION" });
+      window.chrome.webview.postMessage({ type: "GET_APPS" });
+      window.chrome.webview.postMessage({ type: 'SYNC_DOWNLOAD_STATUS' });
+    } else {
+      console.log("App bị khóa -> Chặn toàn bộ Request Data!");
+      // Tắt màn hình Loading đi để hiện cái Modal báo lỗi lên
+      setTimeout(() => { isLoading.value = false; }, 1000);
     }
-
-    window.chrome.webview.postMessage({ type: 'SYNC_DOWNLOAD_STATUS' });
-
-
-    // Đếm ngược 5 giây tắt Loading
-    setTimeout(() => {
-      isLoading.value = false; // 1. Tắt lớp video che màn hình đi
-
-      // 2. NGAY SAU KHI TẮT LOADING, MỚI GỌI HÀM KIỂM TRA
-      if (!isMaintenance.value) {
-        console.log("Đã tắt Loading -> Bắt đầu auto-check cập nhật!"); // Báo log để F12 dễ nhìn
-        checkForUpdates(false);
-      }
-    }, 2000);
-
-
   }
-
-  isMaintenance.value = manifest.value[0].isMaintenance;
-
-
-
 });
 
 
-
-const selectedApp = ref(apps.value[0]);
+const selectedApp = ref(apps.value);
 
 const bgStyle = computed(() => {
   // 1. NẾU APP ĐANG BỊ KHÓA (Bảo trì, Bắt buộc cập nhật, hoặc Web ngoài)
   if (isAppLocked.value || isMaintenance.value || isNotInWebView.value) {
     return {
       // Bạn có thể thay link này bằng một ảnh nền "System Warning/Hacker" tùy thích
-      backgroundImage: `url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1920&auto=format')`
+      backgroundImage: `url('assets/images/appLocked.jpg')`
       // Nếu dùng ảnh trong source: backgroundImage: `url('/src/assets/images/locked-bg.jpg')`
     };
   }
@@ -303,11 +375,30 @@ const handlePlayApp = (app) => {
 };
 
 //gửi lệnh EXTRA ACTION xuống WinForms C#
+// Thêm biến này ở đầu phần script
+const isMultiInstallMode = ref(false);
+
+// Cập nhật lại hàm này
 const handleExtraAction = (payload) => {
   if (window.chrome?.webview) {
 
+    // 1. Nếu là lệnh Tạo bản sao -> Bật cờ, mở Modal
+    // if (payload.type === 'INSTALL_MULTI') {
+    //   isMultiInstallMode.value = true;
+    //   showModal.value = true;
+    //   return; 
+    // }
+
+    // 2. Nếu là lệnh Thay đổi phiên bản -> Tắt cờ, mở Modal (cho chọn full)
+    if (payload.type === 'CHANGE_VERSION') {
+      isMultiInstallMode.value = false;
+      showModal.value = true;
+      return;
+    }
+
+    // 3. Các lệnh khác (như UNINSTALL) thì bắn thẳng xuống C#
     window.chrome.webview.postMessage({
-      type: payload.type, // Sẽ là OPEN_MULTI, UNINSTALL, v.v.
+      type: payload.type,
       appId: payload.id
     });
     console.log(`Đang gửi lệnh ${payload.type} cho app ID: ${payload.id}`);
@@ -329,15 +420,23 @@ const handleKillApp = (app) => {
   }
 };
 
+
+const handleOpenInstallModal = () => {
+  isMultiInstallMode.value = false;
+  showModal.value = true;
+}
 // Gửi lệnh CÀI ĐẶT (cùng với Version & OS đã chọn từ Modal) xuống WinForms C#
 // App.vue - Tìm đến hàm handleInstall và thay bằng đoạn này:
+// Gửi lệnh CÀI ĐẶT (hoặc TẠO BẢN SAO) xuống WinForms C#
 const handleInstall = (selection) => {
   showModal.value = false;
 
-  // Log để bạn kiểm tra dữ liệu trước khi bắn xuống C#
-  console.log("Bắt đầu quy trình INSTALL AIO cho:", selectedApp.value.id);
+  // PHÂN LUỒNG TẠI ĐÂY: Quyết định gửi lệnh gì xuống C#
+  const commandType = isMultiInstallMode.value ? "INSTALL_MULTI" : "INSTALL";
 
-  //load status waiting
+  console.log(`Bắt đầu quy trình ${commandType} cho:`, selectedApp.value.id);
+
+  // Load status waiting
   downloadingApps.value[selectedApp.value.id] = {
     percent: 0,
     status: 'WAITING',
@@ -346,12 +445,11 @@ const handleInstall = (selection) => {
   };
 
   if (window.chrome?.webview) {
-    // Trích xuất dữ liệu từ các Object mà InstallModal gửi lên
     const v = selection.versionObj;
     const a = selection.androidObj;
 
     window.chrome.webview.postMessage({
-      type: "INSTALL",
+      type: commandType, // Sử dụng biến commandType ở đây
       appId: selectedApp.value.id,
 
       // Thông tin bộ cài (.exe)
@@ -359,16 +457,20 @@ const handleInstall = (selection) => {
       exeName: v.fileName,
       exeHash: v.SHA256,
 
-      // Thông tin Android Image (.bin)
+      // Thông tin Android Image (.bin / .zip)
       androidUrl: a.downloadURL,
       androidName: a.fileName,
       androidHash: a.SHA256,
-      androidCode: a.code, // Ví dụ: Nougat32
+      androidCode: a.code,
+      zipPassword: a.zipPassword, // Gửi luôn pass giải nén xuống
 
-      // Đường dẫn cài đặt người dùng chọn
+      // Đường dẫn cài đặt
       installPath: selection.path
     });
   }
+
+  // QUAN TRỌNG: Reset lại cờ sau khi gửi lệnh để không bị kẹt ở chế độ Multi
+  isMultiInstallMode.value = false;
 };
 
 // App.vue
@@ -392,15 +494,6 @@ const confirmCancel = (appId) => {
     });
   }
 
-  //listen for message from C# to confirm cancellation
-  window.chrome.webview.addEventListener('message', (event) => {
-    const res = event.data;
-    if (res.type === 'DOWNLOAD_CANCELLED' && res.appId === appId) {
-      console.log(`Đã xác nhận hủy tải: ${appId}`);
-      delete downloadingApps.value[appId]; // Xóa ngay khỏi UI
-    }
-  });
-
 }
 
 //==================== Cập nhật =====================
@@ -414,38 +507,31 @@ const updateData = ref({
   isForceUpdate: ""
 });
 
-// --- HÀM KIỂM TRA CẬP NHẬT (Dùng chung) ---
+// --- HÀM KIỂM TRA CẬP NHẬT ---
 const checkForUpdates = (isManual = false) => {
-  const appInfo = manifest.value[0];
+  const appInfo = manifest.value; // Khai báo gọn nhẹ thế này thôi
 
-  // Chuyển FE_versioncode và BE_versioncode_latest thành số để so sánh
-  const currentCode = parseInt(appInfo.BE_versioncode);
-  const latestCode = parseInt(appInfo.BE_versioncode_latest);
+  const currentCode = parseInt(appInfo.BE_versioncode || "0");
+  const latestCode = parseInt(appInfo.BE_versioncode_latest || "0");
+  const minRequiredCode = parseInt(appInfo.minRequiredVersionCode || "0"); 
+
+  console.log(`Đang kiểm tra cập nhật: Client(${currentCode}) vs Server(${latestCode})`); // Thêm dòng này để dễ debug
 
   if (latestCode > currentCode) {
-    // Nếu có bản mới -> Cập nhật dữ liệu và Bật Modal
+    const isForcedForThisUser = currentCode < minRequiredCode;
+    
     updateData.value = {
       versionName: appInfo.BE_version_latest,
       changelog: appInfo.changelog,
-      isForceUpdate: appInfo.isForceUpdate
+      isForceUpdate: isForcedForThisUser 
     };
     showUpdateModal.value = true;
-    // NẾU BẢN MỚI NÀY LÀ BẮT BUỘC -> BẬT CÒNG TAY KHÓA APP LUÔN!
+
   } else if (isManual) {
-    // Nếu bấm bằng tay mà KHÔNG có bản mới -> Hiện thông báo
     snackbarText.value = `Bạn đang sử dụng phiên bản mới nhất (${appInfo.BE_version_latest})!`;
     showSnackbar.value = true;
   }
 };
-
-const handleDownloadUpdate = (url) => {
-  // Chỉ thực hiện khi người dùng thực sự nhấn nút "Tải về" trên Modal cập nhật
-  if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: "OPEN_URL", url: url });
-  }
-  showUpdateModal.value = false;
-};
-
 // --- HÀM HỨNG SỰ KIỆN TỪ SETTINGS ---
 const handleManualUpdateCheck = () => {
   checkForUpdates(true); // Truyền true vì đây là thao tác thủ công
@@ -498,103 +584,103 @@ const handleGetApps = () => {
   }
 };
 
-window.chrome.webview.addEventListener('message', (event) => {
-  const res = event.data; // Thống nhất dùng tên biến 'res'
+// window.chrome.webview.addEventListener('message', (event) => {
+//   const res = event.data; // Thống nhất dùng tên biến 'res'
 
-  switch (res.type) {
-    // 1. CẬP NHẬT TIẾN ĐỘ & TRẠNG THÁI
+//   switch (res.type) {
+//     // 1. CẬP NHẬT TIẾN ĐỘ & TRẠNG THÁI
 
-    case 'DOWNLOAD_PROGRESS':
-    case 'DOWNLOAD_STATUS':
-      downloadingApps.value[res.appId] = {
-        ...downloadingApps.value[res.appId],
-        percent: res.percent ?? downloadingApps.value[res.appId]?.percent ?? 0,
-        status: res.status,
-        speed: res.speed || '',
-        downloaded: res.downloaded || ''
-      };
-      break;
+//     case 'DOWNLOAD_PROGRESS':
+//     case 'DOWNLOAD_STATUS':
+//       downloadingApps.value[res.appId] = {
+//         ...downloadingApps.value[res.appId],
+//         percent: res.percent ?? downloadingApps.value[res.appId]?.percent ?? 0,
+//         status: res.status,
+//         speed: res.speed || '',
+//         downloaded: res.downloaded || ''
+//       };
+//       break;
 
-    // 2. KHI CÀI ĐẶT HOÀN TẤT
-    case 'DOWNLOAD_COMPLETED':
-      // Bước A: Tìm App trong danh sách hiển thị để đổi nút
-      const targetApp = apps.value.find(a => a.id === res.appId);
-      if (targetApp) {
-        targetApp.isInstalled = true; // Lật công tắc Đã cài đặt
-        if (res.savedPath) targetApp.programPath = res.savedPath; // Lưu path thực tế
-        console.log(`Đã kích nổ thành công: ${targetApp.name}`);
-      }
+//     // 2. KHI CÀI ĐẶT HOÀN TẤT
+//     case 'DOWNLOAD_COMPLETED':
+//       // Bước A: Tìm App trong danh sách hiển thị để đổi nút
+//       const targetApp = apps.value.find(a => a.id === res.appId);
+//       if (targetApp) {
+//         targetApp.isInstalled = true; // Lật công tắc Đã cài đặt
+//         if (res.savedPath) targetApp.programPath = res.savedPath; // Lưu path thực tế
+//         console.log(`Đã kích nổ thành công: ${targetApp.name}`);
+//       }
 
-      // Bước B: Giữ thông báo 3 giây rồi tự biến mất
-      setTimeout(() => {
-        delete downloadingApps.value[res.appId];
-      }, 3000);
-      break;
+//       // Bước B: Giữ thông báo 3 giây rồi tự biến mất
+//       setTimeout(() => {
+//         delete downloadingApps.value[res.appId];
+//       }, 3000);
+//       break;
 
-    // 3. KHI CÓ LỖI XẢY RA
-    case 'DOWNLOAD_FAILED':
-      console.error("Lỗi cài đặt:", res.error);
-      // Giữ thông báo lỗi để người dùng kịp đọc
-      setTimeout(() => {
-        delete downloadingApps.value[res.appId];
-      }, 5000);
-      break;
+//     // 3. KHI CÓ LỖI XẢY RA
+//     case 'DOWNLOAD_FAILED':
+//       console.error("Lỗi cài đặt:", res.error);
+//       // Giữ thông báo lỗi để người dùng kịp đọc
+//       setTimeout(() => {
+//         delete downloadingApps.value[res.appId];
+//       }, 5000);
+//       break;
 
-    // 4. ĐỒNG BỘ KHI F5
-    // App.vue
-    case 'DOWNLOAD_SYNC_DATA':
-      res.downloads.forEach(download => {
-        const app = this.apps.find(a => a.id === download.appId);
-        if (app) {
-          app.status = download.status; // Lưu trạng thái vào Vue
-          app.percent = download.percent;
+//     // 4. ĐỒNG BỘ KHI F5
+//     // App.vue
+//     case 'DOWNLOAD_SYNC_DATA':
+//       res.downloads.forEach(download => {
+//         const app = this.apps.find(a => a.id === download.appId);
+//         if (app) {
+//           app.status = download.status; // Lưu trạng thái vào Vue
+//           app.percent = download.percent;
 
-          // Nếu status là VERIFYING hoặc INSTALLING -> Hiện hiệu ứng loading chung
-          if (download.status === 'VERIFYING' || download.status === 'INSTALLING') {
-            app.loading = true; // Bật Spinner hoặc Progress Indeterminate
-          }
-        }
-      });
-      break;
+//           // Nếu status là VERIFYING hoặc INSTALLING -> Hiện hiệu ứng loading chung
+//           if (download.status === 'VERIFYING' || download.status === 'INSTALLING') {
+//             app.loading = true; // Bật Spinner hoặc Progress Indeterminate
+//           }
+//         }
+//       });
+//       break;
 
 
-    // 5. CẬP NHẬT TRẠNG THÁI APP ĐANG CHẠY (Nút Play/Kill)
-    case 'APP_STATE_CHANGED':
-      const app = apps.value.find(a => a.id === res.appId);
-      if (app) app.isRunning = res.isRunning;
-      break;
-    case 'DOWNLOAD_CANCELLED':
-      console.log(`Đã hủy tải: ${res.appId}`);
-      delete downloadingApps.value[res.appId];
-      break;
+//     // 5. CẬP NHẬT TRẠNG THÁI APP ĐANG CHẠY (Nút Play/Kill)
+//     case 'APP_STATE_CHANGED':
+//       const app = apps.value.find(a => a.id === res.appId);
+//       if (app) app.isRunning = res.isRunning;
+//       break;
+//     case 'DOWNLOAD_CANCELLED':
+//       console.log(`Đã hủy tải: ${res.appId}`);
+//       delete downloadingApps.value[res.appId];
+//       break;
 
-    case 'APP_UNINSTALLED':
-      const uninstalledApp = apps.value.find(a => a.id === res.appId);
-      if (uninstalledApp) {
-        // 1. Chuyển trạng thái để hiện lại nút "CÀI ĐẶT NGAY"
-        uninstalledApp.isInstalled = false;
-        uninstalledApp.programPath = null;
+//     case 'APP_UNINSTALLED':
+//       const uninstalledApp = apps.value.find(a => a.id === res.appId);
+//       if (uninstalledApp) {
+//         // 1. Chuyển trạng thái để hiện lại nút "CÀI ĐẶT NGAY"
+//         uninstalledApp.isInstalled = false;
+//         uninstalledApp.programPath = null;
 
-        // 2. QUAN TRỌNG: Xóa khỏi danh sách đang xử lý để ẩn Progress Bar
-        delete downloadingApps.value[res.appId];
+//         // 2. QUAN TRỌNG: Xóa khỏi danh sách đang xử lý để ẩn Progress Bar
+//         delete downloadingApps.value[res.appId];
 
-        // 3. (Tùy chọn) Hiện thông báo thành công cho người dùng
-        snackbarText.value = `Đã gỡ cài đặt thành công ${uninstalledApp.name}`;
-        showSnackbar.value = true;
+//         // 3. (Tùy chọn) Hiện thông báo thành công cho người dùng
+//         snackbarText.value = `Đã gỡ cài đặt thành công ${uninstalledApp.name}`;
+//         showSnackbar.value = true;
 
-        console.log(`Đã gỡ cài đặt: ${uninstalledApp.name}`);
-      }
-      break;
-    case 'CLEANUP_COMPLETED':
+//         console.log(`Đã gỡ cài đặt: ${uninstalledApp.name}`);
+//       }
+//       break;
+//     case 'CLEANUP_COMPLETED':
 
-      snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
-      showSnackbar.value = true;
+//       snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
+//       showSnackbar.value = true;
 
-      console.log("Dọn dẹp hoàn tất!");
-      break;
-  }
-}
-);
+//       console.log("Dọn dẹp hoàn tất!");
+//       break;
+//   }
+// }
+// );
 
 // Hàm xử lý khi người dùng bấm nút Xóa Cache
 const handleClearCache = () => {
@@ -612,13 +698,11 @@ const handleClearCache = () => {
   }
 };
 
-const handleUninstall = () =>
-{
+const handleUninstall = () => {
   console.log("Đang yêu cầu gỡ cài đặt");
-  if (window.chrome?.webview)
-{
-  window.chrome.webview.postMessage({type : "UNINSTALL_APP"})
-}
+  if (window.chrome?.webview) {
+    window.chrome.webview.postMessage({ type: "UNINSTALL_APP" })
+  }
 }
 </script>
 

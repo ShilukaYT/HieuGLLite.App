@@ -32,12 +32,10 @@
           style="line-height: 1.6;">
           {{ isDescLong ? shortDesc : app.desc }}
 
-          <a v-if="isDescLong" 
-   @click.prevent="showInfoModal = true"
-   style="cursor: pointer"
-   class="text-primary text-decoration-none ml-1 font-weight-bold">
-   Xem thêm
-</a>
+          <a v-if="isDescLong" @click.prevent="showInfoModal = true" style="cursor: pointer"
+            class="text-primary text-decoration-none ml-1 font-weight-bold">
+            Xem thêm
+          </a>
         </div>
 
         <v-dialog v-model="showInfoModal" max-width="600" transition="dialog-bottom-transition">
@@ -78,37 +76,33 @@
       <v-card-actions class="mt-6 px-4 pb-4 flex-column align-stretch">
         <div v-if="downloadingApps[app.id]" class="modern-notifier-box w-100">
           <div class="d-flex justify-space-between align-center mb-1">
-  <div class="d-flex flex-column">
-    <span class="app-name-label">{{ stageConfig[downloadingApps[app.id].status]?.text || "TẠM DỪNG" }}</span>
-  </div>
+            <div class="d-flex flex-column">
+              <span class="app-name-label">{{ stageConfig[downloadingApps[app.id].status]?.text || "TẠM DỪNG" }}</span>
+            </div>
 
-  <div v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)"
-    class="d-flex align-center">
-    
-    <v-btn icon variant="text" size="small" density="compact" class="mr-1"
-      :color="downloadingApps[app.id].status === 'PAUSED' ? 'success' : 'warning'"
-      @click.stop="$emit('toggle-pause', app.id)">
-      <v-icon size="20">
-        {{ downloadingApps[app.id].status === 'PAUSED' ? 'mdi-play-circle' : 'mdi-pause-circle' }}
-      </v-icon>
-    </v-btn>
+            <div v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)"
+              class="d-flex align-center">
 
-    <v-btn icon variant="text" size="small" density="compact" color="error" class="mr-3"
-      @click.stop="$emit('confirm-cancel', app.id)">
-      <v-icon size="20">mdi-close-circle</v-icon>
-    </v-btn>
+              <v-btn icon variant="text" size="small" density="compact" class="mr-1"
+                :color="downloadingApps[app.id].status === 'PAUSED' ? 'success' : 'warning'"
+                @click.stop="$emit('toggle-pause', app.id)">
+                <v-icon size="20">
+                  {{ downloadingApps[app.id].status === 'PAUSED' ? 'mdi-play-circle' : 'mdi-pause-circle' }}
+                </v-icon>
+              </v-btn>
 
-    <span class="huge-percent">{{ Math.ceil(downloadingApps[app.id].percent) }}<small>%</small></span>
-  </div>
-</div>
+              <v-btn icon variant="text" size="small" density="compact" color="error" class="mr-3"
+                @click.stop="$emit('confirm-cancel', app.id)">
+                <v-icon size="20">mdi-close-circle</v-icon>
+              </v-btn>
 
-<v-progress-linear 
-  :model-value="downloadingApps[app.id].percent"
-  :color="stageConfig[downloadingApps[app.id].status]?.color" 
-  height="6" 
-  rounded
-  :indeterminate="stageConfig[downloadingApps[app.id].status]?.loading"
-></v-progress-linear>
+              <span class="huge-percent">{{ Math.ceil(downloadingApps[app.id].percent) }}<small>%</small></span>
+            </div>
+          </div>
+
+          <v-progress-linear :model-value="downloadingApps[app.id].percent"
+            :color="stageConfig[downloadingApps[app.id].status]?.color" height="6" rounded
+            :indeterminate="stageConfig[downloadingApps[app.id].status]?.loading"></v-progress-linear>
 
 
           <div v-if="downloadingApps[app.id].downloaded || downloadingApps[app.id].speed"
@@ -142,7 +136,8 @@
 
               <v-menu location="top end" transition="slide-y-reverse-transition">
                 <template v-slot:activator="{ props }">
-                  <v-btn v-bind="props" color="success" variant="tonal" size="x-medium" style="gap: 8px;" icon="mdi-cog" rounded="pill">
+                  <v-btn v-bind="props" color="success" variant="tonal" size="x-medium" style="gap: 8px;" icon="mdi-cog"
+                    rounded="pill">
                   </v-btn>
                 </template>
 
@@ -159,11 +154,24 @@
                     @click="$emit('extra-action', { type: 'BACKUP', id: app.id })">
                   </v-list-item>
 
-                <v-list-item prepend-icon="mdi-cloud-download" title="Khôi phục" class="rounded-lg mb-1"
+                  <v-list-item prepend-icon="mdi-cloud-download" title="Khôi phục" class="rounded-lg mb-1"
                     @click="$emit('extra-action', { type: 'RESTORE', id: app.id })">
-                </v-list-item>
+                  </v-list-item>
 
                   <v-divider class="my-1"></v-divider>
+
+                  <v-list-item 
+                    v-if="props.manifest?.BE_versioncode >= 260310" 
+                    prepend-icon="mdi-source-branch" 
+                    title="Thay đổi phiên bản"
+                    class="rounded-lg text-primary" 
+                    @click="$emit('extra-action', { type: 'CHANGE_VERSION', id: app.id })"> 
+                  </v-list-item>
+
+                  <!-- <v-list-item prepend-icon="mdi-monitor-multiple" title="Tạo Instance mới"
+                    class="rounded-lg text-success"
+                    @click="$emit('extra-action', { type: 'INSTALL_MULTI', id: app.id })">
+                  </v-list-item> -->
 
                   <v-list-item prepend-icon="mdi-trash-can-outline" title="Gỡ cài đặt" class="rounded-lg text-error"
                     @click="$emit('extra-action', { type: 'UNINSTALL', id: app.id })">
@@ -189,7 +197,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 
 // 1. Gán biến props CỰC KỲ QUAN TRỌNG
-const props = defineProps(['app', 'downloadingApps', 'stageConfig']); // Nhận từ App.vue
+const props = defineProps(['app', 'downloadingApps', 'stageConfig', 'manifest']); // Nhận từ App.vue
 // 2. Bổ sung 'kill-app' vào danh sách khai báo
 // GamePage.vue
 defineEmits(['play', 'open-install', 'kill-app', 'toggle-pause', 'confirm-cancel', 'extra-action']);

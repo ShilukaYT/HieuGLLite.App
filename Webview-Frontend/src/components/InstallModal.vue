@@ -13,15 +13,20 @@
         <v-avatar size="48" class="mr-4 rounded-lg elevation-4" color="transparent">
           <v-img :src="app.icon"></v-img>
         </v-avatar>
-        <span class="text-h5 font-weight-bold">Cài đặt {{ app.name }}</span>
+        <span class="text-h5 font-weight-bold">
+          {{ isMultiInstance ? 'Tạo bản sao' : 'Cài đặt' }} {{ app.name }}
+        </span>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" size="small" @click="closeModal"></v-btn>
       </v-card-title>
 
       <v-card-text class="px-6 py-4">
-        <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2">Cấu hình phiên bản:</div>
+        <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2">
+          {{ isMultiInstance ? 'Chọn hệ điều hành cho bản sao:' : 'Cấu hình phiên bản:' }}
+        </div>
+        
         <v-row class="mb-2">
-          <v-col cols="6">
+          <v-col cols="6" v-if="!isMultiInstance">
             <v-select
               v-model="selectedVerObj"
               :items="app.versions"
@@ -37,11 +42,11 @@
             ></v-select>
           </v-col>
           
-          <v-col cols="6">
+          <v-col :cols="isMultiInstance ? 12 : 6">
             <v-select
               v-model="selectedAndroidObj"
               :items="availableAndroids"
-              item-title="name"
+              item-title="displayName"
               return-object
               label="Hệ điều hành"
               variant="solo-filled"
@@ -50,26 +55,33 @@
               hide-details
               prepend-inner-icon="mdi-android"
               class="rounded-lg"
-            ></v-select>
+              :item-props="item => ({ disabled: item.isDisabled })"
+            >
+              <template v-slot:no-data>
+                <div class="pa-3 text-caption text-center text-grey">Tất cả phiên bản đều đã được tích hợp!</div>
+              </template>
+            </v-select>
           </v-col>
         </v-row>
 
-        <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2 mt-4">Thư mục lưu trữ:</div>
-        <v-text-field
-          v-model="emulatorPath"
-          readonly
-          variant="solo-filled"
-          :bg-color="isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
-          hide-details
-          class="rounded-lg"
-          prepend-inner-icon="mdi-folder-open"
-        >
-          <template v-slot:append-inner>
-            <v-btn color="blue" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
-              DUYỆT
-            </v-btn>
-          </template>
-        </v-text-field>
+        <template v-if="!isMultiInstance">
+          <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2 mt-4">Thư mục lưu trữ:</div>
+          <v-text-field
+            v-model="emulatorPath"
+            readonly
+            variant="solo-filled"
+            :bg-color="isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
+            hide-details
+            class="rounded-lg"
+            prepend-inner-icon="mdi-folder-open"
+          >
+            <template v-slot:append-inner>
+              <v-btn color="blue" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
+                DUYỆT
+              </v-btn>
+            </template>
+          </v-text-field>
+        </template>
       </v-card-text>
 
       <v-card-actions class="px-6 pb-6 pt-0">
@@ -78,13 +90,14 @@
         <v-btn 
           color="blue" 
           variant="elevated" 
-          class="px-8 font-weight-bold" 
-          :class="text-white"
+          class="px-8 font-weight-bold text-white" 
           rounded="pill" 
           elevation="6"
+          :disabled="!selectedAndroidObj"
           @click="confirmInstall"
         >
-          <v-icon icon="mdi-rocket-launch" class="mr-2"></v-icon> CÀI ĐẶT NGAY
+          <v-icon icon="mdi-rocket-launch" class="mr-2"></v-icon> 
+          {{ isMultiInstance ? 'TÍCH HỢP NGAY' : 'CÀI ĐẶT NGAY' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -93,9 +106,12 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useTheme } from 'vuetify'; // Import useTheme
+import { useTheme } from 'vuetify';
 
-const props = defineProps(['app']);
+const props = defineProps({
+  app: Object,
+  isMultiInstance: Boolean 
+});
 const emit = defineEmits(['close', 'confirm']);
 
 // --- THEME LOGIC ---
@@ -108,43 +124,53 @@ const emulatorPath = ref('');
 // 1. Chọn Version mặc định là bản đầu tiên
 const selectedVerObj = ref(props.app?.versions?.[0] || null);
 
-// 2. Danh sách Android tự động cập nhật khi đổi Version
-const availableAndroids = computed(() => selectedVerObj.value?.androids || []);
+// 2. Danh sách Android tự động cập nhật và kiểm tra trạng thái "Đã cài"
+const availableAndroids = computed(() => {
+  const androids = selectedVerObj.value?.androids || [];
 
-// 3. Chọn Android mặc định là bản đầu tiên của Version đó
-const selectedAndroidObj = ref(availableAndroids.value[0] || null);
+  return androids.map(a => {
+    // Check xem mã Android (ví dụ: Pie64) đã tồn tại trong danh sách instances chưa
+    // Lưu ý: Chỉ áp dụng kiểm tra này nếu đang mở bảng ở chế độ Multi-Instance
+    const isAlreadyInstalled = props.isMultiInstance && props.app?.instances?.some(inst => inst.name === a.code);
 
-// Theo dõi nếu đổi Version thì reset Android về bản đầu tiên của Version mới
+    return {
+      ...a,
+      // Đổi tên hiển thị cho trực quan
+      displayName: isAlreadyInstalled ? `${a.name} (Đã tích hợp)` : a.name,
+      // Gắn cờ khóa
+      isDisabled: isAlreadyInstalled 
+    };
+  });
+});
+
+// 3. Chọn Android mặc định là bản đầu tiên KHÔNG bị khóa
+const selectedAndroidObj = ref(availableAndroids.value.find(a => !a.isDisabled) || null);
+
+// Theo dõi nếu đổi Version thì reset Android về bản hợp lệ đầu tiên
 watch(availableAndroids, (newVal) => {
-  selectedAndroidObj.value = newVal[0] || null;
+  selectedAndroidObj.value = newVal.find(a => !a.isDisabled) || null;
 });
 
 // Logic Path ban đầu
 const oem = computed(() => props.app?.oem || 'unknown');
-//start with BlueStacks_*** like BlueStacks_nxt, then fallback to OEM name, finally fallback to 'unknown'
-  emulatorPath.value = `C:\\ProgramData\\${props.app?.oem.replace(/\s/g, '')}`;
+emulatorPath.value = `C:\\ProgramData\\${props.app?.oem.replace(/\s/g, '')}`;
 
 const closeModal = () => {
   isOpen.value = false;
   setTimeout(() => emit('close'), 300);
 };
 
-// InstallModal.vue
 const confirmInstall = () => {
   emit('confirm', {
-    versionObj: selectedVerObj.value, // Nguyên cục Version
-    androidObj: selectedAndroidObj.value, // Nguyên cục Android
+    versionObj: selectedVerObj.value,
+    androidObj: selectedAndroidObj.value,
     path: emulatorPath.value
   });
 };
 
-// InstallModal.vue
 const handleMessage = (event) => {
   if (event.data?.type === "FOLDER_SELECTED") {
-    // Regex /[\\/]+$/ sẽ tìm và xóa tất cả dấu \ hoặc / ở cuối chuỗi
     const baseDir = event.data.path.replace(/[\\/]+$/, ''); 
-    
-    // Bây giờ nối chuỗi sẽ luôn chỉ có duy nhất 1 dấu gạch chéo
     emulatorPath.value = `${baseDir}\\${oem.value}`;
   }
 };

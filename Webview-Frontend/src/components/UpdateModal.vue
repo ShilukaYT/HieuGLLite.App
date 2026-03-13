@@ -2,69 +2,60 @@
   <v-dialog 
     :model-value="modelValue" 
     @update:model-value="$emit('update:modelValue', $event)" 
-    max-width="650" 
+    max-width="500" 
     persistent 
     transition="dialog-bottom-transition"
   >
-    <v-card class="rounded-xl overflow-hidden"
-      :style="{
-        background: isDark ? 'linear-gradient(135deg, #1e2a3a 0%, #121212 100%)' : 'linear-gradient(135deg, #ffffff 0%, #f0f2f5 100%)',
-        backdropFilter: 'blur(30px)',
-        border: isDark ? '2px solid rgba(88, 101, 242, 0.3)' : '2px solid rgba(88, 101, 242, 0.1)',
-        boxShadow: isDark ? '0 20px 40px rgba(0,0,0,0.6)' : '0 20px 40px rgba(0,0,0,0.2)'
-      }">
+    <v-card class="rounded-xl border text-center pa-6" :theme="isDark ? 'dark' : 'light'" elevation="24">
+      <v-icon color="primary" size="80" class="mx-auto mb-3">mdi-package-up</v-icon>
       
-      <v-card-title class="d-flex flex-column align-center pt-8 pb-4 px-6 text-center">
-        <v-avatar color="primary" size="80" class="mb-4 elevation-12">
-          <v-icon icon="mdi-rocket-launch" size="48" color="white"></v-icon>
-        </v-avatar>
-        <div class="text-h4 font-weight-bold text-primary">Đã có bản cập nhật mới!</div>
-        <div class="text-subtitle-1 mt-2 opacity-80">
-          Phiên bản <v-chip color="primary" label class="font-weight-bold mx-1">{{ updateData?.versionName }}</v-chip> đã sẵn sàng.
-        </div>
+      <v-card-title class="text-h5 font-weight-bold text-primary text-wrap pb-0">
+        CẬP NHẬT PHẦN MỀM
       </v-card-title>
-
-      <v-card-text class="px-8 pt-2 pb-6">
-        <p class="text-body-1 mb-4 text-center">
-          Để có trải nghiệm tốt nhất, hãy cập nhật phần mềm!
-        </p>
+      
+      <v-card-text class="text-body-1 mt-2 pa-0" style="line-height: 1.6;">
+        Phiên bản mới <b>{{ updateData?.versionName }}</b> đã sẵn sàng!<br>
+        Để có trải nghiệm tốt nhất, vui lòng cập nhật ứng dụng.
 
         <v-card 
-          flat
-          class="pa-5 rounded-lg text-body-2" 
-          :style="{ 
-            backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(88, 101, 242, 0.05)', 
-            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(88, 101, 242, 0.1)',
-            whiteSpace: 'pre-line',
-            maxHeight: '250px',
-            overflowY: 'auto'
-          }"
+          variant="tonal" 
+          color="primary" 
+          class="mt-5 pa-4 rounded-lg text-left" 
+          style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(var(--v-theme-primary), 0.1);"
         >
-          <div class="d-flex align-center font-weight-bold mb-3 text-primary">
+          <div class="font-weight-bold mb-2 d-flex align-center">
             <v-icon icon="mdi-star-four-points" size="small" class="mr-2"></v-icon>
             Chi tiết thay đổi:
           </div>
-          {{ updateData?.changelog }}
+          <div class="text-body-2" style="white-space: pre-line;">
+            {{ updateData?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
+          </div>
         </v-card>
       </v-card-text>
 
-      <v-divider class="opacity-20 mx-8"></v-divider>
-
-      <v-card-actions class="pa-6 d-flex justify-space-between align-center">
-        <v-btn v-if="!updateData?.isForceUpdate" variant="text" color="grey" class="text-none px-4" @click="$emit('update:modelValue', false)">
-          Nhắc tôi sau
+      <v-card-actions class="justify-center mt-6 pa-0">
+        <v-btn 
+          v-if="!updateData?.isForceUpdate" 
+          color="grey" 
+          variant="text" 
+          rounded="pill" 
+          size="large" 
+          class="font-weight-bold mr-2" 
+          @click="$emit('update:modelValue', false)"
+        >
+          ĐỂ SAU
         </v-btn>
         
         <v-btn 
           color="primary" 
-          size="x-large"
-          variant="elevated" 
-          class="px-10 rounded-pill text-none font-weight-bold elevation-8" 
-          prepend-icon="mdi-cloud-download" 
+          variant="flat" 
+          rounded="pill" 
+          size="large" 
+          class="px-8 font-weight-bold" 
           @click="$emit('download')"
-          style="transition: all 0.3s ease;"
+          :disabled="true"
         >
-          Tải và Cài đặt ngay
+          CẬP NHẬT NGAY
         </v-btn>
       </v-card-actions>
       
@@ -86,3 +77,19 @@ const emit = defineEmits(['update:modelValue', 'download']);
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 </script>
+
+<style scoped>
+/* Tùy chỉnh thanh cuộn cho khu vực Changelog nhìn xịn hơn */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--v-theme-primary), 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--v-theme-primary), 0.5);
+}
+</style>

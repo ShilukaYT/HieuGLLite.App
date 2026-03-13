@@ -19,7 +19,7 @@
     <Description>Hieu GL Lite's App
 Emulator Launcher</Description>
     <Authors>Hieu GL Lite</Authors>
-    <Version>26.3.9</Version>
+    <Version>26.3.10</Version>
     <Product>Hieu GL Lite's App</Product>
   </PropertyGroup>
 
@@ -50,6 +50,7 @@ Emulator Launcher</Description>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SharpCompress" Version="0.47.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.3" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
     <FrameworkReference Include="Microsoft.Windows.SDK.NET.Ref.CsWinRT3.Windows" />

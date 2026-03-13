@@ -18,8 +18,9 @@ using Windows.Media.Playback;
 using static System.Net.WebRequestMethods;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static HieuGLLite.Apps.AppModel;
-											// Đặt ở phần khai báo đầu file Main.cs
-using WinTaskbar = Microsoft.WindowsAPICodePack.Taskbar;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Common;
 
 
 
@@ -58,10 +59,10 @@ namespace HieuGLLite.Apps
 		private DiscordRpcClient discordClient;
 
 		//Các biến toàn cục khác
-		public bool isDevMode = true;
+		public bool isDevMode = false;
 
 		public string AppName;
-		public string version = "26.3.9";
+		public string version = "26.3.10";
 		public int versioncode = 260309;
 
 		public string FE_version;
@@ -137,11 +138,6 @@ namespace HieuGLLite.Apps
 			bool isDark = IsWindowsDarkMode();
 			this.BackColor = isDark ? Color.FromArgb(18, 18, 18) : Color.White;
 		}
-
-		
-
-
-
 		protected override void WndProc(ref Message m)
 		{
 			if (m.Msg == WM_COPYDATA)
@@ -178,9 +174,6 @@ namespace HieuGLLite.Apps
 
 			base.WndProc(ref m);
 		}
-
-
-
 		private async void Main_Load(object sender, EventArgs e)
 		{
 
@@ -202,7 +195,6 @@ namespace HieuGLLite.Apps
 			webView21.CoreWebView2InitializationCompleted += WebView21_CoreWebView2InitializationCompleted;
 			webView21.WebMessageReceived += WebView_WebMessageReceived;
 			webView21.NavigationCompleted += webview21_NavigationCompleted;
-			SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
 
 			// 4. Khởi tạo môi trường dữ liệu người dùng
 			var env = await CoreWebView2Environment.CreateAsync(null, RootFolder);
@@ -214,12 +206,7 @@ namespace HieuGLLite.Apps
 			System.IO.Path.Combine(Application.StartupPath, "Assets"),
 			CoreWebView2HostResourceAccessKind.Allow
 			);
-
-
-
 			webView21.Source = new Uri(isDevMode ? "http://localhost:5173" : hostURL);
-
-
 		}
 		private void SetupSystemTray()
 		{
@@ -242,17 +229,7 @@ namespace HieuGLLite.Apps
 			// ÉP HIỆN NGAY LẬP TỨC
 			trayIcon.Visible = true;
 		}
-		private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
-		{
-			if (e.Category == UserPreferenceCategory.General)
-			{
-				bool isDarkMode = IsWindowsDarkMode();
-				this.Invoke((MethodInvoker)delegate
-				{
-					ApplyTheme(isDarkMode);
-				});
-			}
-		}
+
 		private void WebView21_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
 		{
 			if (e.IsSuccess)
@@ -311,7 +288,7 @@ namespace HieuGLLite.Apps
 			webView21.CoreWebView2.NavigateToString(html);
 		}
 
-		
+
 
 		private void WebView_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
 		{
@@ -320,7 +297,8 @@ namespace HieuGLLite.Apps
 			switch (type)
 			{
 				case "SELECT_FOLDER":
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						using (FolderBrowserDialog fbd = new FolderBrowserDialog())
 						{
 							if (fbd.ShowDialog(this) == DialogResult.OK)
@@ -406,7 +384,6 @@ namespace HieuGLLite.Apps
 					break;
 
 				case "LOGIN_DISCORD":
-
 					// Bỏ cái Task.Run vào đây để app không bị đơ lúc chờ mở trình duyệt
 					Task.Run(() =>
 					{
@@ -607,7 +584,7 @@ namespace HieuGLLite.Apps
 							System.IO.File.WriteAllText(stateFile, JsonConvert.SerializeObject(package));
 						}
 						SendStatusToVue(pId, "DOWNLOAD_STATUS", new { status = "PAUSED" });
-						
+
 					}
 					break;
 
@@ -677,10 +654,9 @@ namespace HieuGLLite.Apps
 				//{
 				//	this.Invoke((MethodInvoker)delegate { this.WindowState = FormWindowState.Minimized; });
 				//}
-				//else if (type == "CLOSE_WINDOW")
-				//{
-				//	this.Invoke((MethodInvoker)delegate { this.Close(); });
-				//}
+				case "CLOSE_WINDOW":
+					Application.Exit();
+					break;
 				case "OPEN_MULTI":
 					ExecuteAppUtility(message["appId"]?.ToString(), null, "HD-MultiInstanceManager.exe", "");
 
@@ -708,58 +684,268 @@ namespace HieuGLLite.Apps
 					break;
 				case "CLEAR_CACHE":
 					CleanLauncherInternalFilesAsync();
-					
+
 					break;
 				case "UNINSTALL_APP":
 					string protocolName = "hieugllite";
-					var uninstallConfirm = MessageBox.Show("Bạn có muốn gỡ cài đặt ứng dụng này không?\nMột số giả lập sẽ không thể khởi động nếu không có ứng dụng này?","Xác nhận gỡ cài đặt", MessageBoxButtons.YesNo,MessageBoxIcon.Warning);
+					var uninstallConfirm = MessageBox.Show(
+						"Bạn có muốn gỡ cài đặt ứng dụng này không?\nMột số giả lập sẽ không thể khởi động nếu không có ứng dụng này?",
+						"Xác nhận gỡ cài đặt",
+						MessageBoxButtons.YesNo,
+						MessageBoxIcon.Warning
+					);
+
 					if (uninstallConfirm == DialogResult.Yes)
 					{
+
+						webView21.Stop();
+						// 1. GỠ GIAO THỨC REGISTRY (Giữ nguyên của bạn)
 						try
 						{
-							// 1. Thử xóa ở HKEY_CURRENT_USER (Thường dùng vì không cần quyền Admin)
 							using (var hkcuClasses = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Classes", true))
 							{
-								if (hkcuClasses != null && hkcuClasses.OpenSubKey(protocolName) != null)
+								if (hkcuClasses?.OpenSubKey(protocolName) != null)
 								{
 									hkcuClasses.DeleteSubKeyTree(protocolName);
-									Console.WriteLine($"Đã xóa giao thức {protocolName} từ HKCU.");
 								}
 							}
 
-							// 2. Thử xóa ở HKEY_CLASSES_ROOT (Chỉ thành công nếu App đang chạy Run as Administrator)
 							using (var hkcr = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey("", true))
 							{
-								if (hkcr != null && hkcr.OpenSubKey(protocolName) != null)
+								if (hkcr?.OpenSubKey(protocolName) != null)
 								{
 									hkcr.DeleteSubKeyTree(protocolName);
-									Console.WriteLine($"Đã xóa giao thức {protocolName} từ HKCR.");
 								}
 							}
 						}
 						catch (UnauthorizedAccessException)
 						{
-							MessageBox.Show("Ứng dụng cần được chạy dưới quyền Quản trị viên (Run as Administrator) để gỡ bỏ hoàn toàn giao thức hệ thống.", "Thiếu quyền hạn", MessageBoxButtons.OK, MessageBoxIcon.Error);
+							MessageBox.Show("Cần quyền Quản trị viên (Run as Administrator) để gỡ bỏ hoàn toàn giao thức hệ thống.", "Thiếu quyền", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						}
 						catch (Exception ex)
 						{
-							MessageBox.Show($"Đã xảy ra lỗi khi gỡ giao thức URL: {ex.Message}", "Lỗi Registry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+							MessageBox.Show($"Lỗi gỡ Registry: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						}
 
-						// khởi động công cụ uninstall app
-						//Process process = new Process();
-						//ProcessStartInfo info = new ProcessStartInfo();
-						//info.FileName = "";
-						//info.Arguments = "";
-						//info.UseShellExecute = false;
-						//process.StartInfo = info;
-						//process.Start();
+						// 2. GIẢI PHÓNG WEBVIEW2 ĐỂ MỞ KHÓA FOLDER
+						if (webView21 != null)
+						{
+							webView21.Dispose(); // Ép WebView2 nhả các file đang ngậm trong RootFolder ra
+						}
 
+						// 3. XÓA DỮ LIỆU ROOT FOLDER
+						try
+						{
+							if (System.IO.Directory.Exists(RootFolder))
+							{
+								// BẮT BUỘC PHẢI CÓ CHỮ 'true' ĐỂ XÓA XUYÊN TẤT CẢ FILE CON
+								System.IO.Directory.Delete(RootFolder, true);
+							}
+						}
+						catch (Exception ex)
+						{
+							// Không nên dùng MessageBox ở đây, nếu xóa không được 1 vài file rác thì cứ lờ đi rồi thoát app là đẹp nhất
+							Console.WriteLine($"Không thể xóa sạch thư mục: {ex.Message}");
+						}
 
+						// 4. GỌI UNINSTALLER NGOÀI (NẾU BẠN MUỐN XÓA LUÔN FILE .EXE CỦA LAUNCHER NÀY)
+						// Lưu ý: 1 phần mềm đang chạy KHÔNG THỂ TỰ XÓA FILE .EXE CỦA CHÍNH NÓ.
+						// Bắt buộc phải mượn tay 1 tool bên ngoài (như Uninstall.exe của Inno Setup)
+						/*
+						try
+						{
+							Process process = new Process();
+							process.StartInfo.FileName = Path.Combine(Application.StartupPath, "unins000.exe"); // Tên tool gỡ cài đặt
+							process.StartInfo.UseShellExecute = true;
+							process.Start();
+						}
+						catch { }
+						*/
+
+						// 5. RÚT ĐIỆN APP
 						Application.Exit();
 					}
-				break;
-					
+					break;
+
+				//case "INSTALL_MULTI":
+				//	Task.Run(async () =>
+				//	{
+				//		string appId = message["appId"]?.ToString();
+				//		var app = globalAppList.FirstOrDefault(a => a.id == appId);
+
+				//		if (app == null || !app.isInstalled || string.IsNullOrEmpty(app.dataPath))
+				//		{
+				//			this.Invoke((MethodInvoker)delegate { MessageBox.Show("Không tìm thấy đường dẫn Data!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error); });
+				//			return;
+				//		}
+
+				//		string androidCode = message["androidCode"]?.ToString();
+				//		string androidUrl = message["androidUrl"]?.ToString();
+
+				//		var cts = new CancellationTokenSource();
+				//		cancellationTokens[appId] = cts;
+
+				//		try
+				//		{
+				//			isDownloading = true;
+				//			SetTaskbarState(TaskbarProgressBarStatus.Indeterminate);
+
+				//			// =========================================================
+				//			// BƯỚC 1: ÉP BLUESTACKS TẢI BẢN GỐC TRƯỚC VÀ CHỜ ĐỢI
+				//			// =========================================================
+				//			// Báo Vue hiện chữ "Đang chờ tải xuống..." để khách hàng biết
+				//			SendStatusToVue(appId, "DOWNLOAD_STATUS", new { status = "WAITING" });
+
+				//			string multiManagerPath = Path.Combine(app.programPath, "HD-MultiInstanceManager.exe");
+				//			if (System.IO.File.Exists(multiManagerPath))
+				//			{
+				//				using (Process p = new Process())
+				//				{
+				//					p.StartInfo.FileName = multiManagerPath;
+				//					p.StartInfo.Arguments = $"--cmd installImage --imageName {androidCode}";
+				//					p.StartInfo.UseShellExecute = false;
+				//					p.StartInfo.CreateNoWindow = true;
+				//					p.Start();
+				//					// KHÔNG dùng await Task.Delay hay p.Exited ở đây nữa vì process mồi sẽ thoát ngay lập tức
+				//				}
+
+				//				// --- BẮT ĐẦU CHIẾN THUẬT: THEO DÕI KHÓA TỆP (FILE LOCK POLLING) ---
+				//				string engineFolderCheck = Path.Combine(app.dataPath, "Engine", androidCode);
+				//				string vhdPath = Path.Combine(engineFolderCheck, "Root.vhd");
+				//				string vhdxPath = Path.Combine(engineFolderCheck, "Root.vhdx");
+
+				//				bool isBlueStacksDone = false;
+
+				//				// Vòng lặp kiểm tra liên tục mỗi 2 giây
+				//				while (!isBlueStacksDone)
+				//				{
+				//					cts.Token.ThrowIfCancellationRequested(); // Vẫn cho phép khách bấm Hủy nếu đợi lâu quá
+
+				//					bool fileExists = System.IO.File.Exists(vhdPath) || System.IO.File.Exists(vhdxPath);
+
+				//					if (fileExists)
+				//					{
+				//						string targetPath = System.IO.File.Exists(vhdPath) ? vhdPath : vhdxPath;
+				//						try
+				//						{
+				//							// Cố gắng mở file với quyền Ghi. 
+				//							// NẾU GIẢ LẬP ĐANG TẢI: File đang bị khóa -> Văng lỗi IOException ngay lập tức
+				//							using (FileStream fs = System.IO.File.Open(targetPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+				//							{
+				//								// NẾU LỌT VÀO ĐÂY: Mở thành công -> Giả lập đã nhả file ra -> ĐÃ TẢI XONG!
+				//								isBlueStacksDone = true;
+				//							}
+				//						}
+				//						catch (IOException)
+				//						{
+				//							// Bị văng lỗi tức là giả lập vẫn đang tải, im lặng đợi tiếp...
+				//						}
+				//					}
+
+				//					// Nếu chưa xong thì nghỉ 2 giây rồi gõ cửa check tiếp
+				//					if (!isBlueStacksDone)
+				//					{
+				//						await Task.Delay(2000, cts.Token);
+				//					}
+				//				}
+				//			}
+
+				//			// =========================================================
+				//			// BƯỚC 2: TẢI BẢN MOD TỪ JSON CỦA BẠN (Định dạng ZIP)
+				//			// =========================================================
+
+				//			// Lấy tên file từ JSON (thông qua Vue gửi xuống)
+				//			string androidName = message["androidName"]?.ToString() ?? $"{androidCode}_Mod.zip";
+
+				//			// Hứng luôn pass giải nén (nếu có)
+				//			string zipPassword = message["zipPassword"]?.ToString();
+
+				//			string tempZipPath = Path.Combine(DownloadFolder, androidName);
+
+				//			bool success = await DownloadStepAsync(appId, androidUrl, tempZipPath, "DOWNLOADING_ANDROID", cts.Token);
+
+				//			// THÊM IF SUCCESS VÀO ĐÂY ĐỂ ĐẢM BẢO TẢI XONG MỚI CHẠY TIẾP
+				//			if (success)
+				//			{
+				//				SendStatusToVue(appId, "DOWNLOAD_STATUS", new { status = "INSTALLING" });
+
+				//				// KHAI BÁO ENGINE FOLDER Ở ĐÂY
+				//				string engineFolder = Path.Combine(app.dataPath, "Engine", androidCode);
+
+				//				// =========================================================
+				//				// BƯỚC 3: GIẢI NÉN VÀ GHI ĐÈ VÀO THƯ MỤC ENGINE (SHARPCOMPRESS)
+				//				// =========================================================
+
+				//				var readerOptions = new SharpCompress.Readers.ReaderOptions
+				//				{
+				//					Password = string.IsNullOrEmpty(zipPassword) ? null : zipPassword
+				//				};
+
+				//				using (var archive = ZipArchive.OpenArchive(tempZipPath, readerOptions))
+				//				{
+				//					foreach (var entry in archive.Entries)
+				//					{
+				//						if (!entry.IsDirectory)
+				//						{
+				//							try
+				//							{
+				//								entry.WriteToDirectory(engineFolder, new ExtractionOptions()
+				//								{
+				//									ExtractFullPath = true,
+				//									Overwrite = true
+				//								});
+				//							}
+				//							catch (Exception ex)
+				//							{
+				//								Debug.WriteLine($"Lỗi giải nén file {entry.Key}: {ex.Message}");
+				//								throw new Exception("Lỗi giải nén: Sai mật khẩu hoặc file nén bị hỏng!");
+				//							}
+				//						}
+				//					}
+				//				}
+
+				//				// =========================================================
+				//				// BƯỚC 4: XÁC ĐỊNH PHIÊN BẢN VÀ PATCH XML (BYPASS BẢO MẬT)
+				//				// =========================================================
+				//				if (IsVersionGreaterOrEqual(app.installedVersion, "5.22.140"))
+				//				{
+				//					PatchBstkFile(engineFolder, androidCode);
+				//				}
+
+				//				// =========================================================
+				//				// BƯỚC 5: DỌN DẸP VÀ ĐỒNG BỘ GIAO DIỆN
+				//				// =========================================================
+				//				string confFile = Path.Combine(app.dataPath, "bluestacks.conf");
+				//				app.instances = ParseBlueStacksInstances(confFile);
+
+				//				if (System.IO.File.Exists(tempZipPath)) System.IO.File.Delete(tempZipPath);
+
+				//				SendStatusToVue(appId, "DOWNLOAD_COMPLETED", new { });
+				//				this.Invoke((MethodInvoker)delegate {
+				//					MessageBox.Show(
+				//						$"Đã cài và Bypass thành công bản Mod {androidCode} vào lõi giả lập!\n\n" +
+				//						"Vui lòng tạo bản sao mới trong Trình quản lý đa phiên bản để trải nghiệm.",
+				//						"Tuyệt vời", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				//				});
+				//			}
+				//			else
+				//			{
+				//				SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
+				//			}
+				//		}
+				//		catch (Exception ex)
+				//		{
+				//			SendStatusToVue(appId, "DOWNLOAD_FAILED", new { error = ex.Message });
+				//		}
+				//		finally
+				//		{
+				//			isDownloading = false;
+				//			cancellationTokens.Remove(appId);
+				//			activeDownloads.Remove(appId);
+				//			SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
+				//		}
+				//	});
+				//	break;
 				case "default":
 					MessageBox.Show("Yêu cầu không hợp lệ: " + type);
 					break;
@@ -793,6 +979,16 @@ namespace HieuGLLite.Apps
 				if (Directory.Exists(TempFolder))
 				{
 					DirectoryInfo di = new DirectoryInfo(TempFolder);
+					foreach (FileInfo file in di.GetFiles())
+					{
+						try { file.Delete(); } catch { /* Bỏ qua nếu file đang bận */ }
+					}
+				}
+
+				// 2. Dọn dẹp thư mục Download (Xóa các tệp chưa hoàn thiện)
+				if (Directory.Exists(DownloadFolder))
+				{
+					DirectoryInfo di = new DirectoryInfo(DownloadFolder);
 					foreach (FileInfo file in di.GetFiles())
 					{
 						try { file.Delete(); } catch { /* Bỏ qua nếu file đang bận */ }
@@ -908,7 +1104,7 @@ namespace HieuGLLite.Apps
 
 						// 2. Tool đã đóng -> Báo Vue trả lại nút "CHƯA CÀI ĐẶT"
 						SendStatusToVue(appId, "APP_UNINSTALLED", new { });
-						ShowToastWithIconAsync(app.id,"Gỡ cài đặt hoàn tất", $"{app.name} đã được gỡ cài đặt", app.icon);
+						ShowToastWithIconAsync(app.id, "Gỡ cài đặt hoàn tất", $"{app.name} đã được gỡ cài đặt", app.icon);
 						SetTaskbarState(TaskbarProgressBarStatus.NoProgress); // Tắt hiệu ứng trên Taskbar
 					}
 				}
@@ -931,7 +1127,8 @@ namespace HieuGLLite.Apps
 
 			if (!System.IO.File.Exists(fullPath))
 			{
-				this.Invoke((MethodInvoker)delegate {
+				this.Invoke((MethodInvoker)delegate
+				{
 					MessageBox.Show($"Không tìm thấy công cụ dọn dẹp: BSTCleaner.exe", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				});
 				return false;
@@ -968,7 +1165,8 @@ namespace HieuGLLite.Apps
 			}
 			catch (Exception ex)
 			{
-				this.Invoke((MethodInvoker)delegate {
+				this.Invoke((MethodInvoker)delegate
+				{
 					MessageBox.Show($"Lỗi khi chạy công cụ dọn dẹp: {ex.Message}");
 				});
 				return false;
@@ -1458,7 +1656,7 @@ namespace HieuGLLite.Apps
 
 			app.isInstalled = false;
 			app.isConflict = false;
-			app.conflictAppName = ""; // Đảm bảo reset tên mỗi lần check
+			app.conflictAppName = "";
 
 			try
 			{
@@ -1468,7 +1666,20 @@ namespace HieuGLLite.Apps
 					if (key != null)
 					{
 						string installDir = key.GetValue("InstallDir")?.ToString();
-						string registryAppID = key.GetValue("appID")?.ToString(); // Đọc "bs5" từ máy
+						string registryAppID = key.GetValue("appID")?.ToString();
+						string dataDir = key.GetValue("DataDir")?.ToString();
+
+						// --- XỬ LÝ VERSION NGAY TỪ ĐẦU ---
+						string rawVersion = key.GetValue("Version")?.ToString();
+						string cleanVersion = null;
+						if (!string.IsNullOrEmpty(rawVersion))
+						{
+							// Cắt chuỗi và chỉ lấy 3 số đầu
+							string[] parts = rawVersion.Split('.');
+							cleanVersion = parts.Length >= 3 ? $"{parts[0]}.{parts[1]}.{parts[2]}" : rawVersion;
+						}
+						// ---------------------------------
+
 						string fullExePath = Path.Combine(installDir ?? "", app.exeName ?? "");
 
 						if (!string.IsNullOrEmpty(installDir) && System.IO.File.Exists(fullExePath))
@@ -1477,6 +1688,8 @@ namespace HieuGLLite.Apps
 							{
 								app.isInstalled = true;
 								app.programPath = installDir;
+								app.dataPath = dataDir;
+								app.installedVersion = cleanVersion; // Gán chuỗi đã gọt sạch tinh tươm
 							}
 							else
 							{
@@ -1485,8 +1698,6 @@ namespace HieuGLLite.Apps
 								app.conflictAppID = registryAppID;
 								app.programPath = installDir;
 
-								// --- DÒ TÌM NGƯỢC TÊN ---
-								// Tìm trong globalAppList đã nạp ở hàm GetData
 								var existingApp = globalAppList.FirstOrDefault(a => a.id == registryAppID);
 								app.conflictAppName = existingApp != null ? existingApp.name : registryAppID;
 							}
@@ -1623,7 +1834,8 @@ namespace HieuGLLite.Apps
 		{
 			if (isDownloading)
 			{
-				this.Invoke((MethodInvoker)delegate {
+				this.Invoke((MethodInvoker)delegate
+				{
 					MessageBox.Show("Hiện đang có một ứng dụng khác đang được xử lý!", "Thông báo");
 				});
 				return;
@@ -1649,7 +1861,8 @@ namespace HieuGLLite.Apps
 			if (freeGB < requiredGB)
 			{
 				SetTaskbarState(TaskbarProgressBarStatus.Error);
-				this.Invoke((MethodInvoker)delegate {
+				this.Invoke((MethodInvoker)delegate
+				{
 					MessageBox.Show(
 						$"Ổ đĩa {Path.GetPathRoot(checkPath)} không đủ dung lượng!\n" +
 						$"- Cần: {requiredGB:F2} GB\n" +
@@ -1664,12 +1877,46 @@ namespace HieuGLLite.Apps
 			}
 			Task.Run(async () =>
 			{
-				if (app.isConflict)
+				if (app.isInstalled)
 				{
 					DialogResult result = DialogResult.None;
 
-					// Lấy tên app bị trùng (nếu có), không có thì báo chung chung
-					string conflictName = !string.IsNullOrEmpty(app.conflictAppName) ? app.conflictAppName : "một phiên bản giả lập không xác định";
+					this.Invoke((MethodInvoker)delegate {
+						result = MessageBox.Show(
+							$"Bạn đang thực hiện thay đổi phiên bản cho {app.name}.\n\n" +
+							"Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu, ứng dụng và cài đặt của phiên bản hiện tại trước khi cài đặt phiên bản mới.\n\n" +
+							"Bạn có chắc chắn muốn tiếp tục?",
+							"Cảnh báo thay đổi phiên bản",
+							MessageBoxButtons.YesNo,
+							MessageBoxIcon.Warning
+						);
+					});
+
+					if (result == DialogResult.Yes)
+					{
+						// Gọi luôn hàm dọn dẹp bằng OEM thần thánh lúc nãy để xóa trắng bản cũ
+						bool cleanSuccess = await Task.Run(() => CleanConflictingApp(app));
+
+						if (!cleanSuccess)
+						{
+							// Nếu tool dọn dẹp thất bại -> Báo Vue hủy bỏ cài đặt
+							SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
+							return;
+						}
+						// Nếu dọn dẹp thành công, nó sẽ tự động chạy tiếp xuống dưới để tải bản mới!
+					}
+					else
+					{
+						// Nếu bấm "Không" -> Hủy ngay
+						SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
+						return;
+					}
+				}
+				// ================= CHỐT CHẶN 2: PHÁT HIỆN XUNG ĐỘT (CỦA BẠN ĐÃ VIẾT) =================
+				else if (app.isConflict)
+				{
+					DialogResult result = DialogResult.None;
+					string conflictName = !string.IsNullOrEmpty(app.conflictAppName) ? app.conflictAppName : "một phiên bản giả lập khác (cùng lõi hệ thống)";
 
 					this.Invoke((MethodInvoker)delegate {
 						result = MessageBox.Show(
@@ -1683,23 +1930,21 @@ namespace HieuGLLite.Apps
 
 					if (result == DialogResult.Yes)
 					{
-						// Gọi hàm dọn dẹp mới tạo và chờ hoàn tất
 						bool cleanSuccess = await Task.Run(() => CleanConflictingApp(app));
-
 						if (!cleanSuccess)
 						{
-							// Nếu lỗi tool dọn dẹp -> Báo Vue hủy bỏ cài đặt
 							SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
 							return;
 						}
 					}
 					else
 					{
-						// Nếu bấm "Không" -> Hủy cài đặt ngay lập tức
 						SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
 						return;
 					}
 				}
+
+
 
 				// Sau khi dọn dẹp hoặc nếu không có xung đột, tiến hành tải và cài đặt
 				try
@@ -1811,7 +2056,8 @@ namespace HieuGLLite.Apps
 				{
 					SendStatusToVue(appid, "DOWNLOAD_PROGRESS", new { percent, speed, downloaded, status = statusType });
 
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						SetTaskbarProgressValue((int)percent);
 					});
 				};
@@ -1888,7 +2134,7 @@ namespace HieuGLLite.Apps
 
 						// Báo Vue đổi nút thành "MỞ ỨNG DỤNG"
 						SendStatusToVue(appid, "DOWNLOAD_COMPLETED", new { savedPath = installPath });
-						ShowToastWithIconAsync(appid,"Cài đặt hoàn tất", $"{app.name} đã được cài đặt", app.icon);
+						ShowToastWithIconAsync(appid, "Cài đặt hoàn tất", $"{app.name} đã được cài đặt", app.icon);
 
 					}
 					else
@@ -2063,8 +2309,130 @@ namespace HieuGLLite.Apps
 				await _downloader.ResumeFromPackageAsync(package);
 			}
 		}
+		private List<InstanceInfo> ParseBlueStacksInstances(string confPath)
+		{
+			var instances = new Dictionary<string, InstanceInfo>();
 
-		
+			if (!System.IO.File.Exists(confPath)) return new List<InstanceInfo>();
+
+			try
+			{
+				string[] lines = System.IO.File.ReadAllLines(confPath);
+				foreach (string line in lines)
+				{
+					// --- 1. ĐỌC CÁC BẢN MOD ĐÃ TÍCH HỢP (Từ bst.installed_images) ---
+					if (line.StartsWith("bst.installed_images="))
+					{
+						string currentImages = line.Split(new char[] { '=' }, 2)[1].Trim('\"');
+						string[] codes = currentImages.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+						foreach (string code in codes)
+						{
+							if (!string.IsNullOrEmpty(code) && !instances.ContainsKey(code))
+							{
+								instances[code] = new InstanceInfo { name = code, displayName = code };
+							}
+						}
+					}
+
+					// --- 2. ĐỌC CÁC BẢN SAO (INSTANCE) ĐÃ TẠO ---
+					if (line.StartsWith("bst.instance."))
+					{
+						string[] parts = line.Split(new char[] { '=' }, 2);
+						if (parts.Length == 2)
+						{
+							string key = parts[0].Trim();
+							string value = parts[1].Trim('\"', ' ');
+
+							string[] keyParts = key.Split('.');
+							if (keyParts.Length >= 4)
+							{
+								string instanceName = keyParts[2];
+								string property = keyParts[3];
+
+								if (!instances.ContainsKey(instanceName))
+								{
+									instances[instanceName] = new InstanceInfo
+									{
+										name = instanceName,
+										displayName = instanceName
+									};
+								}
+
+								if (property == "display_name")
+								{
+									instances[instanceName].displayName = value;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Lỗi đọc file conf: " + ex.Message);
+			}
+
+			return instances.Values.ToList();
+		}
+
+		private bool IsVersionGreaterOrEqual(string currentVersion, string targetVersion)
+		{
+			try
+			{
+				if (Version.TryParse(currentVersion, out Version v1) && Version.TryParse(targetVersion, out Version v2))
+				{
+					return v1 >= v2;
+				}
+			}
+			catch { }
+			return false;
+		}
+		private void PatchBstkFile(string engineFolder, string androidCode)
+		{
+			string bstkPath = Path.Combine(engineFolder, $"{androidCode}.bstk");
+			string bstkInPath = Path.Combine(engineFolder, "Android.bstk.in");
+
+			// Phải có đủ 2 file mới phẫu thuật được
+			if (!System.IO.File.Exists(bstkPath) || !System.IO.File.Exists(bstkInPath)) return;
+
+			try
+			{
+				XDocument docIn = XDocument.Load(bstkInPath);
+				XDocument docTarget = XDocument.Load(bstkPath);
+
+				var hardDisksIn = docIn.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
+				var hardDisksTarget = docTarget.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
+
+				// 1. CẬP NHẬT FILE ROOT
+				var rootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
+				var rootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
+				if (rootIn != null && rootTarget != null)
+				{
+					rootTarget.SetAttributeValue("uuid", rootIn.Attribute("uuid")?.Value);
+					rootTarget.SetAttributeValue("location", rootIn.Attribute("location")?.Value);
+				}
+
+				// 2. CẬP NHẬT FILE FASTBOOT
+				var fastbootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
+				var fastbootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
+				if (fastbootIn != null && fastbootTarget != null)
+				{
+					fastbootTarget.SetAttributeValue("uuid", fastbootIn.Attribute("uuid")?.Value);
+					fastbootTarget.SetAttributeValue("location", fastbootIn.Attribute("location")?.Value);
+				}
+
+				// 3. LƯU LẠI
+				docTarget.Save(bstkPath);
+				Debug.WriteLine("Đã Patch thành công file BSTK cho phiên bản mới!");
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("Lỗi sửa file BSTK: " + ex.Message);
+			}
+		}
+
+
+
 		//private void SaveDownloadState(string appid)
 		//{
 		//	if (activeDownloads.TryGetValue(appid, out var downloader))

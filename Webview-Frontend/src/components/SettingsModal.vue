@@ -32,10 +32,7 @@
 
         <div class="border-end h-100 mx-1" :class="isDark ? 'border-white-50' : 'border-black-25'"></div>
 
-
-
         <v-window v-model="tab" class="flex-grow-1 pa-6">
-          <!-- Tab General -->
           <v-window-item value="general">
             <div class="text-h6 font-weight-bold mb-4"><v-icon icon="mdi-palette-outline"></v-icon> Giao diện</div>
 
@@ -62,16 +59,8 @@
             </v-list>
 
             <v-divider class="my-6 border-opacity-25"></v-divider>
-
-            <!-- <div class="text-h6 font-weight-bold mb-4">Khởi động</div>
-            <v-switch label="Tự động chạy cùng Windows" color="warning" hide-details inset></v-switch>
-            <br>
-            <div class="text-h6 font-weight-bold mb-4">Cài đặt ứng dụng</div>
-            <v-switch label="Giữ lại tệp sau khi cài đặt (chỉ áp dụng cho giả lập công khai)" color="warning"
-              hide-details inset></v-switch> -->
           </v-window-item>
 
-          <!-- Tab update -->
           <v-window-item value="update">
             <div class="mt-4 px-2">
 
@@ -81,13 +70,13 @@
                   <div class="text-subtitle-2 text-grey mb-1">
                     Phiên bản UI/UX:
                     <span class="font-weight-bold ml-1" :class="isDark ? 'text-white' : 'text-black'">
-                      {{ props.app[0]?.FE_version }}
+                      {{ props.app?.FE_version }}
                     </span>
                   </div>
                   <div class="text-subtitle-2 text-grey">
                     Phiên bản Client:
                     <span class="font-weight-bold ml-1" :class="isDark ? 'text-white' : 'text-black'">
-                      {{ props.app[0]?.BE_version || 'Không xác định' }}
+                      {{ props.app?.BE_version || 'Không xác định' }}
                     </span>
                   </div>
                 </div>
@@ -119,23 +108,18 @@
               <div class="px-2 mb-4">
                 <div class="text-body-1 font-weight-bold mb-3 d-flex align-center">
                   <v-icon icon="mdi-text-box-outline" start color="primary" size="small"></v-icon>
-                  Chi tiết bản cập nhật (Phiên bản: {{ props.app[0]?.FE_version }})
+                  Chi tiết bản cập nhật (Phiên bản: {{ props.app?.FE_version }})
                 </div>
 
                 <v-card variant="flat" :color="isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'"
                   :class="isDark ? 'pa-4 rounded-lg text-body-2 text-grey-lighten-1' : 'pa-4 rounded-lg text-body-2 text-grey-darken-2'"
                   style="white-space: pre-line; max-height: 220px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05);">
-                  {{ props.app[0]?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
+                  {{ props.app?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
                 </v-card>
               </div>
-
-
-              
-
             </div>
           </v-window-item>
 
-          <!-- Tab application -->
           <v-window-item value="application">
             <div class="mt-4 px-2">
 
@@ -178,14 +162,10 @@
                   </v-col>
                 </v-row>
               </div>
-
-              
-
             </div>
           </v-window-item>
 
 
-          <!-- Tab About -->
           <v-window-item value="about">
             <div class="text-center mt-4">
               <v-avatar size="100" variant="tonal" class="mb-4">
@@ -208,7 +188,6 @@
               </div>
             </div>
           </v-window-item>
-
 
         </v-window>
       </div>
@@ -233,7 +212,7 @@ const themeName = ref(theme.global.name.value);
 // Hàm gửi yêu cầu lấy version
 const GetClientVersion = () => {
   if (window.chrome?.webview) {
-    // 1. Gửi yêu cầu lên C#
+    // Gửi yêu cầu lên C#. C# sẽ trả lời, và App.vue sẽ hứng lấy để cập nhật props.app
     window.chrome.webview.postMessage({ type: "GET_CLIENT_VERSION" });
   }
 };
@@ -241,20 +220,9 @@ const GetClientVersion = () => {
 onMounted(() => {
   GetClientVersion();
 
-  // 2. Chỉ đăng ký lắng nghe tin nhắn MỘT LẦN khi mount component
   if (window.chrome?.webview) {
-    window.chrome.webview.addEventListener('message', (event) => {
-      const response = event.data;
-      if (response.type === 'CLIENT_VERSION') {
-        // Cập nhật vào mảng manifest (phần tử 0)
-        // Lưu ý: Trong thực tế nên dùng emit, nhưng với cấu trúc hiện tại của bạn thì viết như sau:
-        props.app[0].BE_version = response.version;
-        props.app[0].BE_versioncode = response.versioncode;
-      }
-    });
     window.chrome.webview.postMessage({ type: "CHANGE_TITLE", title: "Cài đặt" });
   }
-
 });
 
 const closeModal = () => {
@@ -265,25 +233,18 @@ const closeModal = () => {
   }
 };
 
-
-
 const themePreference = ref(localStorage.getItem('theme-preference') || 'system');
 
 const applyThemePreference = (val) => {
-  // 1. Lưu tùy chọn vào localStorage
   localStorage.setItem('theme-preference', val);
 
   let targetTheme = val;
-
-  // 2. Nếu là 'system', kiểm tra màu của Windows
   if (val === 'system') {
     targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
-  // 3. Cập nhật Vuetify Theme
   theme.global.name.value = targetTheme;
 
-  // 4. Báo cho C# để đổi màu thanh Title
   if (window.chrome?.webview) {
     window.chrome.webview.postMessage({
       type: "THEME_CHANGED",
