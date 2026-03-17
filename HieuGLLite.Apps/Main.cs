@@ -59,11 +59,11 @@ namespace HieuGLLite.Apps
 		private DiscordRpcClient discordClient;
 
 		//Các biến toàn cục khác
-		public bool isDevMode = false;
+		public bool isDevMode = true;
 
 		public string AppName;
-		public string version = "26.3.10";
-		public int versioncode = 260310;
+		public string version = "26.3.11";
+		public int versioncode = 260311;
 
 		public string FE_version;
 
@@ -95,7 +95,7 @@ namespace HieuGLLite.Apps
 		private static string DownloadFolder => Path.Combine(RootFolder, "Downloads");
 		private static string StateFolder => Path.Combine(RootFolder, "DownloadStates");
 		private static string ConfigFile => Path.Combine(RootFolder, "installed_apps.json");
-
+		private static string SettingsFile => Path.Combine(RootFolder, "launcher_settings.json");
 		private static string TempFolder => Path.Combine(RootFolder, "Temp");
 
 		private Dictionary<string, AppProgressState> appRunningStates = new Dictionary<string, AppProgressState>();
@@ -129,13 +129,19 @@ namespace HieuGLLite.Apps
 
 		private ITaskbarList3 _taskbarList;
 
+		[DllImport("psapi.dll")]
+		public static extern int EmptyWorkingSet(IntPtr hwProc);
+
 		public Main()
 		{
 			SetCurrentProcessExplicitAppUserModelID("HieuGLLite.Launcher.v1");
 			InitializeComponent();
 			ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
+			LoadSettings();
+			this.Resize += Main_Resize;
 
-			bool isDark = IsWindowsDarkMode();
+			// Đổi màu nền dựa theo file JSON
+			bool isDark = currentTheme == "dark" || (currentTheme == "system" && IsWindowsDarkMode());
 			this.BackColor = isDark ? Color.FromArgb(18, 18, 18) : Color.White;
 		}
 		protected override void WndProc(ref Message m)
@@ -176,19 +182,20 @@ namespace HieuGLLite.Apps
 		}
 		private async void Main_Load(object sender, EventArgs e)
 		{
-
+			AppName = isDevMode ? "Hieu GL Lite (Developer mode)" : "Hieu GL Lite (beta)";
 			SetupSystemTray();
 			InitializeRPC();
-			// 2. Đồng bộ Theme hệ thống cho thanh Title
-			ApplyTheme(IsWindowsDarkMode());
 
-			AppName = isDevMode ? "Hieu GL Lite (Developer mode)" : "Hieu GL Lite (beta)";
+			// 1. TÍNH TOÁN THEME TỪ BIẾN JSON ĐÃ LOAD Ở HÀM CONSTRUCTOR
+			bool isDarkTheme = currentTheme == "dark" || (currentTheme == "system" && IsWindowsDarkMode());
+
+			// 2. ĐỒNG BỘ THEME CHO WINFORMS (Thanh Title, Nút X/Min/Max)
+			ApplyTheme(isDarkTheme);
 
 			this.Text = AppName;
 
-			// 3. Cấu hình WebView2 trước khi khởi tạo
-			// Quan trọng: Đặt DefaultBackgroundColor trùng màu App để xóa "đen màn"
-			webView21.DefaultBackgroundColor = IsWindowsDarkMode() ? Color.FromArgb(18, 18, 18) : Color.White;
+			// 3. ĐỒNG BỘ THEME CHO WEBVIEW2 TRƯỚC KHI KHỞI TẠO (Chống chớp trắng/đen màn hình)
+			webView21.DefaultBackgroundColor = isDarkTheme ? Color.FromArgb(18, 18, 18) : Color.White;
 			webView21.ZoomFactor = 0.8;
 
 			// Đăng ký các sự kiện
@@ -206,6 +213,7 @@ namespace HieuGLLite.Apps
 			System.IO.Path.Combine(Application.StartupPath, "Assets"),
 			CoreWebView2HostResourceAccessKind.Allow
 			);
+
 			webView21.Source = new Uri(isDevMode ? "http://localhost:5173" : hostURL);
 		}
 		private void SetupSystemTray()
@@ -230,6 +238,45 @@ namespace HieuGLLite.Apps
 			trayIcon.Visible = true;
 		}
 
+		// 1. Hàm tính toán và áp dụng Zoom dựa trên chiều rộng (Width)
+		private void UpdateWebViewZoom()
+		{
+			// Kiểm tra xem WebView2 đã khởi tạo xong chưa để tránh lỗi
+			if (webView21 == null || webView21.CoreWebView2 == null) return;
+
+			int width = this.ClientSize.Width;
+			double newZoom = 1.0;
+
+			// Logic phân cấp theo yêu cầu của bạn
+			if (width <= 1280)
+			{
+				newZoom = 0.8;
+			}
+			else if (width <= 1800)
+			{
+				newZoom = 0.9;
+			}
+			else if (width <= 2560)
+			{
+				newZoom = 1.0;
+			}
+			else {
+				newZoom = 1.3;
+			}
+
+			// Chỉ cập nhật nếu giá trị Zoom có sự thay đổi để tránh giật lag
+			if (webView21.ZoomFactor != newZoom)
+			{
+				webView21.ZoomFactor = newZoom;
+			}
+		}
+
+		// 2. Sự kiện xảy ra mỗi khi cửa sổ thay đổi kích thước
+		private void Main_Resize(object sender, EventArgs e)
+		{
+			UpdateWebViewZoom();
+		}
+
 		private void WebView21_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
 		{
 			if (e.IsSuccess)
@@ -240,6 +287,8 @@ namespace HieuGLLite.Apps
 				webView21.CoreWebView2.Settings.AreDefaultContextMenusEnabled = isDevMode ? true : false;
 				webView21.CoreWebView2.Settings.AreDevToolsEnabled = isDevMode ? true : false;
 				webView21.CoreWebView2.Settings.IsBuiltInErrorPageEnabled = isDevMode ? true : false;
+				webView21.CoreWebView2.Settings.IsZoomControlEnabled = isDevMode;
+
 			}
 			else
 			{
@@ -315,14 +364,6 @@ namespace HieuGLLite.Apps
 								webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(response));
 							}
 						}
-					});
-					break;
-
-				case "THEME_CHANGED":
-					string mode = message["mode"]?.ToString();
-					this.Invoke((MethodInvoker)delegate
-					{
-						ApplyTheme(mode == "dark");
 					});
 					break;
 
@@ -765,6 +806,32 @@ namespace HieuGLLite.Apps
 						// 5. RÚT ĐIỆN APP
 						Application.Exit();
 					}
+					break;
+
+				case "GET_SETTINGS":
+					// Vue yêu cầu lấy Cài đặt lúc vừa khởi động
+					this.Invoke((MethodInvoker)delegate {
+						webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new
+						{
+							type = "SYNC_SETTINGS",
+							theme = currentTheme,
+							minimizeToTray = minimizeToTrayOnClose
+						}));
+					});
+					break;
+
+				case "THEME_CHANGED":
+					currentTheme = message["mode"]?.ToString() ?? "system";
+					SaveSettings(); // LƯU VÀO JSON
+					this.Invoke((MethodInvoker)delegate {
+						bool isDarkTheme = currentTheme == "dark" || (currentTheme == "system" && IsWindowsDarkMode());
+						ApplyTheme(isDarkTheme);
+					});
+					break;
+
+				case "SET_CLOSE_BEHAVIOR":
+					minimizeToTrayOnClose = message["minimizeToTray"]?.Value<bool>() ?? true;
+					SaveSettings(); // LƯU VÀO JSON
 					break;
 
 				//case "INSTALL_MULTI":
@@ -1528,91 +1595,169 @@ namespace HieuGLLite.Apps
 				_taskbarList.SetProgressValue(this.Handle, (ulong)value, (ulong)total);
 			});
 		}
+		// Biến cờ đánh dấu app đang trong quá trình bị tiêu diệt (Chống lỗi WebView2)
+		private bool isExiting = false;
+		// 1. Hàm kiểm tra điều kiện an toàn trước khi thoát
+		private bool CanExitApp()
+		{
+			if (isDownloading)
+			{
+				MessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			if (isRunning)
+			{
+				MessageBox.Show("Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			return true;
+		}
+
+		// 2. Hàm dọn dẹp các tiến trình nền
+		private void CleanupBeforeExit()
+		{
+			if (trayIcon != null)
+			{
+				trayIcon.Visible = false;
+				trayIcon.Dispose();
+			}
+			discordClient?.Dispose();
+		}
+
+		// Hàm đánh thức ứng dụng
+		private void ShowApp()
+		{
+			this.Show();
+			this.WindowState = FormWindowState.Normal;
+			this.Activate();
+
+			// THÊM !webView21.IsDisposed VÀO ĐÂY
+			if (webView21 != null && !webView21.IsDisposed && webView21.CoreWebView2 != null)
+			{
+				try
+				{
+					webView21.CoreWebView2.Resume();
+					System.Diagnostics.Debug.WriteLine("[Hệ thống] Đã đánh thức WebView2.");
+				}
+				catch { }
+			}
+		}
+
+
+		// Hàm vét cạn RAM của TOÀN BỘ HỆ THỐNG (C# và WebView2)
+		private void TrimTotalMemory()
+		{
+			try
+			{
+				// 1. ÉP RAM CỦA CHÍNH LAUNCHER C# XUỐNG ĐÁY (Vũ khí bí mật ở đây)
+				EmptyWorkingSet(System.Diagnostics.Process.GetCurrentProcess().Handle);
+
+				// 2. ÉP RAM CỦA TẤT CẢ TIẾN TRÌNH WEBVIEW2 XUỐNG ĐÁY
+				Process[] wv2Processes = Process.GetProcessesByName("msedgewebview2");
+				foreach (Process p in wv2Processes)
+				{
+					try
+					{
+						EmptyWorkingSet(p.Handle);
+					}
+					catch
+					{
+						// Bỏ qua các tiến trình không có quyền truy cập
+					}
+				}
+			}
+			catch { }
+		}
+
+		// ==========================================
+		// CÁC SỰ KIỆN CHÍNH (ĐÃ ĐƯỢC LÀM SẠCH)
+		// ==========================================
+
+		// 1. HÀM XỬ LÝ KHI BẤM NÚT X TRÊN CÙNG
 		private void Main_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			if (e.CloseReason == CloseReason.UserClosing)
 			{
-				// Hỏi người dùng có chắc muốn thoát hay ẩn đi không
-				var result = MessageBox.Show("Bạn có chắc muốn thoát hoàn toàn? Bấm 'Không' sẽ chỉ ẩn ứng dụng xuống khay hệ thống.", "Xác nhận thoát", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-
-				if (result == DialogResult.Yes)
+				// NẾU CÀI ĐẶT TRONG JSON LÀ "THU NHỎ XUỐNG KHAY" (Mặc định)
+				if (minimizeToTrayOnClose)
 				{
-					// --- BẮT ĐẦU KIỂM TRA AN NINH ---
-					if (isDownloading)
-					{
-						MessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-						e.Cancel = true; // Chặn Windows giết app
-						return; // Thoát hàm ngay
-					}
-
-					if (isRunning)
-					{
-						MessageBox.Show("Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-						e.Cancel = true; // Chặn Windows giết app
-						return; // Thoát hàm ngay
-					}
-
-					// --- NẾU QUA ĐƯỢC HẾT CÁC ẢI ---
-					// Người dùng chọn "Có" và không có app nào chạy/tải -> Cho phép thoát hoàn toàn
-					trayIcon.Visible = false;
-					trayIcon.Dispose();
-					discordClient?.Dispose();
-					// Không cần gọi Application.Exit() ở đây vì form đang tự đóng rồi.
+					e.Cancel = true;
+					SuspendApp(); // Kích hoạt quy trình Ẩn & Giảm RAM
 				}
-				else if (result == DialogResult.No)
-				{
-					e.Cancel = true; // Chặn Windows giết app
-					this.Hide();     // Giấu cửa sổ đi (Icon dưới khay vẫn đang hiện sẵn rồi)
-				}
+				// NẾU CÀI ĐẶT TRONG JSON LÀ "THOÁT HẲN"
 				else
 				{
-					// Bấm Cancel hoặc đóng hộp thoại
-					e.Cancel = true;
+					// Kiểm tra xem có đang tải game hay đang chơi game không
+					if (!CanExitApp())
+					{
+						e.Cancel = true; // Kẹt tiến trình -> Hủy lệnh tắt
+						return;
+					}
+
+					// Vượt qua ải an toàn -> Bật cờ khóa mọi giao tiếp với WebView2
+					isExiting = true;
+
+					CleanupBeforeExit(); // Dọn dẹp TrayIcon và Discord
+										 // Sau dòng này Windows sẽ tự kết liễu Form
 				}
 			}
 		}
-		private void TrayIcon_DoubleClick(object sender, EventArgs e)
+
+		// 2. HÀM NGỦ ĐÔNG VÀ VẮT KIỆT RAM (Bản chống đạn tuyệt đối)
+		private async void SuspendApp()
 		{
-			ShowApp();
+			try
+			{
+				// KHIÊN 1: Chặn ngay từ cửa nếu app đang có dấu hiệu bị tắt
+				if (isExiting || this.IsDisposed) return;
+
+				this.Hide(); // Ẩn cửa sổ
+
+				// KHIÊN 2: Kiểm tra sinh tồn của WebView2 trước khi đụng vào
+				if (webView21 != null && !webView21.IsDisposed && webView21.CoreWebView2 != null)
+				{
+					// Lệnh bất đồng bộ rất dễ bị "đột tử" giữa chừng
+					await webView21.CoreWebView2.TrySuspendAsync();
+
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+					TrimTotalMemory();
+				}
+			}
+			// --- LƯỚI HỨNG ĐẠN TẦNG 3 ---
+			catch (ObjectDisposedException)
+			{
+				// WebView2 bị xóa mất xác -> Bỏ qua vì đằng nào RAM cũng đã được giải phóng
+			}
+			catch (InvalidCastException)
+			{
+				// Lỗi COM Component đặc trưng của nhân Chromium khi nó bị rút điện đột ngột -> Bỏ qua
+			}
+			catch (Exception ex)
+			{
+				// Ghi log các lỗi khác nếu có
+				System.Diagnostics.Debug.WriteLine("Lỗi nhẹ khi Suspend WebView2: " + ex.Message);
+			}
 		}
 
-		// Khi bấm nút "Mở" trên menu chuột phải
-		private void TrayOpen_Click(object sender, EventArgs e)
-		{
-			ShowApp();
-		}
-
-		// Hàm dùng chung để lôi app lên lại mặt đất
-		private void ShowApp()
-		{
-			this.Show();                               // Hiện lại Form
-			this.WindowState = FormWindowState.Normal; // Đảm bảo không bị thu nhỏ
-			this.Activate();                           // Đưa lên trên cùng các cửa sổ khác
-		}
-
-		// Khi bấm "Thoát hoàn toàn" trên menu chuột phải
+		// 3. HÀM TẮT TỪ MENU CHUỘT PHẢI DƯỚI KHAY HỆ THỐNG
 		private void TrayExit_Click(object sender, EventArgs e)
 		{
-			// 1. Check xem có đang tải file không?
-			if (isDownloading)
-			{
-				MessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return; // Đuổi về, không chạy tiếp xuống dưới
-			}
+			if (!CanExitApp()) return; // Chặn nếu đang tải/chơi game
 
-			// 2. Check xem có giả lập nào đang mở không?
-			if (isRunning)
-			{
-				MessageBox.Show("Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return; // Đuổi về tiếp
-			}
+			// Bật cờ khóa WebView2
+			isExiting = true;
 
-			// 3. Vượt qua được 2 vòng bảo vệ trên thì mới cho phép tắt!
-			trayIcon.Visible = false;
-			trayIcon.Dispose();
-			discordClient?.Dispose();// Dọn dẹp RAM
-			Application.Exit();     // Tắt chết app thực sự!
+			CleanupBeforeExit(); // Dọn dẹp
+			Application.Exit();  // Tắt chết app
 		}
+		// Dùng biểu thức => cho ngắn gọn với các sự kiện gọi 1 hàm
+		private void TrayIcon_DoubleClick(object sender, EventArgs e) => ShowApp();
+		private void TrayOpen_Click(object sender, EventArgs e) => ShowApp();
+
+
 
 		// Khai báo biến toàn cục để lưu danh sách App dùng chung cho toàn bộ Launcher
 		// Hàm này CHỈ làm nhiệm vụ đi lấy data và xử lý nghiệp vụ (Registry/Conf...)
@@ -2116,31 +2261,48 @@ namespace HieuGLLite.Apps
 					};
 
 					p.Start();
-					bool success = await tcs.Task;
+					bool processSuccess = await tcs.Task; // Chờ tiến trình cài đặt đóng lại
 
-					if (success)
+					// --- BẮT ĐẦU CHỐT CHẶN CHỐNG ROLLBACK VÀ DELAY I/O ---
+
+					// 1. Nghỉ 2 giây để Windows xả Cache File và chốt khóa Registry
+					await Task.Delay(2000);
+					CheckAppInstallation(app);
+
+					// 2. Vòng lặp kiên nhẫn: Nếu chưa thấy file, thử tìm lại thêm tối đa 3 lần (Mỗi lần cách nhau 2 giây)
+					// (Phòng trường hợp ổ cứng HDD/SSD của máy khách hàng bị chậm)
+					int retryCount = 0;
+					while (!app.isInstalled && retryCount < 3)
 					{
-						// --- CLEANUP: CHỈ XÓA EXE VÀ STATE JSON ---
+						await Task.Delay(2000);
+						CheckAppInstallation(app);
+						retryCount++;
+					}
+
+					// CHỈ KHI: Máy quét xác nhận 100% file đã tồn tại trên máy (Bỏ qua luôn ExitCode vì nhiều bộ cài trả về sai)
+					if (app.isInstalled)
+					{
+						// --- DỌN DẸP RÁC SAU KHI THÀNH CÔNG ---
 						if (System.IO.File.Exists(exePath)) System.IO.File.Delete(exePath);
 
 						string stateFile = Path.Combine(StateFolder, $"{appid}_state.json");
 						if (System.IO.File.Exists(stateFile)) System.IO.File.Delete(stateFile);
 
-						// Lưu trạng thái mới vào danh sách global và ghi xuống ổ cứng
-						UpdateLocalAppStatus(appid, true, installPath);
+						// Cập nhật lại đường dẫn Data và lưu JSON
+						app.dataPath = installPath;
 						SaveAppListToDisk();
 
-						isDownloading = false; // Hạ cờ tải xuống để cho phép thoát app nếu muốn
+						isDownloading = false;
 
-						// Báo Vue đổi nút thành "MỞ ỨNG DỤNG"
-						SendStatusToVue(appid, "DOWNLOAD_COMPLETED", new { savedPath = installPath });
+						// Báo Vue cài thành công
+						SendStatusToVue(appid, "DOWNLOAD_COMPLETED", new { savedPath = app.programPath });
 						ShowToastWithIconAsync(appid, "Cài đặt hoàn tất", $"{app.name} đã được cài đặt", app.icon);
-
 					}
 					else
 					{
-						// Nếu lỗi, BlueStacks thường đã hiện bảng lỗi rồi, ta chỉ báo Failed trên UI
-						SendStatusToVue(appid, "DOWNLOAD_FAILED", new { error = "Cài đặt không hoàn tất." });
+						// NẾU LỌT VÀO ĐÂY: Quét 4 lần vẫn không thấy -> 100% là Rollback hoặc lỗi!
+						SendStatusToVue(appid, "DOWNLOAD_FAILED", new { error = "Cài đặt thất bại, bị xung đột hoặc lỗi hệ thống (Bộ cài đã hoàn tác)." });
+						MessageBox.Show("Cài đặt thất bại, trình cài đặt hiện đã hoàn tác thay đổi", "Cài đặt thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						SetTaskbarState(TaskbarProgressBarStatus.Error);
 					}
 				}
@@ -2387,6 +2549,57 @@ namespace HieuGLLite.Apps
 			catch { }
 			return false;
 		}
+
+		private bool minimizeToTrayOnClose = true;
+		private string currentTheme = "system";
+
+		private void LoadSettings()
+		{
+			if (System.IO.File.Exists(SettingsFile))
+			{
+				try
+				{
+					string json = System.IO.File.ReadAllText(SettingsFile);
+
+					// DÙNG MODEL ĐỂ GIẢI MÃ: Nhanh, chuẩn xác và không sợ sai kiểu dữ liệu
+					var settings = JsonConvert.DeserializeObject<AppSettingsModel>(json);
+
+					if (settings != null)
+					{
+						minimizeToTrayOnClose = settings.minimizeToTray;
+						currentTheme = settings.theme;
+					}
+				}
+				catch (Exception ex)
+				{
+					// In ra lỗi thay vì nuốt chửng để dễ debug
+					System.Diagnostics.Debug.WriteLine("Lỗi đọc file Cài đặt JSON: " + ex.Message);
+				}
+			}
+		}
+
+		private void SaveSettings()
+		{
+			try
+			{
+				Directory.CreateDirectory(RootFolder);
+
+				// ĐÓNG GÓI VÀO MODEL TRƯỚC KHI LƯU
+				var settings = new AppSettingsModel
+				{
+					minimizeToTray = minimizeToTrayOnClose,
+					theme = currentTheme
+				};
+
+				// Dùng Formatting.Indented để file JSON khi mở bằng Notepad nhìn tự động thụt đầu dòng cực đẹp
+				System.IO.File.WriteAllText(SettingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine("Lỗi lưu file Cài đặt JSON: " + ex.Message);
+			}
+		}
+
 		private void PatchBstkFile(string engineFolder, string androidCode)
 		{
 			string bstkPath = Path.Combine(engineFolder, $"{androidCode}.bstk");

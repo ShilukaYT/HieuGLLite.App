@@ -82,8 +82,8 @@
 
         <InstallModal v-if="showModal && selectedApp" :app="selectedApp" :is-multi-instance="isMultiInstallMode"
           @close="showModal = false" @confirm="handleInstall" />
-        <SettingsModal v-if="showSettings" @close="showSettings = false" @check-update="handleManualUpdateCheck"
-          @get-apps="handleGetApps" @clear-cache="handleClearCache" @uninstall="handleUninstall" :app="manifest" />
+        <SettingsModal v-if="showSettings" @close="showSettings = false" :app="manifest" :settings="userSettings" @check-update="handleManualUpdateCheck"
+          @get-apps="handleGetApps" @clear-cache="handleClearCache" @uninstall="handleUninstall" />
 
         <v-snackbar v-model="showSnackbar" :timeout="2000" :color="isDark ? '#1e1e1e' : 'white'" location="top"
           rounded="pill" class="mt-4">
@@ -142,20 +142,13 @@ const overlayStyle = computed(() => ({
 const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 // Lắng nghe thay đổi từ hệ thống (không cần C# can thiệp)
-// Lắng nghe thay đổi từ hệ thống (CHỈ áp dụng nếu đang chọn chế độ "Hệ thống")
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-  const currentPref = localStorage.getItem('theme-preference') || 'system';
-  
-  if (currentPref === 'system') {
+  if (userSettings.value.theme === 'system') {
     const newColorScheme = event.matches ? "dark" : "light";
-    theme.global.name.value = newColorScheme; // Đổi theme Vuetify
+    theme.global.name.value = newColorScheme; 
     
-    // Báo cho C# đổi màu viền theo hệ thống
     if (window.chrome?.webview) {
-      window.chrome.webview.postMessage({
-        type: "THEME_CHANGED",
-        mode: newColorScheme
-      });
+      window.chrome.webview.postMessage({ type: "THEME_CHANGED", mode: "system" });
     }
   }
 });
@@ -167,16 +160,16 @@ const isMaintenance = ref(false);
 const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
 // Đổi thành Object (Dùng ngoặc nhọn {} thôi)
 const manifest = ref({
-    FE_version: '26.3.10',
-    FE_versioncode: '260310',
+    FE_version: '26.3.11',
+    FE_versioncode: '260311',
     BE_version: null,
     BE_versioncode: null,
-    BE_version_latest: '26.3.10',
-    BE_versioncode_latest: '260310',
+    BE_version_latest: '26.3.11',
+    BE_versioncode_latest: '260311',
     release_date: '2026-03-13',
-    changelog: 'Yêu cầu phiên bản Client: 26.3.10 để có trải nghiệm tốt nhất\n\nTối ưu hóa thời gian khởi động ứng dụng\nCho phép thay đổi phiên bản của giả lập (sẽ cài mới giả lập)\nSửa lỗi chế độ sáng/tối luôn theo hệ thống\nTối ưu hóa luồng cập nhật phần mềm giúp cho trải nghiệm luôn liền mạch\nKhu vực thử nghiệm giới hạn đã được kích hoạt',
+    changelog: 'Yêu cầu phiên bản Client: 26.3.11\n\nDừng sử dụng LocalStorage để lưu trữ cài đặt, chuyển sang tệp cấu hình\nTên giả lập sẽ được hiển thị trên tiêu đề\nGiờ đây chúng ta có thể ẩn hoặc tắt một cách linh hoạt (thay đổi trong cài đặt)\n Tối ưu hoá nội dung theo kích thước cửa sổ\nSửa lỗi thu phóng trong ứng dụng\nSửa lỗi thuật toán sau khi cài đặt ứng dụng\nTối ưu hóa Webview2 sau khi ẩn ứng dụng',
     isMaintenance: false,
-    minRequiredVersionCode: '260309'
+    minRequiredVersionCode: '260311'
 });
 
 const isLoading = ref(true);
@@ -184,46 +177,14 @@ const videoPathDark = ref('http://hieugllite.app/videos/LoadingScreen_dark.mp4')
 const videoPathLight = ref('http://hieugllite.app/videos/LoadingScreen_light.mp4');
 
 onMounted(async () => {
-  // 1. Lấy tùy chọn Theme
-  const savedPreference = localStorage.getItem('theme-preference') || 'system';
-  let targetTheme = savedPreference;
-  if (savedPreference === 'system') {
-    targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  theme.global.name.value = targetTheme;
-
-  // 2. CHECK REGION (Khóa vùng bằng IP)
-  try {
-    const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
-    const ipData = await ipRes.json();
-    
-    if (ipData && ipData.country && ipData.country !== 'VN') {
-      isRegionBlocked.value = true;
-      console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
-    }
-  } catch (error) {
-    console.log("Không thể kiểm tra vùng, tạm thời bỏ qua.");
-  }
-
-  isMaintenance.value = manifest.value.isMaintenance;
-
-  // 3. KIỂM TRA MÔI TRƯỜNG CHẠY
-  if (!window.chrome || !window.chrome.webview) {
-    isNotInWebView.value = true;
-    console.warn("Đang chạy trên trình duyệt web thông thường!");
-    videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
-    videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
-    
-    setTimeout(() => { isLoading.value = false; }, 5000);
-  } else {
-    // ---- MÔI TRƯỜNG CHUẨN (WEBVIEW2) ----
-
-    // A. GẮN ĐÚNG 1 CÁI "TAI NGHE" DUY NHẤT ĐỂ HỨNG MỌI TIN NHẮN TỪ C#
+  // =======================================================
+  // BƯỚC 1: ĐEO TAI NGHE TRƯỚC KHI LÀM BẤT CỨ VIỆC GÌ
+  // =======================================================
+  if (window.chrome && window.chrome.webview) {
     window.chrome.webview.addEventListener('message', (event) => {
       const res = event.data;
 
       switch (res.type) {
-        // --- NHÓM 1: DỮ LIỆU KHỞI TẠO TỪ C# ---
         case 'CLIENT_VERSION':
           manifest.value.BE_version = res.version;
           manifest.value.BE_versioncode = res.versioncode;
@@ -237,24 +198,19 @@ onMounted(async () => {
           snackbarText.value = "Danh sách ứng dụng đã được cập nhật!";
           showSnackbar.value = true;
 
-          // Báo ngược lên C# phiên bản của FE
           window.chrome.webview.postMessage({
             type: "PUSH_FE_VERSION",
             version: manifest.value.FE_version
           });
-          console.log("Đã tải xong danh sách Game từ C#!", apps.value);
-
-          // DATA NẠP XONG -> TẮT MÀN HÌNH LOADING NGAY LẬP TỨC
+          
           isLoading.value = false; 
           
-          // SỬA Ở ĐÂY: Chỉ tự động check update nếu chưa từng check
           if (!isMaintenance.value && !hasCheckedUpdate.value) {
             checkForUpdates(false);
-            hasCheckedUpdate.value = true; // Đánh dấu là đã check rồi, lần sau không gọi nữa
+            hasCheckedUpdate.value = true; 
           }
           break;
 
-        // --- NHÓM 2: CẬP NHẬT TRẠNG THÁI TẢI XUỐNG ---
         case 'DOWNLOAD_PROGRESS':
         case 'DOWNLOAD_STATUS':
           downloadingApps.value[res.appId] = {
@@ -296,7 +252,6 @@ onMounted(async () => {
           });
           break;
 
-        // --- NHÓM 3: TRẠNG THÁI APP & DỌN DẸP ---
         case 'APP_STATE_CHANGED':
           const runApp = apps.value.find(a => a.id === res.appId);
           if (runApp) runApp.isRunning = res.isRunning;
@@ -317,16 +272,57 @@ onMounted(async () => {
           snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
           showSnackbar.value = true;
           break;
+          
+        case 'SYNC_SETTINGS':
+          // C# GỬI LÊN -> GÁN NGAY VÀO VUE
+          userSettings.value.theme = res.theme;
+          userSettings.value.minimizeToTray = res.minimizeToTray;
+
+          // Áp dụng Theme cho Vuetify
+          let targetTheme = res.theme;
+          if (targetTheme === 'system') {
+            targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          theme.global.name.value = targetTheme;
+          break;
       }
     });
 
-    // B. GỬI LỆNH ĐỔI THEME
-    window.chrome.webview.postMessage({
-      type: "THEME_CHANGED",
-      mode: targetTheme
-    });
+    // =======================================================
+    // BƯỚC 2: SAU KHI ĐÃ CÓ TAI NGHE, BẮT ĐẦU ĐÒI C# DỮ LIỆU
+    // =======================================================
+    window.chrome.webview.postMessage({ type: "GET_SETTINGS" });
+  }
 
-    // C. CHỐT CHẶN BẢO MẬT: Chỉ yêu cầu nạp Game nếu KHÔNG BỊ KHÓA
+  // =======================================================
+  // BƯỚC 3: CHECK IP (Sẽ làm Vue bị delay một lát)
+  // =======================================================
+  try {
+    const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
+    const ipData = await ipRes.json();
+    
+    if (ipData && ipData.country && ipData.country !== 'VN') {
+      isRegionBlocked.value = true;
+      console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
+    }
+  } catch (error) {
+    console.log("Không thể kiểm tra vùng, tạm thời bỏ qua.");
+  }
+
+  isMaintenance.value = manifest.value.isMaintenance;
+
+  // =======================================================
+  // BƯỚC 4: YÊU CẦU DATA CHÍNH NẾU KHÔNG BỊ KHÓA
+  // =======================================================
+  if (!window.chrome || !window.chrome.webview) {
+    isNotInWebView.value = true;
+    console.warn("Đang chạy trên trình duyệt web thông thường!");
+    videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
+    videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
+    
+    setTimeout(() => { isLoading.value = false; }, 5000);
+  } else {
+    // Chỉ yêu cầu nạp Game nếu KHÔNG BỊ KHÓA
     if (!isMaintenance.value && !isRegionBlocked.value) {
       console.log("App bình thường -> Bắt đầu Request Data từ C#");
       window.chrome.webview.postMessage({ type: "GET_CLIENT_VERSION" });
@@ -334,7 +330,6 @@ onMounted(async () => {
       window.chrome.webview.postMessage({ type: 'SYNC_DOWNLOAD_STATUS' });
     } else {
       console.log("App bị khóa -> Chặn toàn bộ Request Data!");
-      // Tắt màn hình Loading đi để hiện cái Modal báo lỗi lên
       setTimeout(() => { isLoading.value = false; }, 1000);
     }
   }
@@ -554,6 +549,11 @@ const handleManualUpdateCheck = () => {
 //   if (window.chrome?.webview) window.chrome.webview.postMessage({ type: "CLOSE_WINDOW" });
 // };
 
+const userSettings = ref({
+  theme: 'system',
+  minimizeToTray: true
+});
+
 //==============Cài đặt==================
 
 // App.vue
@@ -573,12 +573,15 @@ const stageConfig = {
 
 
 const handleGetApps = () => {
-  console.log("Yêu cầu tải lại danh sách Game từ C#!");
-
+  console.log("Yêu cầu tải lại danh sách Game và Role từ C#!");
 
   if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: "GET_APPS" });
-    console.log("Đã gửi yêu cầu GET_APPS lên C#");
+    // THÊM force: true VÀO ĐÂY ĐỂ ÉP C# LOAD LẠI ROLE
+    window.chrome.webview.postMessage({ 
+      type: "GET_APPS", 
+      force: true 
+    });
+    console.log("Đã gửi yêu cầu GET_APPS (Force Refresh) lên C#");
   } else {
     console.error("Không tìm thấy môi trường WebView2!");
   }

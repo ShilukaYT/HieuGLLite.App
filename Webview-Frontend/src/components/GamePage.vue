@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted ,watch} from 'vue';
 import { useTheme } from 'vuetify';
 
 // 1. Gán biến props CỰC KỲ QUAN TRỌNG
@@ -208,10 +208,27 @@ const isOtherAppDownloading = computed(() => {
 
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
+// Hàm gửi tiêu đề lên C#
+const updateWindowTitle = (name) => {
+  if (window.chrome?.webview && name) {
+    window.chrome.webview.postMessage({ 
+      type: "CHANGE_TITLE", 
+      title: name 
+    });
+  }
+};
 
 onMounted(() => {
   window.chrome.webview.postMessage({ type: "SYNC_DOWNLOAD_STATUS" });
+
+updateWindowTitle(props.app?.name);
 });
+
+// 2. Cập nhật ngay lập tức nếu dữ liệu app thay đổi (Chuyển game)
+watch(() => props.app?.name, (newName) => {
+  updateWindowTitle(newName);
+}, { immediate: true });
+
 
 // Tạo biến màu overlay dựa trên theme
 const overlayColor = computed(() =>

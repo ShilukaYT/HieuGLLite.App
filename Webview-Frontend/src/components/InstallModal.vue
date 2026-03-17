@@ -96,7 +96,7 @@
           :disabled="!selectedAndroidObj"
           @click="confirmInstall"
         >
-          <v-icon icon="mdi-rocket-launch" class="mr-2"></v-icon> 
+          <v-icon icon="mdi-monitor-arrow-down-variant" class="mr-2"></v-icon> 
           {{ isMultiInstance ? 'TÍCH HỢP NGAY' : 'CÀI ĐẶT NGAY' }}
         </v-btn>
       </v-card-actions>

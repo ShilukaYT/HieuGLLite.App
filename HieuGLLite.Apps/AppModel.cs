@@ -113,5 +113,12 @@ namespace HieuGLLite.Apps
 			public string name { get; set; }        // Tên mã hệ thống (VD: Pie64, Pie64_1)
 			public string displayName { get; set; } // Tên hiển thị (VD: BlueStacks App Player 1)
 		}
+
+		public class AppSettingsModel
+		{
+			// Đặt giá trị mặc định luôn ở đây để an toàn tuyệt đối
+			public bool minimizeToTray { get; set; } = true;
+			public string theme { get; set; } = "system";
+		}
 	}
 }

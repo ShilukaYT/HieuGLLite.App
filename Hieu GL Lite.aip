@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DOCUMENT Type="Advanced Installer" CreateVersion="19.4" version="19.4" Modules="express" RootPath="." Language="en" Id="{E68C37DC-4002-4D6F-A274-8A3F0F61EDF9}">
+  <COMPONENT cid="caphyon.advinst.msicomp.ProjectOptionsComponent">
+    <ROW Name="Application_AssetGenDestFolderPath" Value="Generated Assets" ValueType="1"/>
+    <ROW Name="Application_WorkingDir" Value="APPDIR"/>
+    <ROW Name="AssetGenPkgDestFolderPath" Value="Generated Assets" ValueType="1"/>
+    <ROW Name="AssetGenPkgSourceFilePath" Value="HieuGLLite.Apps\rounded-in-photoretrica.ico" ValueType="1"/>
+    <ROW Name="HiddenItems" Value="MsiThemeComponent;BackgroundImagesComponent;UpdaterComponent;SerValComponent;MsiInstExSeqComponent;DictionaryComponent;MsiAppSearchComponent;MsiOdbcDataSrcComponent;CPLAppletComponent;ActSyncAppComponent;PreReqComponent;WebApplicationsComponent;MsiJavaComponent;MsiDriverPackagesComponent;UserAccountsComponent;ScheduledTasksComponent;SqlConnectionComponent;AutorunComponent;FirewallExceptionComponent;GameUxComponent;MsiDirectEditorComponent;SharePointSlnComponent;SilverlightSlnComponent;MultipleInstancesComponent;SccmComponent;TilesComponent;ActSyncAppComponent;AutorunComponent;CPLAppletComponent;GameUxComponent;SilverlightSlnComponent"/>
+    <ROW Name="MigrationUninstallCode" Value="{A44939A7-B900-4EB0-86DA-E32E84137B42}"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
+    <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
+    <ROW Property="AI_CURRENT_YEAR" Value="2026" ValueLocId="-"/>
+    <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 19.4 build 4648ec91" ValueLocId="-"/>
+    <ROW Property="ALLUSERS" Value="1"/>
+    <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
+    <ROW Property="ARPNOMODIFY" MultiBuildValue="Build_MSIX_APPX:1"/>
+    <ROW Property="ARPNOREPAIR" Value="1"/>
+    <ROW Property="ARPPRODUCTICON" Value="HieuGLLite.Apps.exe" Type="8"/>
+    <ROW Property="Manufacturer" Value="Hieu GL Lite"/>
+    <ROW Property="ProductCode" Value="1033:{1B776E80-3AF4-4EC7-98B6-16EBA34E7494} " Type="16"/>
+    <ROW Property="ProductLanguage" Value="1033"/>
+    <ROW Property="ProductName" Value="Hieu GL Lite"/>
+    <ROW Property="ProductVersion" Value="1.0.0"/>
+    <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
+    <ROW Property="UpgradeCode" Value="{A44939A7-B900-4EB0-86DA-E32E84137B42}"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
+    <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
+    <ROW Directory="Assets" Directory_Parent="TARGETDIR" DefaultDir="Assets" IsPseudoRoot="1"/>
+    <ROW Directory="Assets_1_Dir" Directory_Parent="BSTCleaner_native_Dir" DefaultDir="Assets"/>
+    <ROW Directory="Assets_Dir" Directory_Parent="APPDIR" DefaultDir="Assets"/>
+    <ROW Directory="BSTCleaner_native_Dir" Directory_Parent="APPDIR" DefaultDir="BSTCLE~1|BSTCleaner_native"/>
+    <ROW Directory="DesktopFolder" Directory_Parent="TARGETDIR" DefaultDir="DESKTO~1|DesktopFolder" IsPseudoRoot="1"/>
+    <ROW Directory="Locales_Dir" Directory_Parent="BSTCleaner_native_Dir" DefaultDir="Locales"/>
+    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
+    <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
+    <ROW Directory="fonts_Dir" Directory_Parent="Assets_Dir" DefaultDir="fonts"/>
+    <ROW Directory="images_Dir" Directory_Parent="Assets_Dir" DefaultDir="images"/>
+    <ROW Directory="native_1_Dir" Directory_Parent="winx64_Dir" DefaultDir="native"/>
+    <ROW Directory="native_2_Dir" Directory_Parent="winx86_Dir" DefaultDir="native"/>
+    <ROW Directory="native_Dir" Directory_Parent="winarm64_Dir" DefaultDir="native"/>
+    <ROW Directory="runtimes_Dir" Directory_Parent="APPDIR" DefaultDir="runtimes"/>
+    <ROW Directory="videos_Dir" Directory_Parent="Assets_Dir" DefaultDir="videos"/>
+    <ROW Directory="winarm64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="WIN-AR~1|win-arm64"/>
+    <ROW Directory="winx64_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x64"/>
+    <ROW Directory="winx86_Dir" Directory_Parent="runtimes_Dir" DefaultDir="win-x86"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
+    <ROW Component="APPDIR" ComponentId="{4F67C5E2-AFC9-4BDC-ACED-A167B5AB5A0D}" Directory_="APPDIR" Attributes="0"/>
+    <ROW Component="BSTCleaner.exe" ComponentId="{B0AC3742-9361-4BF4-B213-45D41F54BB97}" Directory_="BSTCleaner_native_Dir" Attributes="0" KeyPath="BSTCleaner.exe"/>
+    <ROW Component="BSTCleaner.exe.config" ComponentId="{06B0FA4F-C48F-4677-AF64-EE701AB45C95}" Directory_="BSTCleaner_native_Dir" Attributes="0" KeyPath="BSTCleaner.exe.config" Type="0"/>
+    <ROW Component="GoogleSansBold.ttf" ComponentId="{D937A942-C0B8-43D0-B56C-8420A9578372}" Directory_="fonts_Dir" Attributes="0" Type="0"/>
+    <ROW Component="HDForceGPUx64.exe" ComponentId="{1198C6CB-B7E7-4675-B705-1F5953B2E631}" Directory_="BSTCleaner_native_Dir" Attributes="256" KeyPath="HDForceGPUx64.exe"/>
+    <ROW Component="HDForceGPUx86.exe" ComponentId="{A07F0195-EB05-49B0-97AB-6C7ADE2039D1}" Directory_="BSTCleaner_native_Dir" Attributes="0" KeyPath="HDForceGPUx86.exe"/>
+    <ROW Component="HieuGLLite.Apps.exe" ComponentId="{BDF0F49E-9F6F-4391-9CD9-EAF800DE97D6}" Directory_="APPDIR" Attributes="256" KeyPath="HieuGLLite.Apps.exe"/>
+    <ROW Component="LoadingScreen_dark.mp4" ComponentId="{1CBD057C-3D83-4E1C-882A-907342DEA97A}" Directory_="videos_Dir" Attributes="0" KeyPath="LoadingScreen_dark.mp4" Type="0"/>
+    <ROW Component="Microsoft.Web.WebView2.Core.xml" ComponentId="{50064ABD-96C2-4086-AC26-9DF4A60A8020}" Directory_="APPDIR" Attributes="0" KeyPath="Microsoft.Web.WebView2.Core.xml" Type="0"/>
+    <ROW Component="MicrosoftEdgeWebview2Setup.exe" ComponentId="{E01FCFA8-FCBC-48FA-BA81-2908393A4B90}" Directory_="runtimes_Dir" Attributes="0" KeyPath="MicrosoftEdgeWebview2Setup.exe"/>
+    <ROW Component="ProductInformation" ComponentId="{44E4BCDC-6897-4B7C-950D-23D125BD9D45}" Directory_="APPDIR" Attributes="4" KeyPath="Version"/>
+    <ROW Component="SHORTCUTDIR" ComponentId="{5887FC4A-A09F-4275-B827-836279B3D0FA}" Directory_="SHORTCUTDIR" Attributes="0"/>
+    <ROW Component="Store50x50Logo.scale100.png" ComponentId="{80A5D4FA-E53B-412E-AF61-BE14126BD272}" Directory_="Assets" Attributes="0" KeyPath="Store50x50Logo.scale100.png" Type="0"/>
+    <ROW Component="WebView2Loader.dll" ComponentId="{0AA54064-7467-420E-A2EE-0E57169204EF}" Directory_="native_Dir" Attributes="256" KeyPath="WebView2Loader.dll"/>
+    <ROW Component="WebView2Loader.dll_1" ComponentId="{303FB6CF-E615-4EA2-81C6-304E006FC6A1}" Directory_="native_1_Dir" Attributes="256" KeyPath="WebView2Loader.dll_1"/>
+    <ROW Component="WebView2Loader.dll_2" ComponentId="{2BB88D8E-9CA0-4368-932E-49C1F57F32A2}" Directory_="native_2_Dir" Attributes="0" KeyPath="WebView2Loader.dll_2"/>
+    <ROW Component="WebView2Loader.dll_3" ComponentId="{B39F1BAE-340A-4922-87FC-DF594B740AAB}" Directory_="APPDIR" Attributes="256" KeyPath="WebView2Loader.dll_3"/>
+    <ROW Component="bluestacks.ico" ComponentId="{DED2CE3B-FCFC-4923-A4BC-5554DAF0E659}" Directory_="Assets_1_Dir" Attributes="0" KeyPath="bluestacks.ico" Type="0"/>
+    <ROW Component="favicon.ico" ComponentId="{A94611C2-94AF-43CF-A521-3A37C815D1FD}" Directory_="images_Dir" Attributes="0" KeyPath="favicon.ico" Type="0"/>
+    <ROW Component="i18n.arEG.txt" ComponentId="{875DD71E-8302-4194-BCA1-13792B12C136}" Directory_="Locales_Dir" Attributes="0" KeyPath="i18n.arEG.txt" Type="0"/>
+    <ROW Component="offline.html" ComponentId="{9F094BC5-955F-426A-B817-05DBF85FC867}" Directory_="Assets_Dir" Attributes="0" KeyPath="offline.html" Type="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
+    <ROW Feature="AiAppXAssets" Title="AiAppXAssets" Description="Description" Display="3" Level="0" Directory_="APPDIR" Attributes="0" Options="271" Builds="Build_MSIX_APPX"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0"/>
+    <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
+    <ROW File="GoogleSansBold.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~1.TTF|GoogleSans-Bold.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-Bold.ttf" SelfReg="false"/>
+    <ROW File="GoogleSansBoldItalic.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~2.TTF|GoogleSans-BoldItalic.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-BoldItalic.ttf" SelfReg="false"/>
+    <ROW File="GoogleSansItalic.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~3.TTF|GoogleSans-Italic.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-Italic.ttf" SelfReg="false"/>
+    <ROW File="GoogleSansMedium.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~4.TTF|GoogleSans-Medium.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-Medium.ttf" SelfReg="false"/>
+    <ROW File="GoogleSansMediumItalic.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~5.TTF|GoogleSans-MediumItalic.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-MediumItalic.ttf" SelfReg="false"/>
+    <ROW File="GoogleSansRegular.ttf" Component_="GoogleSansBold.ttf" FileName="GOOGLE~6.TTF|GoogleSans-Regular.ttf" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\fonts\GoogleSans-Regular.ttf" SelfReg="false"/>
+    <ROW File="favicon.ico" Component_="favicon.ico" FileName="favicon.ico" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\images\favicon.ico" SelfReg="false"/>
+    <ROW File="offline.html" Component_="offline.html" FileName="OFFLIN~1.HTM|offline.html" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\offline.html" SelfReg="false"/>
+    <ROW File="LoadingScreen_dark.mp4" Component_="LoadingScreen_dark.mp4" FileName="LOADIN~1.MP4|LoadingScreen_dark.mp4" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\videos\LoadingScreen_dark.mp4" SelfReg="false"/>
+    <ROW File="LoadingScreen_light.mp4" Component_="LoadingScreen_dark.mp4" FileName="LOADIN~2.MP4|LoadingScreen_light.mp4" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Assets\videos\LoadingScreen_light.mp4" SelfReg="false"/>
+    <ROW File="bluestacks.ico" Component_="bluestacks.ico" FileName="BLUEST~1.ICO|bluestacks.ico" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Assets\bluestacks.ico" SelfReg="false"/>
+    <ROW File="loadingbar.gif" Component_="bluestacks.ico" FileName="LOADIN~1.GIF|loadingbar.gif" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Assets\loadingbar.gif" SelfReg="false"/>
+    <ROW File="BSTCleaner.exe" Component_="BSTCleaner.exe" FileName="BSTCLE~1.EXE|BSTCleaner.exe" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\BSTCleaner.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="BSTCleaner.exe.config" Component_="BSTCleaner.exe.config" FileName="BSTCLE~1.CON|BSTCleaner.exe.config" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\BSTCleaner.exe.config" SelfReg="false"/>
+    <ROW File="HDForceGPUx64.exe" Component_="HDForceGPUx64.exe" FileName="HD-FOR~1.EXE|HD-ForceGPU-x64.exe" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\HD-ForceGPU-x64.exe" SelfReg="false"/>
+    <ROW File="HDForceGPUx86.exe" Component_="HDForceGPUx86.exe" FileName="HD-FOR~2.EXE|HD-ForceGPU-x86.exe" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\HD-ForceGPU-x86.exe" SelfReg="false"/>
+    <ROW File="i18n.arEG.txt" Component_="i18n.arEG.txt" FileName="I18NAR~1.TXT|i18n.ar-EG.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.ar-EG.txt" SelfReg="false"/>
+    <ROW File="i18n.arIL.txt" Component_="i18n.arEG.txt" FileName="I18NAR~2.TXT|i18n.ar-IL.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.ar-IL.txt" SelfReg="false"/>
+    <ROW File="i18n.deDE.txt" Component_="i18n.arEG.txt" FileName="I18NDE~1.TXT|i18n.de-DE.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.de-DE.txt" SelfReg="false"/>
+    <ROW File="i18n.enUS.txt" Component_="i18n.arEG.txt" FileName="I18NEN~1.TXT|i18n.en-US.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.en-US.txt" SelfReg="false"/>
+    <ROW File="i18n.esES.txt" Component_="i18n.arEG.txt" FileName="I18NES~1.TXT|i18n.es-ES.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.es-ES.txt" SelfReg="false"/>
+    <ROW File="i18n.frFR.txt" Component_="i18n.arEG.txt" FileName="I18NFR~1.TXT|i18n.fr-FR.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.fr-FR.txt" SelfReg="false"/>
+    <ROW File="i18n.idID.txt" Component_="i18n.arEG.txt" FileName="I18NID~1.TXT|i18n.id-ID.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.id-ID.txt" SelfReg="false"/>
+    <ROW File="i18n.itIT.txt" Component_="i18n.arEG.txt" FileName="I18NIT~1.TXT|i18n.it-IT.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.it-IT.txt" SelfReg="false"/>
+    <ROW File="i18n.jaJP.txt" Component_="i18n.arEG.txt" FileName="I18NJA~1.TXT|i18n.ja-JP.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.ja-JP.txt" SelfReg="false"/>
+    <ROW File="i18n.koKR.txt" Component_="i18n.arEG.txt" FileName="I18NKO~1.TXT|i18n.ko-KR.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.ko-KR.txt" SelfReg="false"/>
+    <ROW File="i18n.plPL.txt" Component_="i18n.arEG.txt" FileName="I18NPL~1.TXT|i18n.pl-PL.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.pl-PL.txt" SelfReg="false"/>
+    <ROW File="i18n.ptBR.txt" Component_="i18n.arEG.txt" FileName="I18NPT~1.TXT|i18n.pt-BR.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.pt-BR.txt" SelfReg="false"/>
+    <ROW File="i18n.ruRU.txt" Component_="i18n.arEG.txt" FileName="I18NRU~1.TXT|i18n.ru-RU.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.ru-RU.txt" SelfReg="false"/>
+    <ROW File="i18n.thTH.txt" Component_="i18n.arEG.txt" FileName="I18NTH~1.TXT|i18n.th-TH.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.th-TH.txt" SelfReg="false"/>
+    <ROW File="i18n.trTR.txt" Component_="i18n.arEG.txt" FileName="I18NTR~1.TXT|i18n.tr-TR.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.tr-TR.txt" SelfReg="false"/>
+    <ROW File="i18n.viVN.txt" Component_="i18n.arEG.txt" FileName="I18NVI~1.TXT|i18n.vi-VN.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.vi-VN.txt" SelfReg="false"/>
+    <ROW File="i18n.zhCN.txt" Component_="i18n.arEG.txt" FileName="I18NZH~1.TXT|i18n.zh-CN.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.zh-CN.txt" SelfReg="false"/>
+    <ROW File="i18n.zhTW.txt" Component_="i18n.arEG.txt" FileName="I18NZH~2.TXT|i18n.zh-TW.txt" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\BSTCleaner_native\Locales\i18n.zh-TW.txt" SelfReg="false"/>
+    <ROW File="HieuGLLite.Apps.exe" Component_="HieuGLLite.Apps.exe" FileName="HIEUGL~1.EXE|HieuGLLite.Apps.exe" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\HieuGLLite.Apps.exe" SelfReg="false" DigSign="true"/>
+    <ROW File="HieuGLLite.Apps.pdb" Component_="HieuGLLite.Apps.exe" FileName="HIEUGL~1.PDB|HieuGLLite.Apps.pdb" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\HieuGLLite.Apps.pdb" SelfReg="false"/>
+    <ROW File="Microsoft.Web.WebView2.Core.xml" Component_="Microsoft.Web.WebView2.Core.xml" FileName="MICROS~1.XML|Microsoft.Web.WebView2.Core.xml" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Microsoft.Web.WebView2.Core.xml" SelfReg="false"/>
+    <ROW File="Microsoft.Web.WebView2.WinForms.xml" Component_="Microsoft.Web.WebView2.Core.xml" FileName="MICROS~2.XML|Microsoft.Web.WebView2.WinForms.xml" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Microsoft.Web.WebView2.WinForms.xml" SelfReg="false"/>
+    <ROW File="Microsoft.Web.WebView2.Wpf.xml" Component_="Microsoft.Web.WebView2.Core.xml" FileName="MICROS~3.XML|Microsoft.Web.WebView2.Wpf.xml" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\Microsoft.Web.WebView2.Wpf.xml" SelfReg="false"/>
+    <ROW File="MicrosoftEdgeWebview2Setup.exe" Component_="MicrosoftEdgeWebview2Setup.exe" FileName="MICROS~1.EXE|MicrosoftEdgeWebview2Setup.exe" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\runtimes\MicrosoftEdgeWebview2Setup.exe" SelfReg="false"/>
+    <ROW File="WebView2Loader.dll" Component_="WebView2Loader.dll" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\runtimes\win-arm64\native\WebView2Loader.dll" SelfReg="false"/>
+    <ROW File="WebView2Loader.dll_1" Component_="WebView2Loader.dll_1" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\runtimes\win-x64\native\WebView2Loader.dll" SelfReg="false"/>
+    <ROW File="WebView2Loader.dll_2" Component_="WebView2Loader.dll_2" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\runtimes\win-x86\native\WebView2Loader.dll" SelfReg="false"/>
+    <ROW File="WebView2Loader.dll_3" Component_="WebView2Loader.dll_3" FileName="WEBVIE~1.DLL|WebView2Loader.dll" Attributes="0" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\WebView2Loader.dll" SelfReg="false"/>
+    <ROW File="Store50x50Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="STORE5~1.PNG|Store50x50Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\Store50x50Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~1.PNG|HieuGLLiteSquare71x71Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~2.PNG|HieuGLLiteSquare71x71Logo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~3.PNG|HieuGLLiteSquare71x71Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~4.PNG|HieuGLLiteSquare71x71Logo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~5.PNG|HieuGLLiteSquare71x71Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~6.PNG|HieuGLLiteSquare71x71Logo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~7.PNG|HieuGLLiteSquare71x71Logo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~8.PNG|HieuGLLiteSquare71x71Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUGL~9.PNG|HieuGLLiteSquare71x71Logo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~10.PNG|HieuGLLiteSquare71x71Logo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~11.PNG|HieuGLLiteSquare71x71Logo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~12.PNG|HieuGLLiteSquare71x71Logo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~13.PNG|HieuGLLiteSquare71x71Logo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~14.PNG|HieuGLLiteSquare71x71Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare71x71Logo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~15.PNG|HieuGLLiteSquare71x71Logo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare71x71Logo.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~16.PNG|HieuGLLiteSquare150x150Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~17.PNG|HieuGLLiteSquare150x150Logo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~18.PNG|HieuGLLiteSquare150x150Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~19.PNG|HieuGLLiteSquare150x150Logo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~20.PNG|HieuGLLiteSquare150x150Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~21.PNG|HieuGLLiteSquare150x150Logo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~22.PNG|HieuGLLiteSquare150x150Logo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~23.PNG|HieuGLLiteSquare150x150Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~24.PNG|HieuGLLiteSquare150x150Logo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~25.PNG|HieuGLLiteSquare150x150Logo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~26.PNG|HieuGLLiteSquare150x150Logo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~27.PNG|HieuGLLiteSquare150x150Logo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~28.PNG|HieuGLLiteSquare150x150Logo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~29.PNG|HieuGLLiteSquare150x150Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare150x150Logo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~30.PNG|HieuGLLiteSquare150x150Logo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare150x150Logo.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~31.PNG|HieuGLLiteWide310x150Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~32.PNG|HieuGLLiteWide310x150Logo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~33.PNG|HieuGLLiteWide310x150Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~34.PNG|HieuGLLiteWide310x150Logo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~35.PNG|HieuGLLiteWide310x150Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~36.PNG|HieuGLLiteWide310x150Logo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~37.PNG|HieuGLLiteWide310x150Logo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~38.PNG|HieuGLLiteWide310x150Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~39.PNG|HieuGLLiteWide310x150Logo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~40.PNG|HieuGLLiteWide310x150Logo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~41.PNG|HieuGLLiteWide310x150Logo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~42.PNG|HieuGLLiteWide310x150Logo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~43.PNG|HieuGLLiteWide310x150Logo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~44.PNG|HieuGLLiteWide310x150Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteWide310x150Logo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~45.PNG|HieuGLLiteWide310x150Logo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteWide310x150Logo.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~46.PNG|HieuGLLiteSquare310x310Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~47.PNG|HieuGLLiteSquare310x310Logo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~48.PNG|HieuGLLiteSquare310x310Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~49.PNG|HieuGLLiteSquare310x310Logo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~50.PNG|HieuGLLiteSquare310x310Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~51.PNG|HieuGLLiteSquare310x310Logo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~52.PNG|HieuGLLiteSquare310x310Logo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~53.PNG|HieuGLLiteSquare310x310Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~54.PNG|HieuGLLiteSquare310x310Logo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~55.PNG|HieuGLLiteSquare310x310Logo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~56.PNG|HieuGLLiteSquare310x310Logo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~57.PNG|HieuGLLiteSquare310x310Logo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~58.PNG|HieuGLLiteSquare310x310Logo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~59.PNG|HieuGLLiteSquare310x310Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare310x310Logo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~60.PNG|HieuGLLiteSquare310x310Logo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare310x310Logo.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~61.PNG|HieuGLLiteSquare44x44Logo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize16.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~62.PNG|HieuGLLiteSquare44x44Logo.targetsize-16.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-16.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize16_altformunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~63.PNG|HieuGLLiteSquare44x44Logo.targetsize-16_altform-unplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-16_altform-unplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize16_altformlightunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~64.PNG|HieuGLLiteSquare44x44Logo.targetsize-16_altform-lightunplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-16_altform-lightunplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~65.PNG|HieuGLLiteSquare44x44Logo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~66.PNG|HieuGLLiteSquare44x44Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize24.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~67.PNG|HieuGLLiteSquare44x44Logo.targetsize-24.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-24.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize24_altformunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~68.PNG|HieuGLLiteSquare44x44Logo.targetsize-24_altform-unplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-24_altform-unplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize24_altformlightunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~69.PNG|HieuGLLiteSquare44x44Logo.targetsize-24_altform-lightunplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-24_altform-lightunplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~70.PNG|HieuGLLiteSquare44x44Logo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~71.PNG|HieuGLLiteSquare44x44Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize32.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~72.PNG|HieuGLLiteSquare44x44Logo.targetsize-32.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-32.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize32_altformunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~73.PNG|HieuGLLiteSquare44x44Logo.targetsize-32_altform-unplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-32_altform-unplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize32_altformlightunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~74.PNG|HieuGLLiteSquare44x44Logo.targetsize-32_altform-lightunplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-32_altform-lightunplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~75.PNG|HieuGLLiteSquare44x44Logo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~76.PNG|HieuGLLiteSquare44x44Logo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~77.PNG|HieuGLLiteSquare44x44Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize48.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~78.PNG|HieuGLLiteSquare44x44Logo.targetsize-48.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-48.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize48_altformunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~79.PNG|HieuGLLiteSquare44x44Logo.targetsize-48_altform-unplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-48_altform-unplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize48_altformlightunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~80.PNG|HieuGLLiteSquare44x44Logo.targetsize-48_altform-lightunplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-48_altform-lightunplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~81.PNG|HieuGLLiteSquare44x44Logo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~82.PNG|HieuGLLiteSquare44x44Logo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~83.PNG|HieuGLLiteSquare44x44Logo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~84.PNG|HieuGLLiteSquare44x44Logo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~85.PNG|HieuGLLiteSquare44x44Logo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~86.PNG|HieuGLLiteSquare44x44Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize256.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~87.PNG|HieuGLLiteSquare44x44Logo.targetsize-256.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-256.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize256_altformunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~88.PNG|HieuGLLiteSquare44x44Logo.targetsize-256_altform-unplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-256_altform-unplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.targetsize256_altformlightunplated.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~89.PNG|HieuGLLiteSquare44x44Logo.targetsize-256_altform-lightunplated.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.targetsize-256_altform-lightunplated.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSquare44x44Logo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~90.PNG|HieuGLLiteSquare44x44Logo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSquare44x44Logo.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~91.PNG|HieuGLLiteSplashScreen.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~92.PNG|HieuGLLiteSplashScreen.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~93.PNG|HieuGLLiteSplashScreen.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~94.PNG|HieuGLLiteSplashScreen.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~95.PNG|HieuGLLiteSplashScreen.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~96.PNG|HieuGLLiteSplashScreen.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~97.PNG|HieuGLLiteSplashScreen.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~98.PNG|HieuGLLiteSplashScreen.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEUG~99.PNG|HieuGLLiteSplashScreen.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~100.PNG|HieuGLLiteSplashScreen.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~101.PNG|HieuGLLiteSplashScreen.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~102.PNG|HieuGLLiteSplashScreen.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~103.PNG|HieuGLLiteSplashScreen.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~104.PNG|HieuGLLiteSplashScreen.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteSplashScreen.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~105.PNG|HieuGLLiteSplashScreen.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteSplashScreen.scale-500.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale100.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~106.PNG|HieuGLLiteBadgeLogo.scale-100.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-100.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale120.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~107.PNG|HieuGLLiteBadgeLogo.scale-120.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-120.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~108.PNG|HieuGLLiteBadgeLogo.scale-125.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-125.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale140.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~109.PNG|HieuGLLiteBadgeLogo.scale-140.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-140.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~110.PNG|HieuGLLiteBadgeLogo.scale-150.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-150.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale160.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~111.PNG|HieuGLLiteBadgeLogo.scale-160.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-160.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale180.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~112.PNG|HieuGLLiteBadgeLogo.scale-180.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-180.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~113.PNG|HieuGLLiteBadgeLogo.scale-200.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-200.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale220.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~114.PNG|HieuGLLiteBadgeLogo.scale-220.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-220.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale225.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~115.PNG|HieuGLLiteBadgeLogo.scale-225.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-225.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale240.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~116.PNG|HieuGLLiteBadgeLogo.scale-240.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-240.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale250.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~117.PNG|HieuGLLiteBadgeLogo.scale-250.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-250.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale300.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~118.PNG|HieuGLLiteBadgeLogo.scale-300.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-300.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~119.PNG|HieuGLLiteBadgeLogo.scale-400.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-400.png" SelfReg="false"/>
+    <ROW File="HieuGLLiteBadgeLogo.scale500.png" Component_="Store50x50Logo.scale100.png" FileName="HIEU~120.PNG|HieuGLLiteBadgeLogo.scale-500.png" Attributes="0" SourcePath="Generated Assets\HieuGLLiteBadgeLogo.scale-500.png" SelfReg="false"/>
+    <ROW File="Store50x50Logo.scale125.png" Component_="Store50x50Logo.scale100.png" FileName="STORE5~2.PNG|Store50x50Logo.scale-125.png" Attributes="0" SourcePath="Generated Assets\Store50x50Logo.scale-125.png" SelfReg="false"/>
+    <ROW File="Store50x50Logo.scale150.png" Component_="Store50x50Logo.scale100.png" FileName="STORE5~3.PNG|Store50x50Logo.scale-150.png" Attributes="0" SourcePath="Generated Assets\Store50x50Logo.scale-150.png" SelfReg="false"/>
+    <ROW File="Store50x50Logo.scale200.png" Component_="Store50x50Logo.scale100.png" FileName="STORE5~4.PNG|Store50x50Logo.scale-200.png" Attributes="0" SourcePath="Generated Assets\Store50x50Logo.scale-200.png" SelfReg="false"/>
+    <ROW File="Store50x50Logo.scale400.png" Component_="Store50x50Logo.scale100.png" FileName="STORE5~5.PNG|Store50x50Logo.scale-400.png" Attributes="0" SourcePath="Generated Assets\Store50x50Logo.scale-400.png" SelfReg="false"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.AppXCfgComponent">
+    <ROW ID="Configuration" Order="1" ManifestFile="AppxManifest.xml" TargetOs="4" AutoUpdatesFrequency="0" AutoUpdatesOptions="0" ManifestBundleFile="AppxBundleManifest.xml"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
+    <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
+    <ROW BuildKey="Build_MSIX_APPX" BuildName="Build_MSIX_APPX" BuildOrder="1" BuildType="7" PackageFolder="Build_MSIX_APPXSetupFiles" Languages="en" UwpTargetDesktop="TargetDeviceFamily"/>
+    <ROW BuildKey="Build_MSIX_APPXSubBuild" BuildName="x64" BuildOrder="2" BuildType="8" ParentBuild="Build_MSIX_APPX"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.DictionaryComponent">
+    <ROW Path="&lt;AI_DICTS&gt;ui.ail"/>
+    <ROW Path="&lt;AI_DICTS&gt;ui_en.ail"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.DigCertStoreComponent">
+    <ROW DigitalCertificate="..\HieuGLLite.pfx" TimeStampUrl="http://timestamp.digicert.com" SignerDescription="[|ProductName]" SignOptions="7" SignTool="0" UseSha256="1" Password="7099B6A4C193F703228080539342AE11CFFB6E7A" Subject="CN=Hieu GL Lite, O=Hieu GL Lite, C=VN"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
+    <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
+    <ROW Fragment="FolderDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\FolderDlg.aip"/>
+    <ROW Fragment="MaintenanceTypeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceTypeDlg.aip"/>
+    <ROW Fragment="MaintenanceWelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\MaintenanceWelcomeDlg.aip"/>
+    <ROW Fragment="SequenceDialogs.aip" Path="&lt;AI_THEMES&gt;classic\fragments\SequenceDialogs.aip"/>
+    <ROW Fragment="Sequences.aip" Path="&lt;AI_FRAGS&gt;Sequences.aip"/>
+    <ROW Fragment="StaticUIStrings.aip" Path="&lt;AI_FRAGS&gt;StaticUIStrings.aip"/>
+    <ROW Fragment="Themes.aip" Path="&lt;AI_FRAGS&gt;Themes.aip"/>
+    <ROW Fragment="UI.aip" Path="&lt;AI_THEMES&gt;classic\fragments\UI.aip"/>
+    <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip"/>
+    <ROW Fragment="VerifyRemoveDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRemoveDlg.aip"/>
+    <ROW Fragment="VerifyRepairDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\VerifyRepairDlg.aip"/>
+    <ROW Fragment="WelcomeDlg.aip" Path="&lt;AI_THEMES&gt;classic\fragments\WelcomeDlg.aip"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.GenericXmlAttributeComponent">
+    <ROW XmlAttribute="Alias" XmlElement="ExecutionAlias" Name="Alias" Flags="0" Order="0" Value="HieuGLLite.Apps.exe"/>
+    <ROW XmlAttribute="BackgroundColor" XmlElement="VisualElements" Name="BackgroundColor" Flags="0" Order="0" Value="transparent"/>
+    <ROW XmlAttribute="BadgeLogo" XmlElement="LockScreen" Name="BadgeLogo" Flags="0" Order="0" FileId="HieuGLLiteBadgeLogo.scale100.png"/>
+    <ROW XmlAttribute="Category" XmlElement="Extension" Name="Category" Flags="0" Order="0" Value="windows.appExecutionAlias"/>
+    <ROW XmlAttribute="Category_1" XmlElement="Extension_1" Name="Category" Flags="0" Order="0" Value="windows.desktopAppMigration"/>
+    <ROW XmlAttribute="Description" XmlElement="VisualElements" Name="Description" Flags="0" Order="0" Value="Hieu GL Lite"/>
+    <ROW XmlAttribute="DisplayName" XmlElement="VisualElements" Name="DisplayName" Flags="0" Order="0" Value="Hieu GL Lite"/>
+    <ROW XmlAttribute="Enforcement" XmlElement="Content" Name="Enforcement" Flags="0" Order="0" Value="on"/>
+    <ROW XmlAttribute="EntryPoint" XmlElement="Application" Name="EntryPoint" Flags="0" Order="0" Value="Windows.FullTrustApplication"/>
+    <ROW XmlAttribute="EntryPoint_1" XmlElement="Extension_1" Name="EntryPoint" Flags="0" Order="0" Value="Windows.FullTrustApplication"/>
+    <ROW XmlAttribute="Executable" XmlElement="Application" Name="Executable" Flags="0" Order="0" FileId="HieuGLLite.Apps.exe"/>
+    <ROW XmlAttribute="Executable_1" XmlElement="Extension_1" Name="Executable" Flags="0" Order="0" FileId="HieuGLLite.Apps.exe"/>
+    <ROW XmlAttribute="Id" XmlElement="Application" Name="Id" Flags="0" Order="0" Value="HieuGLLite"/>
+    <ROW XmlAttribute="Image" XmlElement="SplashScreen" Name="Image" Flags="0" Order="0" FileId="HieuGLLiteSplashScreen.scale100.png"/>
+    <ROW XmlAttribute="Language" XmlElement="Resource" Name="Language" Flags="0" Order="0" Value="en-US"/>
+    <ROW XmlAttribute="MaxVersionTested" XmlElement="TargetDeviceFamily" Name="MaxVersionTested" Flags="0" Order="0" Value="10.0.22000.0"/>
+    <ROW XmlAttribute="MinVersion" XmlElement="TargetDeviceFamily" Name="MinVersion" Flags="0" Order="0" Value="10.0.17763.0"/>
+    <ROW XmlAttribute="Name" XmlElement="Identity" Name="Name" Flags="0" Order="0" Value="HieuGLLite.App"/>
+    <ROW XmlAttribute="Name_1" XmlElement="Capability" Name="Name" Flags="0" Order="0" Value="runFullTrust"/>
+    <ROW XmlAttribute="Name_2" XmlElement="Capability_1" Name="Name" Flags="0" Order="0" Value="allowElevation"/>
+    <ROW XmlAttribute="Name_3" XmlElement="TargetDeviceFamily" Name="Name" Flags="0" Order="0" Value="Windows.Desktop"/>
+    <ROW XmlAttribute="Notification" XmlElement="LockScreen" Name="Notification" Flags="0" Order="0" Value="badge"/>
+    <ROW XmlAttribute="Preference" XmlElement="Rotation" Name="Preference" Flags="0" Order="0" Value="portrait"/>
+    <ROW XmlAttribute="Preference_1" XmlElement="Rotation_1" Name="Preference" Flags="0" Order="0" Value="landscape"/>
+    <ROW XmlAttribute="Preference_2" XmlElement="Rotation_2" Name="Preference" Flags="0" Order="0" Value="portraitFlipped"/>
+    <ROW XmlAttribute="Preference_3" XmlElement="Rotation_3" Name="Preference" Flags="0" Order="0" Value="landscapeFlipped"/>
+    <ROW XmlAttribute="ProcessorArchitecture" XmlElement="Identity" Name="ProcessorArchitecture" Flags="0" Order="0" Value="x64"/>
+    <ROW XmlAttribute="Publisher" XmlElement="Identity" Name="Publisher" Flags="0" Order="0" Value="CN=Hieu GL Lite, O=Hieu GL Lite, C=VN"/>
+    <ROW XmlAttribute="Scale" XmlElement="Resource_1" Name="Scale" Flags="0" Order="0" Value="100"/>
+    <ROW XmlAttribute="ShortcutPath" XmlElement="DesktopApp" Name="ShortcutPath" Flags="0" Order="0" Value="%APPDATA%\Microsoft\Windows\Start Menu\Programs\Hieu GL Lite\Hieu GL Lite.lnk"/>
+    <ROW XmlAttribute="ShortcutPath_1" XmlElement="DesktopApp_1" Name="ShortcutPath" Flags="0" Order="0" Value="%PROGRAMDATA%\Microsoft\Windows\Start Menu\Programs\Hieu GL Lite\Hieu GL Lite.lnk"/>
+    <ROW XmlAttribute="ShortcutPath_2" XmlElement="DesktopApp_2" Name="ShortcutPath" Flags="0" Order="0" Value="%USERPROFILE%\Desktop\Hieu GL Lite.lnk"/>
+    <ROW XmlAttribute="Square150x150Logo" XmlElement="VisualElements" Name="Square150x150Logo" Flags="0" Order="0" FileId="HieuGLLiteSquare150x150Logo.scale100.png"/>
+    <ROW XmlAttribute="Square310x310Logo" XmlElement="DefaultTile" Name="Square310x310Logo" Flags="0" Order="0" FileId="HieuGLLiteSquare310x310Logo.scale100.png"/>
+    <ROW XmlAttribute="Square44x44Logo" XmlElement="VisualElements" Name="Square44x44Logo" Flags="0" Order="0" FileId="HieuGLLiteSquare44x44Logo.scale100.png"/>
+    <ROW XmlAttribute="Square71x71Logo" XmlElement="DefaultTile" Name="Square71x71Logo" Flags="0" Order="0" FileId="HieuGLLiteSquare71x71Logo.scale100.png"/>
+    <ROW XmlAttribute="Version" XmlElement="Identity" Name="Version" Flags="0" Order="0" Value="26.3.10.0"/>
+    <ROW XmlAttribute="Wide310x150Logo" XmlElement="DefaultTile" Name="Wide310x150Logo" Flags="0" Order="0" FileId="HieuGLLiteWide310x150Logo.scale100.png"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.GenericXmlElementComponent">
+    <ROW XmlElement="AppExecutionAlias" ParentElement="Extension" Name="AppExecutionAlias" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Application" ParentElement="Applications" Name="Application" Order="0" Flags="0" Type="4"/>
+    <ROW XmlElement="Applications" ParentElement="Package" Name="Applications" Order="3" Flags="0" Type="3"/>
+    <ROW XmlElement="Bundle" Name="Bundle" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Capabilities" ParentElement="Package" Name="Capabilities" Order="4" Flags="0" Type="0"/>
+    <ROW XmlElement="Capability" ParentElement="Capabilities" Name="Capability" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Capability_1" ParentElement="Capabilities" Name="Capability" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Content" ParentElement="PackageIntegrity" Name="Content" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="DefaultTile" ParentElement="VisualElements" Name="DefaultTile" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Dependencies" ParentElement="Package" Name="Dependencies" Order="5" Flags="0" Type="0"/>
+    <ROW XmlElement="DesktopApp" ParentElement="DesktopAppMigration" Name="DesktopApp" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="DesktopAppMigration" ParentElement="Extension_1" Name="DesktopAppMigration" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="DesktopApp_1" ParentElement="DesktopAppMigration" Name="DesktopApp" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="DesktopApp_2" ParentElement="DesktopAppMigration" Name="DesktopApp" Order="2" Flags="0" Type="0"/>
+    <ROW XmlElement="DisplayName" ParentElement="Properties" Name="DisplayName" Order="1" Flags="0" Text="Hieu GL Lite" Type="0"/>
+    <ROW XmlElement="ExecutionAlias" ParentElement="AppExecutionAlias" Name="ExecutionAlias" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Extension" ParentElement="Extensions" Name="Extension" Order="0" Flags="0" Type="54"/>
+    <ROW XmlElement="Extension_1" ParentElement="Extensions" Name="Extension" Order="1" Flags="0" Type="55"/>
+    <ROW XmlElement="Extensions" ParentElement="Application" Name="Extensions" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Identity" ParentElement="Package" Name="Identity" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="InitialRotationPreference" ParentElement="VisualElements" Name="InitialRotationPreference" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="LockScreen" ParentElement="VisualElements" Name="LockScreen" Order="3" Flags="0" Type="0"/>
+    <ROW XmlElement="Logo" ParentElement="Properties" Name="Logo" Order="2" Flags="0" FileId="Store50x50Logo.scale100.png" Type="0"/>
+    <ROW XmlElement="Package" Name="Package" Order="0" Flags="0" Type="6"/>
+    <ROW XmlElement="PackageIntegrity" ParentElement="Properties" Name="PackageIntegrity" Order="3" Flags="0" Type="0"/>
+    <ROW XmlElement="Properties" ParentElement="Package" Name="Properties" Order="2" Flags="0" Type="0"/>
+    <ROW XmlElement="PublisherDisplayName" ParentElement="Properties" Name="PublisherDisplayName" Order="0" Flags="0" Text="Hieu GL Lite" Type="0"/>
+    <ROW XmlElement="Resource" ParentElement="Resources" Name="Resource" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Resource_1" ParentElement="Resources" Name="Resource" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Resources" ParentElement="Package" Name="Resources" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Rotation" ParentElement="InitialRotationPreference" Name="Rotation" Order="0" Flags="0" Type="0"/>
+    <ROW XmlElement="Rotation_1" ParentElement="InitialRotationPreference" Name="Rotation" Order="1" Flags="0" Type="0"/>
+    <ROW XmlElement="Rotation_2" ParentElement="InitialRotationPreference" Name="Rotation" Order="2" Flags="0" Type="0"/>
+    <ROW XmlElement="Rotation_3" ParentElement="InitialRotationPreference" Name="Rotation" Order="3" Flags="0" Type="0"/>
+    <ROW XmlElement="SplashScreen" ParentElement="VisualElements" Name="SplashScreen" Order="2" Flags="0" Type="0"/>
+    <ROW XmlElement="SupportedUsers" ParentElement="Properties" Name="SupportedUsers" Order="4" Flags="0" Text="multiple" Type="0"/>
+    <ROW XmlElement="TargetDeviceFamily" ParentElement="Dependencies" Name="TargetDeviceFamily" Order="0" Flags="0" Type="28"/>
+    <ROW XmlElement="VisualElements" ParentElement="Application" Name="VisualElements" Order="0" Flags="0" Type="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.GenericXmlFileComponent">
+    <ROW XmlFile="AppxBundleManifest.xml" FileName="AppxBundleManifest.xml" RootElement="Bundle" Flags="89" Version="1.0" Encoding="UTF-8" IndentUnits="2"/>
+    <ROW XmlFile="AppxManifest.xml" FileName="AppxManifest.xml" RootElement="Package" Flags="89" Version="1.0" Encoding="UTF-8" IndentUnits="2"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
+    <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
+    <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="FolderDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_INSTALL" Ordering="201"/>
+    <ROW Dialog_="FolderDlg" Control_="Back" Event="NewDialog" Argument="WelcomeDlg" Condition="AI_INSTALL" Ordering="1"/>
+    <ROW Dialog_="MaintenanceWelcomeDlg" Control_="Next" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="99"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_MAINT" Ordering="198"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="202"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_INSTALL" Ordering="197"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="201"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_MAINT" Ordering="101"/>
+    <ROW Dialog_="CustomizeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="ChangeButton" Event="NewDialog" Argument="CustomizeDlg" Condition="AI_MAINT" Ordering="501"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceWelcomeDlg" Condition="AI_MAINT" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RemoveButton" Event="NewDialog" Argument="VerifyRemoveDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="1"/>
+    <ROW Dialog_="MaintenanceTypeDlg" Control_="RepairButton" Event="NewDialog" Argument="VerifyRepairDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="601"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Back" Event="NewDialog" Argument="MaintenanceTypeDlg" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="1"/>
+    <ROW Dialog_="VerifyRepairDlg" Control_="Repair" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Repair&quot;" Ordering="399" Options="1"/>
+    <ROW Dialog_="VerifyRemoveDlg" Control_="Remove" Event="EndDialog" Argument="Return" Condition="AI_MAINT AND InstallMode=&quot;Remove&quot;" Ordering="299" Options="1"/>
+    <ROW Dialog_="PatchWelcomeDlg" Control_="Next" Event="NewDialog" Argument="VerifyReadyDlg" Condition="AI_PATCH" Ordering="201"/>
+    <ROW Dialog_="ResumeDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_RESUME" Ordering="299"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Install" Event="EndDialog" Argument="Return" Condition="AI_PATCH" Ordering="199"/>
+    <ROW Dialog_="VerifyReadyDlg" Control_="Back" Event="NewDialog" Argument="PatchWelcomeDlg" Condition="AI_PATCH" Ordering="203"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
+    <ROW Directory_="APPDIR" Component_="APPDIR" ManualDelete="true"/>
+    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR" ManualDelete="false"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
+    <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
+    <ROW Action="AI_DpiContentScale" Type="1" Source="aicustact.dll" Target="DpiContentScale"/>
+    <ROW Action="AI_EnableDebugLog" Type="321" Source="aicustact.dll" Target="EnableDebugLog"/>
+    <ROW Action="AI_InstallModeCheck" Type="1" Source="aicustact.dll" Target="UpdateInstallMode" WithoutSeq="true"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Type="65" Source="aicustact.dll" Target="PrepareUpgrade"/>
+    <ROW Action="AI_RESTORE_LOCATION" Type="65" Source="aicustact.dll" Target="RestoreLocation"/>
+    <ROW Action="AI_ResolveKnownFolders" Type="1" Source="aicustact.dll" Target="AI_ResolveKnownFolders"/>
+    <ROW Action="AI_SHOW_LOG" Type="65" Source="aicustact.dll" Target="LaunchLogFile" WithoutSeq="true"/>
+    <ROW Action="AI_STORE_LOCATION" Type="51" Source="ARPINSTALLLOCATION" Target="[APPDIR]"/>
+    <ROW Action="SET_APPDIR" Type="307" Source="APPDIR" Target="[ProgramFilesFolder][Manufacturer]\[ProductName]" MultiBuildTarget="Build_MSIX_APPX:"/>
+    <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
+    <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
+    <ROW Feature_="MainFeature" Component_="APPDIR"/>
+    <ROW Feature_="MainFeature" Component_="ProductInformation"/>
+    <ROW Feature_="MainFeature" Component_="GoogleSansBold.ttf"/>
+    <ROW Feature_="MainFeature" Component_="favicon.ico"/>
+    <ROW Feature_="MainFeature" Component_="offline.html"/>
+    <ROW Feature_="MainFeature" Component_="LoadingScreen_dark.mp4"/>
+    <ROW Feature_="MainFeature" Component_="bluestacks.ico"/>
+    <ROW Feature_="MainFeature" Component_="BSTCleaner.exe"/>
+    <ROW Feature_="MainFeature" Component_="BSTCleaner.exe.config"/>
+    <ROW Feature_="MainFeature" Component_="HDForceGPUx64.exe"/>
+    <ROW Feature_="MainFeature" Component_="HDForceGPUx86.exe"/>
+    <ROW Feature_="MainFeature" Component_="i18n.arEG.txt"/>
+    <ROW Feature_="MainFeature" Component_="HieuGLLite.Apps.exe"/>
+    <ROW Feature_="MainFeature" Component_="Microsoft.Web.WebView2.Core.xml"/>
+    <ROW Feature_="MainFeature" Component_="MicrosoftEdgeWebview2Setup.exe"/>
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll"/>
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_1"/>
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_2"/>
+    <ROW Feature_="MainFeature" Component_="WebView2Loader.dll_3"/>
+    <ROW Feature_="MainFeature" Component_="SHORTCUTDIR"/>
+    <ROW Feature_="AiAppXAssets" Component_="Store50x50Logo.scale100.png"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
+    <ROW Name="HieuGLLite.Apps.exe" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64\HieuGLLite.Apps.exe" Index="0"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstExSeqComponent">
+    <ROW Action="AI_DOWNGRADE" Condition="AI_NEWERPRODUCTFOUND AND (UILevel &lt;&gt; 5)" Sequence="210"/>
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
+    <ROW Action="AI_STORE_LOCATION" Condition="(Not Installed) OR REINSTALL" Sequence="1501"/>
+    <ROW Action="AI_PREPARE_UPGRADE" Condition="AI_UPGRADE=&quot;No&quot; AND (Not Installed)" Sequence="1399"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiInstallUISequenceComponent">
+    <ROW Action="AI_RESTORE_LOCATION" Condition="APPDIR=&quot;&quot;" Sequence="749"/>
+    <ROW Action="AI_ResolveKnownFolders" Sequence="53"/>
+    <ROW Action="AI_DpiContentScale" Sequence="52"/>
+    <ROW Action="AI_EnableDebugLog" Sequence="51"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
+    <ROW Registry="Manufacturer" Root="-1" Key="Software\[Manufacturer]" Name="\"/>
+    <ROW Registry="Path" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Value="[APPDIR]" Component_="ProductInformation"/>
+    <ROW Registry="ProductName" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="\"/>
+    <ROW Registry="Software" Root="-1" Key="Software" Name="\"/>
+    <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
+    <ROW Shortcut="HieuGLLite" Directory_="SHORTCUTDIR" Name="HIEUGL~1|Hieu GL Lite" Component_="HieuGLLite.Apps.exe" Target="[#HieuGLLite.Apps.exe]" Description="Hieu GL Lite" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
+    <ROW Shortcut="HieuGLLite_1" Directory_="DesktopFolder" Name="HIEUGL~1|Hieu GL Lite" Component_="HieuGLLite.Apps.exe" Target="[#HieuGLLite.Apps.exe]" Description="Hieu GL Lite" Hotkey="0" IconIndex="0" ShowCmd="1" WkDir="APPDIR"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
+    <ATTRIBUTE name="UsedTheme" value="classic"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
+    <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
+  </COMPONENT>
+  <COMPONENT cid="caphyon.advinst.msicomp.SynchronizedFolderComponent">
+    <ROW Directory_="APPDIR" SourcePath="HieuGLLite.Apps\bin\Release\net8.0-windows10.0.19041.0\publish\win-x64" Feature="MainFeature" ExcludePattern="*~|#*#|%*%|._|CVS|.cvsignore|SCCS|vssver.scc|mssccprj.scc|vssver2.scc|.svn|.DS_Store" ExcludeFlags="6"/>
+  </COMPONENT>
+</DOCUMENT>
