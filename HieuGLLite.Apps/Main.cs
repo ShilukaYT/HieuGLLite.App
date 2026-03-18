@@ -59,7 +59,7 @@ namespace HieuGLLite.Apps
 		private DiscordRpcClient discordClient;
 
 		//Các biến toàn cục khác
-		public bool isDevMode = true;
+		public bool isDevMode = false;
 
 		public string AppName;
 		public string version = "26.3.12 (Public Beta)";

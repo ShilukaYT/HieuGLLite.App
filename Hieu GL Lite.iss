@@ -61,6 +61,35 @@ Source: "C:\Users\doanh\Desktop\HieuGLLite.pfx"; DestDir: "{tmp}"; Flags: delete
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
+[Registry]
+; --- ĐĂNG KÝ URI SCHEME: hieugllite:// ---
+; Khớp với protocolName trong Main.cs (Dòng 599)
+Root: HKCR; Subkey: "hieugllite"; ValueType: string; ValueData: "URL:Hieu GL Lite Protocol"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "hieugllite"; ValueName: "URL Protocol"; ValueType: string; ValueData: ""; Flags: uninsdeletekey
+Root: HKCR; Subkey: "hieugllite\shell\open\command"; ValueType: string; ValueData: """{app}\HieuGLLite.Apps.exe"" ""%1"""; Flags: uninsdeletekey
+
+[Code]
+// Hàm xóa thư mục dữ liệu trong LocalAppData khi gỡ cài đặt
+// Khớp với RootFolder trong Main.cs (Dòng 92): Path.Combine(Environment.SpecialFolder.LocalApplicationData, "HieuGLLite.Apps")
+procedure CurUninstallStepChanged(UninstallStep: TUninstallStep);
+var
+  DataPath: string;
+begin
+  if UninstallStep = usPostUninstall then
+  begin
+    DataPath := ExpandConstant('{localappdata}\HieuGLLite.Apps');
+    if DirExists(DataPath) then
+    begin
+      // Xóa sạch thư mục cấu hình, download, cache mà C# tạo ra
+      DelTree(DataPath, True, True, True);
+    end;
+  end;
+end;
+
+[UninstallDelete]
+; Xóa các file log hoặc tệp tạm phát sinh trong thư mục cài đặt
+Type: filesandordirs; Name: "{app}"
+
 [Run]
 ; 1. Cài đặt chứng chỉ (Luôn chạy ngầm dù là cài thường hay cài im lặng)
 Filename: "certutil.exe"; Parameters: "-f -p ""HieuGLLite"" -importpfx Root ""{tmp}\HieuGLLite.pfx"""; Flags: runhidden waituntilterminated
