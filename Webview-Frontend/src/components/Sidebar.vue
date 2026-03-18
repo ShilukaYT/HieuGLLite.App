@@ -136,7 +136,7 @@
                   <v-list-item>
 
                     <template v-slot:prepend>
-                      <v-avatar size="56" :image="user.avatar" class="mr-2"></v-avatar>
+                      <v-avatar size="64" :image="userAvatarUrl" class="mr-2"></v-avatar>
                     </template>
 
                     <template v-slot:title>
@@ -215,17 +215,18 @@ const updateAppsList = computed(() => {
 });
 
 const userAvatarUrl = computed(() => {
-  // 1. Nếu chưa có dữ liệu user -> Trả về ảnh mặc định xám để không bị "đen thui"
+  // 1. Nếu chưa có dữ liệu user -> Trả về ảnh mặc định xám
   if (!user.value || !user.value.id) {
     return '';
   }
 
-  // 2. Nếu đã có avatar tùy chỉnh từ C# gửi lên
-  if (user.value.avatar && user.value.avatar !== 'null' && user.value.avatar !== '') {
-    return user.value.avatar;
+  // 2. NẾU ĐÃ CÓ AVATAR (Chặn luôn trường hợp lỗi /.png do C# gửi lên)
+  const avatar = user.value.avatar;
+  if (avatar && avatar !== 'null' && avatar !== '' && !avatar.endsWith('/.png')) {
+    return avatar;
   }
 
-  // 3. Xử lý cho tài khoản "discriminator: 0" (Hệ thống mới)
+  // 3. Xử lý cho tài khoản "discriminator: 0" (Hệ thống mới) hoặc tài khoản không có avatar
   try {
     const id = user.value.id;
     const desc = user.value.discriminator;

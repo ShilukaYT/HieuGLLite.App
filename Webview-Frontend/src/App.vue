@@ -82,8 +82,9 @@
 
         <InstallModal v-if="showModal && selectedApp" :app="selectedApp" :is-multi-instance="isMultiInstallMode"
           @close="showModal = false" @confirm="handleInstall" />
-        <SettingsModal v-if="showSettings" @close="showSettings = false" :app="manifest" :settings="userSettings" @check-update="handleManualUpdateCheck"
-          @get-apps="handleGetApps" @clear-cache="handleClearCache" @uninstall="handleUninstall" />
+        <SettingsModal v-if="showSettings" @close="showSettings = false" :app="manifest" :settings="userSettings"
+          @check-update="handleManualUpdateCheck" @get-apps="handleGetApps" @clear-cache="handleClearCache"
+          @uninstall="handleUninstall" />
 
         <v-snackbar v-model="showSnackbar" :timeout="2000" :color="isDark ? '#1e1e1e' : 'white'" location="top"
           rounded="pill" class="mt-4">
@@ -95,7 +96,12 @@
 
 
       </div>
-      <UpdateModal v-model="showUpdateModal" :update-data="updateData" @download="handleDownloadUpdate" />
+      <UpdateModal 
+    v-model="showUpdateModal" 
+    :update-data="updateData" 
+    @download="handleDownloadUpdate" 
+    @install="handleInstallUpdate" />
+    <WelcomeModal v-if="showWelcomeModal" @close="showWelcomeModal = false" />
     </div>
   </v-app>
 
@@ -113,8 +119,11 @@ import SettingsModal from './components/SettingsModal.vue'; // Thêm dòng này
 import MaintenanceModal from './components/MaintenanceModal.vue';
 import UpdateModal from './components/UpdateModal.vue';
 import RegionBlockModal from './components/RegionBlockModal.vue';
+import WelcomeModal from './components/WelcomeModal.vue';
+
 const isRegionBlocked = ref(false); // Thêm cờ quản lý vùng
 const showSettings = ref(false); // Thêm dòng này
+const showWelcomeModal = ref(false);
 // Thay vì tự gán tay, chúng ta cho nó tự động nội suy
 const isNotInWebView = ref(false);
 const isAppLocked = computed(() => {
@@ -145,8 +154,8 @@ const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
   if (userSettings.value.theme === 'system') {
     const newColorScheme = event.matches ? "dark" : "light";
-    theme.global.name.value = newColorScheme; 
-    
+    theme.global.name.value = newColorScheme;
+
     if (window.chrome?.webview) {
       window.chrome.webview.postMessage({ type: "THEME_CHANGED", mode: "system" });
     }
@@ -160,16 +169,18 @@ const isMaintenance = ref(false);
 const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
 // Đổi thành Object (Dùng ngoặc nhọn {} thôi)
 const manifest = ref({
-    FE_version: '26.3.11',
-    FE_versioncode: '260311',
-    BE_version: null,
-    BE_versioncode: null,
-    BE_version_latest: '26.3.11',
-    BE_versioncode_latest: '260311',
-    release_date: '2026-03-13',
-    changelog: 'Yêu cầu phiên bản Client: 26.3.11\n\nDừng sử dụng LocalStorage để lưu trữ cài đặt, chuyển sang tệp cấu hình\nTên giả lập sẽ được hiển thị trên tiêu đề\nGiờ đây chúng ta có thể ẩn hoặc tắt một cách linh hoạt (thay đổi trong cài đặt)\n Tối ưu hoá nội dung theo kích thước cửa sổ\nSửa lỗi thu phóng trong ứng dụng\nSửa lỗi thuật toán sau khi cài đặt ứng dụng\nTối ưu hóa Webview2 sau khi ẩn ứng dụng',
-    isMaintenance: false,
-    minRequiredVersionCode: '260311'
+  FE_version: '26.3.12 (Public Beta)',
+  FE_versioncode: '260312',
+  BE_version: null,
+  BE_versioncode: null,
+  BE_version_latest: '26.3.12',
+  BE_versioncode_latest: '260312',
+  release_date: '2026-03-20',
+  changelog: 'Để có trải nghiệm tốt nhất, hãy cập nhật lên phiên bản 26.3.12\n\nĐã có thể cập nhật phần mềm (từ phiên bản 26.3.12)\nSửa lỗi thuật toán khi cài ứng dụng\nSửa lỗi ảnh đại diện không hiển thị khi không có\nTiêu đề ứng dụng giờ đã linh hoạt hơn',
+  isMaintenance: false,
+  minRequiredVersionCode: '260311',
+  updateUrl: 'https://github.com/ShilukaYT/HieuGLLite.App/releases/download/260312/mysetup.exe',
+  sha256:"7b82aaed4ce6d12d8b21b77d09d0123bd118e5ec1ca6bd801bfe52c3bf8f819c"
 });
 
 const isLoading = ref(true);
@@ -177,6 +188,7 @@ const videoPathDark = ref('http://hieugllite.app/videos/LoadingScreen_dark.mp4')
 const videoPathLight = ref('http://hieugllite.app/videos/LoadingScreen_light.mp4');
 
 onMounted(async () => {
+  showWelcomeModal.value = true;
   // =======================================================
   // BƯỚC 1: ĐEO TAI NGHE TRƯỚC KHI LÀM BẤT CỨ VIỆC GÌ
   // =======================================================
@@ -202,12 +214,12 @@ onMounted(async () => {
             type: "PUSH_FE_VERSION",
             version: manifest.value.FE_version
           });
-          
-          isLoading.value = false; 
+
+          isLoading.value = false;
           
           if (!isMaintenance.value && !hasCheckedUpdate.value) {
             checkForUpdates(false);
-            hasCheckedUpdate.value = true; 
+            hasCheckedUpdate.value = true;
           }
           break;
 
@@ -272,7 +284,7 @@ onMounted(async () => {
           snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
           showSnackbar.value = true;
           break;
-          
+
         case 'SYNC_SETTINGS':
           // C# GỬI LÊN -> GÁN NGAY VÀO VUE
           userSettings.value.theme = res.theme;
@@ -284,6 +296,22 @@ onMounted(async () => {
             targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
           }
           theme.global.name.value = targetTheme;
+          break;
+        case 'UPDATE_PROGRESS':
+          updateData.value.isDownloading = true;
+          updateData.value.percent = res.percent;
+          break;
+
+        case 'UPDATE_READY':
+          updateData.value.isDownloading = false;
+          updateData.value.isReady = true;
+          updateData.value.savedPath = res.path;
+          break;
+
+        case 'UPDATE_FAILED':
+          updateData.value.isDownloading = false;
+          snackbarText.value = "Tải bản cập nhật thất bại: " + (res.error || "");
+          showSnackbar.value = true;
           break;
       }
     });
@@ -300,7 +328,7 @@ onMounted(async () => {
   try {
     const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
     const ipData = await ipRes.json();
-    
+
     if (ipData && ipData.country && ipData.country !== 'VN') {
       isRegionBlocked.value = true;
       console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
@@ -319,7 +347,7 @@ onMounted(async () => {
     console.warn("Đang chạy trên trình duyệt web thông thường!");
     videoPathDark.value = './assets/videos/LoadingScreen_dark.mp4';
     videoPathLight.value = './assets/videos/LoadingScreen_light.mp4';
-    
+
     setTimeout(() => { isLoading.value = false; }, 5000);
   } else {
     // Chỉ yêu cầu nạp Game nếu KHÔNG BỊ KHÓA
@@ -499,30 +527,37 @@ const snackbarText = ref("");
 const updateData = ref({
   versionName: "",
   changelog: "",
-  isForceUpdate: ""
+  isForceUpdate: false,
+  updateUrl: "", // Thêm link
+  isDownloading: false, // Thêm cờ tải
+  isReady: false, // Thêm cờ sẵn sàng
+  percent: 0, // Thêm %
+  savedPath: "", // Lưu đường dẫn EXE tải về,
+  updateHash: ""
 });
 
-// --- HÀM KIỂM TRA CẬP NHẬT ---
+// Cập nhật lại hàm checkForUpdates để truyền URL vào:
 const checkForUpdates = (isManual = false) => {
-  const appInfo = manifest.value; // Khai báo gọn nhẹ thế này thôi
-
+  const appInfo = manifest.value;
   const currentCode = parseInt(appInfo.BE_versioncode || "0");
   const latestCode = parseInt(appInfo.BE_versioncode_latest || "0");
-  const minRequiredCode = parseInt(appInfo.minRequiredVersionCode || "0"); 
-
-  console.log(`Đang kiểm tra cập nhật: Client(${currentCode}) vs Server(${latestCode})`); // Thêm dòng này để dễ debug
+  const minRequiredCode = parseInt(appInfo.minRequiredVersionCode || "0");
 
   if (latestCode > currentCode) {
-    const isForcedForThisUser = currentCode < minRequiredCode;
-    
     updateData.value = {
       versionName: appInfo.BE_version_latest,
       changelog: appInfo.changelog,
-      isForceUpdate: isForcedForThisUser 
+      isForceUpdate: currentCode < minRequiredCode,
+      updateUrl: appInfo.updateUrl, // Gán link
+      updateHash: appInfo.updateHash,
+      isDownloading: false,
+      isReady: false,
+      percent: 0,
+      savedPath: ""
     };
     showUpdateModal.value = true;
-
   } else if (isManual) {
+    // ...
     snackbarText.value = `Bạn đang sử dụng phiên bản mới nhất (${appInfo.BE_version_latest})!`;
     showSnackbar.value = true;
   }
@@ -530,6 +565,37 @@ const checkForUpdates = (isManual = false) => {
 // --- HÀM HỨNG SỰ KIỆN TỪ SETTINGS ---
 const handleManualUpdateCheck = () => {
   checkForUpdates(true); // Truyền true vì đây là thao tác thủ công
+};
+
+const handleDownloadUpdate = () => {
+  const currentCode = parseInt(manifest.value.BE_versioncode || "0");
+  
+  // CHỈ CHO PHÉP TẢI NGẦM NẾU VER >= 260312
+  if (currentCode >= 260312) {
+    updateData.value.isDownloading = true;
+    if (window.chrome?.webview) {
+      window.chrome.webview.postMessage({ 
+        type: "DOWNLOAD_UPDATE", 
+        url: updateData.value.updateUrl ,
+        hash: updateData.value.updateHash
+      });
+    }
+  } else {
+    // Các bản cũ thì ném link ra trình duyệt web
+    if (window.chrome?.webview) {
+      window.chrome.webview.postMessage({ type: "OPEN_URL", url: updateData.value.updateUrl });
+    }
+    showUpdateModal.value = false; // Ẩn modal đi
+  }
+};
+
+const handleInstallUpdate = () => {
+  if (window.chrome?.webview && updateData.value.savedPath) {
+    window.chrome.webview.postMessage({ 
+      type: "INSTALL_UPDATE", 
+      path: updateData.value.savedPath 
+    });
+  }
 };
 
 //=================================================================
@@ -577,9 +643,9 @@ const handleGetApps = () => {
 
   if (window.chrome?.webview) {
     // THÊM force: true VÀO ĐÂY ĐỂ ÉP C# LOAD LẠI ROLE
-    window.chrome.webview.postMessage({ 
-      type: "GET_APPS", 
-      force: true 
+    window.chrome.webview.postMessage({
+      type: "GET_APPS",
+      force: true
     });
     console.log("Đã gửi yêu cầu GET_APPS (Force Refresh) lên C#");
   } else {

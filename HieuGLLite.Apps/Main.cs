@@ -62,8 +62,8 @@ namespace HieuGLLite.Apps
 		public bool isDevMode = true;
 
 		public string AppName;
-		public string version = "26.3.11";
-		public int versioncode = 260311;
+		public string version = "26.3.12 (Public Beta)";
+		public int versioncode = 260312;
 
 		public string FE_version;
 
@@ -81,6 +81,8 @@ namespace HieuGLLite.Apps
 		private string officialGuildId = "1074226640894316655";
 
 		private List<string> currentUserRoles = new List<string>();
+
+		private string recentTitle = string.Empty;
 
 		private MultiThreadedDownloader _downloader; // Biến quản lý quá trình tải về, có thể dùng chung cho nhiều app nếu cần
 
@@ -182,7 +184,7 @@ namespace HieuGLLite.Apps
 		}
 		private async void Main_Load(object sender, EventArgs e)
 		{
-			AppName = isDevMode ? "Hieu GL Lite (Developer mode)" : "Hieu GL Lite (beta)";
+			AppName = isDevMode ? "Hieu GL Lite (Developer mode)" : "Hieu GL Lite (Public Beta)";
 			SetupSystemTray();
 			InitializeRPC();
 
@@ -260,7 +262,8 @@ namespace HieuGLLite.Apps
 			{
 				newZoom = 1.0;
 			}
-			else {
+			else
+			{
 				newZoom = 1.3;
 			}
 
@@ -391,17 +394,19 @@ namespace HieuGLLite.Apps
 					string title = message["title"]?.ToString();
 					if (title != null)
 					{
+						recentTitle = this.Text;
 						newTitle = title + " - " + AppName;
 					}
 					else
 
 					{
-						newTitle = AppName;
+						newTitle = recentTitle;
 					}
 						;
 
 
 					this.Invoke((MethodInvoker)delegate { this.Text = newTitle; });
+					Debug.WriteLine("Đã thay đổi title thành: " + newTitle);
 					break;
 				case "OPEN_URL":
 
@@ -411,11 +416,13 @@ namespace HieuGLLite.Apps
 					{
 						try
 						{
+							Debug.WriteLine("Đã yêu cầu mở liên kết: "+ url);
 							System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
 							{
 								FileName = url,
 								UseShellExecute = true
 							});
+
 						}
 						catch (Exception ex)
 						{
@@ -724,8 +731,19 @@ namespace HieuGLLite.Apps
 					else return;
 					break;
 				case "CLEAR_CACHE":
-					CleanLauncherInternalFilesAsync();
-
+					if (!isDownloading)
+					{
+						var dialogresult = MessageBox.Show("Bạn có muốn dọn dẹp hay không?\nDữ liệu tải xuống và dữ liệu tạm sẽ bị xóa!", "Cảnh báo!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+						if (dialogresult == DialogResult.Yes)
+						{
+							CleanLauncherInternalFilesAsync();
+						}
+						else return; break;
+					}
+					else
+					{
+						MessageBox.Show("Có tệp đang tải xuống, bạn không thể dọn dẹp ngay lúc này!", "Không thể dọn dẹp", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
 					break;
 				case "UNINSTALL_APP":
 					string protocolName = "hieugllite";
@@ -810,7 +828,8 @@ namespace HieuGLLite.Apps
 
 				case "GET_SETTINGS":
 					// Vue yêu cầu lấy Cài đặt lúc vừa khởi động
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new
 						{
 							type = "SYNC_SETTINGS",
@@ -823,7 +842,8 @@ namespace HieuGLLite.Apps
 				case "THEME_CHANGED":
 					currentTheme = message["mode"]?.ToString() ?? "system";
 					SaveSettings(); // LƯU VÀO JSON
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						bool isDarkTheme = currentTheme == "dark" || (currentTheme == "system" && IsWindowsDarkMode());
 						ApplyTheme(isDarkTheme);
 					});
@@ -832,6 +852,103 @@ namespace HieuGLLite.Apps
 				case "SET_CLOSE_BEHAVIOR":
 					minimizeToTrayOnClose = message["minimizeToTray"]?.Value<bool>() ?? true;
 					SaveSettings(); // LƯU VÀO JSON
+					break;
+
+				case "DOWNLOAD_UPDATE":
+					string updateUrl = message["url"]?.ToString();
+					string expectedHash = message["hash"]?.ToString(); // NHẬN MÃ HASH TỪ VUE
+					if (string.IsNullOrEmpty(updateUrl)) return;
+
+					Task.Run(async () =>
+					{
+						try
+						{
+							// 1. Tạo thư mục Temp nếu chưa có
+							Directory.CreateDirectory(TempFolder);
+							string exePath = Path.Combine(TempFolder, "HieuGLLite_Update.exe");
+
+							// 2. Xóa bản cũ nếu tải dở
+							if (System.IO.File.Exists(exePath)) System.IO.File.Delete(exePath);
+							isDownloading = true;
+
+							// 3. Tải file bằng Downloader của bạn
+							using (MultiThreadedDownloader downloader = new MultiThreadedDownloader())
+							{
+								downloader.OnProgressChanged += (percent, speed, downloaded) =>
+								{
+									this.Invoke((MethodInvoker)delegate
+									{
+										// Ép % tối đa là 99% lúc đang tải để chừa 1% cuối cho lúc kiểm tra Hash
+										double displayPercent = percent >= 99 ? 99 : Math.Round(percent);
+										webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "UPDATE_PROGRESS", percent = displayPercent }));
+									});
+								};
+
+								await downloader.StartDownloadAsync(updateUrl, exePath);
+
+								// =======================================================
+								// 4. CHỐT CHẶN BẢO MẬT: XÁC THỰC MÃ BĂM (SHA256)
+								// =======================================================
+								bool isOk = true;
+
+								// Chỉ kiểm tra nếu trong JSON (trên server) có cung cấp mã Hash
+								if (!string.IsNullOrEmpty(expectedHash))
+								{
+									// Quét file vừa tải xong
+									isOk = VerifySHA256(exePath, expectedHash);
+								}
+
+								if (isOk)
+								{
+									// Báo Vue 100% và hiện nút Khởi động lại
+									this.Invoke((MethodInvoker)delegate
+									{
+										webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "UPDATE_READY", path = exePath }));
+									});
+								}
+								else
+								{
+									// Nếu sai mã băm -> Xóa ngay file nhiễm độc/lỗi
+									if (System.IO.File.Exists(exePath)) System.IO.File.Delete(exePath);
+
+									// Báo lỗi đỏ lên Vue
+									this.Invoke((MethodInvoker)delegate
+									{
+										webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "UPDATE_FAILED", error = "Xác thực tệp thất bại (Lỗi SHA256)! Vui lòng tải lại để đảm bảo an toàn." }));
+									});
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							this.Invoke((MethodInvoker)delegate
+							{
+								webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "UPDATE_FAILED", error = ex.Message }));
+							});
+						}
+					});
+					break;
+
+				case "INSTALL_UPDATE":
+					string installerPath = message["path"]?.ToString();
+					if (System.IO.File.Exists(installerPath))
+					{
+						// Gọi bộ cài đặt
+						Process.Start(new ProcessStartInfo
+						{
+							FileName = installerPath,
+							UseShellExecute = true ,// Cần cấp quyền Admin nếu file cài đặt yêu cầu
+							Arguments = "/SILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS"
+						});
+
+						// Tắt Launcher hiện tại nhường chỗ cho bộ cài
+						CleanupBeforeExit();
+						Application.Exit();
+					}
+					else
+					{
+						MessageBox.Show("Không tìm thấy file cài đặt, vui lòng tải lại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					}
 					break;
 
 				//case "INSTALL_MULTI":
@@ -1191,6 +1308,8 @@ namespace HieuGLLite.Apps
 
 			string FolderPath = Path.Combine(Application.StartupPath, "BSTCleaner_native");
 			string fullPath = Path.Combine(FolderPath, "BSTCleaner.exe");
+
+			Debug.WriteLine("Đang yêu cầu gỡ cài đặt: "+oemToClean);
 
 			if (!System.IO.File.Exists(fullPath))
 			{
@@ -2026,7 +2145,8 @@ namespace HieuGLLite.Apps
 				{
 					DialogResult result = DialogResult.None;
 
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						result = MessageBox.Show(
 							$"Bạn đang thực hiện thay đổi phiên bản cho {app.name}.\n\n" +
 							"Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu, ứng dụng và cài đặt của phiên bản hiện tại trước khi cài đặt phiên bản mới.\n\n" +
@@ -2063,7 +2183,8 @@ namespace HieuGLLite.Apps
 					DialogResult result = DialogResult.None;
 					string conflictName = !string.IsNullOrEmpty(app.conflictAppName) ? app.conflictAppName : "một phiên bản giả lập khác (cùng lõi hệ thống)";
 
-					this.Invoke((MethodInvoker)delegate {
+					this.Invoke((MethodInvoker)delegate
+					{
 						result = MessageBox.Show(
 							$"Máy bạn đang cài đặt {conflictName} bị xung đột với phiên bản này.\n\n" +
 							$"Bạn có muốn gỡ cài đặt nó để tiếp tục cài {app.name} không?",
@@ -2125,7 +2246,7 @@ namespace HieuGLLite.Apps
 					SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
 					return;
 				}
-
+				SetTaskbarState(TaskbarProgressBarStatus.Indeterminate);
 				// BƯỚC 2: Tải Android - Nếu bước 1 bị hủy, dòng này sẽ không bao giờ chạy
 				if (!await DownloadStepAsync(appid, data["androidUrl"].ToString(), androidPath, "DOWNLOADING_ANDROID", cts.Token))
 				{
@@ -2133,8 +2254,15 @@ namespace HieuGLLite.Apps
 					SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
 					return;
 				}
+				//BƯỚC 3: Kiểm tra tệp có tồn tại hay không
+				if (!System.IO.File.Exists(exePath) || !System.IO.File.Exists(androidPath))
+				{
+					MessageBox.Show("Cài đặt thất bại, không tìm thấy tệp cần cài đặt!", "Cài đặt thất bại", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-				// Bước 3: Xác thực SHA256 (Tệp đã sẵn sàng vì downloader đã disposed ở bước trên)
+					return;
+				}
+
+				// Bước 4: Xác thực SHA256 (Tệp đã sẵn sàng vì downloader đã disposed ở bước trên)
 				SendStatusToVue(appid, "DOWNLOAD_STATUS", new { status = "VERIFYING" });
 				SetTaskbarState(TaskbarProgressBarStatus.Indeterminate);
 				await Task.Delay(300); // Tạo độ trễ nhỏ để người dùng thấy trạng thái trên UI
@@ -2184,6 +2312,7 @@ namespace HieuGLLite.Apps
 
 				// Gửi lệnh xóa thanh Progress trên Vue
 				SendStatusToVue(appid, "DOWNLOAD_CANCELLED", new { });
+				SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
 
 				Debug.WriteLine($"[Hệ thống] Đã giải phóng hoàn toàn tiến trình cho {appid}");
 			}
@@ -2200,6 +2329,7 @@ namespace HieuGLLite.Apps
 				downloader.OnProgressChanged += (percent, speed, downloaded) =>
 				{
 					SendStatusToVue(appid, "DOWNLOAD_PROGRESS", new { percent, speed, downloaded, status = statusType });
+
 
 					this.Invoke((MethodInvoker)delegate
 					{
