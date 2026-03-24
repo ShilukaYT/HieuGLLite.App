@@ -64,7 +64,6 @@ namespace HieuGLLite.Apps
 
 		public string FE_version;
 
-
 		public bool isDownloading; // Biến trạng thái tải về (Dùng để Vue có thể bật loading khi cần)
 
 		public bool isRunning; // Biến trạng thái app đang chạy hay không (Dùng để Vue đổi nút Play thành màu xanh khi đang mở app)
@@ -323,8 +322,6 @@ namespace HieuGLLite.Apps
 
 			trayIcon.ContextMenuStrip = trayMenu;
 			trayIcon.DoubleClick += TrayIcon_DoubleClick;
-
-			// ÉP HIỆN NGAY LẬP TỨC
 			trayIcon.Visible = true;
 		}
 
