@@ -22,10 +22,6 @@ using Windows.Media.Playback;
 using static System.Net.WebRequestMethods;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static HieuGLLite.Apps.AppModel;
-
-
-
-
 namespace HieuGLLite.Apps
 {
 	public partial class Main : Form
