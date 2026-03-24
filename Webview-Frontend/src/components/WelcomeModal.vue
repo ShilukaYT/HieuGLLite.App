@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="isOpen" max-width="500" persistent transition="dialog-bottom-transition">
         <v-card class="rounded-xl border text-center pa-6" :theme="isDark ? 'dark' : 'light'" elevation="24">
-            <v-img src="../assets/images/logo.png" width="150" class="mx-auto"></v-img>
+            <v-img src="./assets/images/logo.png" width="150" class="mx-auto"></v-img>
             <br>
             <v-card-title class="text-h5 font-weight-bold text-info text-wrap pb-0">
                 CHÀO MỪNG ĐẾN VỚI PUBLIC BETA

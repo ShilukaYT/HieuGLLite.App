@@ -83,7 +83,7 @@
         </v-menu>
       </div>
 
-      <v-list density="compact" class="flex-grow-1 bg-transparent px-2" nav>
+      <v-list density="compact" class="flex-grow-1 bg-transparent px-2 overflow-y-auto hide-scrollbar" nav>
         <v-list-item v-for="app in apps" :key="app.id" :value="app.id" class="mb-3 rounded-xl py-2 custom-list-item"
           @click="$emit('change-app', app)" :active="activeId === app.id">
           <template v-slot:default>
@@ -162,10 +162,14 @@
 
                 <v-divider class="mx-4 my-2"></v-divider>
 
-                <v-list density="compact" nav bg-transparent class="pa-2">
-                  <v-list-item @click="handleLogout" prepend-icon="mdi-logout" title="Đăng xuất"
-                    color="error"></v-list-item>
-                </v-list>
+                <div class="px-2 pb-2">
+                  <v-list-item @click="handleLogout" color="error" rounded="lg" class="px-4 py-1">
+                    <div class="d-flex align-center text-error">
+                      <v-icon icon="mdi-logout" class="mr-3" size="22"></v-icon>
+                      <span class="text-body-1 font-weight-medium">Đăng xuất</span>
+                    </div>
+                  </v-list-item>
+                </div>
               </template>
 
               <template v-else>
@@ -189,8 +193,8 @@
 </template>
 
 <script setup>
-defineProps(['apps', 'activeId']);
-defineEmits(['change-app', 'open-settings']);
+const props = defineProps(['apps', 'activeId', 'user']); // Thêm 'user'
+const emit = defineEmits(['change-app', 'open-settings', 'logout']); // Thêm 'logout'
 import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
@@ -215,32 +219,24 @@ const updateAppsList = computed(() => {
 });
 
 const userAvatarUrl = computed(() => {
-  // 1. Nếu chưa có dữ liệu user -> Trả về ảnh mặc định xám
-  if (!user.value || !user.value.id) {
-    return '';
-  }
+  if (!props.user || !props.user.id) return '';
 
-  // 2. NẾU ĐÃ CÓ AVATAR (Chặn luôn trường hợp lỗi /.png do C# gửi lên)
-  const avatar = user.value.avatar;
+  const avatar = props.user.avatar;
   if (avatar && avatar !== 'null' && avatar !== '' && !avatar.endsWith('/.png')) {
     return avatar;
   }
 
-  // 3. Xử lý cho tài khoản "discriminator: 0" (Hệ thống mới) hoặc tài khoản không có avatar
   try {
-    const id = user.value.id;
-    const desc = user.value.discriminator;
+    const id = props.user.id;
+    const desc = props.user.discriminator;
 
     if (desc === '0' || !desc) {
-      // Dùng BigInt để tính toán ID dài mà không bị sai số
       const index = Number(BigInt(id) >> 22n) % 6;
       return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
     } else {
-      // Cho các tài khoản cũ có số #1234
       return `https://cdn.discordapp.com/embed/avatars/${parseInt(desc) % 5}.png`;
     }
   } catch (e) {
-    // Nếu có lỗi tính toán, trả về màu xám làm phương án dự phòng
     return 'https://cdn.discordapp.com/embed/avatars/0.png';
   }
 });
@@ -248,7 +244,6 @@ const userAvatarUrl = computed(() => {
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 
-const user = ref(null);
 
 const openExternal = (url) => {
   if (window.chrome?.webview) {
@@ -265,21 +260,6 @@ const openExternal = (url) => {
 
 };
 
-onMounted(() => {
-
-  if (window.chrome?.webview) {
-    // 1. Vừa bật app lên là hối C# kiểm tra tự động liền!
-    window.chrome.webview.postMessage({ type: "CHECK_AUTO_LOGIN" });
-
-    // 2. Lắng nghe C# trả lời
-    window.chrome.webview.addEventListener('message', (event) => {
-      if (event.data.type === 'USER_LOGGED_IN') {
-        // alert("Dữ liệu Vue nhận được từ C#:\n" + JSON.stringify(event.data.data));
-        user.value = event.data.data;
-      }
-    });
-  }
-});
 const openPopup = (url, width, height) => {
   // Tính toán để cửa sổ hiện ra chính giữa màn hình
   const left = (window.screen.width / 2) - (width / 2);
@@ -301,7 +281,7 @@ const handleLogin = () => {
 
 // Hàm gắn vào nút "Đăng xuất"
 const handleLogout = () => {
-  user.value = null; // Giao diện về mặc định
+  emit('logout'); // Kêu App.vue xóa giao diện user đi
   if (window.chrome?.webview) {
     // Kêu C# xóa file token đi
     window.chrome.webview.postMessage({ type: "LOGOUT_DISCORD" });

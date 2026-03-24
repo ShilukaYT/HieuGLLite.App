@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "Hieu GL Lite"
-#define MyAppVersion "26.3.12"
+#define MyAppVersion "26.3.14"
 #define MyAppPublisher "Hieu GL Lite"
 #define MyAppURL "https://sites.google.com/view/hieugllite"
 #define MyAppExeName "HieuGLLite.Apps.exe"
@@ -34,7 +34,7 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
 OutputDir=C:\Users\doanh\Desktop
-OutputBaseFilename=mysetup
+OutputBaseFilename=HieuGLLiteAppsSetup
 SetupIconFile=C:\Users\doanh\Desktop\HieuGLLiteApp\HieuGLLite.Apps\rounded-in-photoretrica.ico
 SolidCompression=yes
 Compression=lzma2/max
@@ -89,6 +89,9 @@ end;
 [UninstallDelete]
 ; Xóa các file log hoặc tệp tạm phát sinh trong thư mục cài đặt
 Type: filesandordirs; Name: "{app}"
+[UninstallRun]
+; Ép buộc tắt ứng dụng (nếu đang mở) một cách im lặng trước khi gỡ cài đặt
+Filename: "taskkill.exe"; Parameters: "/f /t /im {#MyAppExeName}"; Flags: runhidden waituntilterminated
 
 [Run]
 ; 1. Cài đặt chứng chỉ (Luôn chạy ngầm dù là cài thường hay cài im lặng)

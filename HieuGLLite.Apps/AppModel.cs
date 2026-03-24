@@ -26,6 +26,8 @@ namespace HieuGLLite.Apps
 
 			public string requiredRoleID { get; set; } = ""; // Thêm requiredRoleID để xác định quyền truy cập
 
+			public bool isVerifyRequired { get; set; }
+
 
 			public List<TagItem> tags { get; set; } = new List<TagItem>();
 

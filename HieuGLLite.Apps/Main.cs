@@ -14,13 +14,14 @@ using Microsoft.WindowsAPICodePack.Shell;   // Đôi khi enum ProgressState nằ
 using Microsoft.WindowsAPICodePack.Taskbar; // Để dùng TaskbarManager
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Common;
+using Windows.ApplicationModel.Store;
 using Windows.Media.Playback;
 using static System.Net.WebRequestMethods;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static HieuGLLite.Apps.AppModel;
-using SharpCompress.Archives;
-using SharpCompress.Archives.Zip;
-using SharpCompress.Common;
 
 
 
@@ -62,8 +63,8 @@ namespace HieuGLLite.Apps
 		public bool isDevMode = false;
 
 		public string AppName;
-		public string version = "26.3.12 (Public Beta)";
-		public int versioncode = 260312;
+		public string version = "26.3.14 (Public Beta)";
+		public int versioncode = 260314;
 
 		public string FE_version;
 
@@ -72,9 +73,10 @@ namespace HieuGLLite.Apps
 
 		public bool isRunning; // Biến trạng thái app đang chạy hay không (Dùng để Vue đổi nút Play thành màu xanh khi đang mở app)
 
+		// Biến lưu trữ trạng thái OTP của phiên làm việc hiện tại
+		private bool isSessionVerified = false;
 		public readonly string hostURL = "https://shilukayt.github.io/HieuGLLiteFE/";
 		//public readonly string hostURL = "http://localhost:5173";
-
 		public readonly string jsonURL = "https://raw.githubusercontent.com/ShilukaYT/HieuGLLiteFE/refs/heads/main/assets/json/";
 		private readonly string authURL = "https://shilukayt.github.io/DiscordAuth/";
 
@@ -99,6 +101,7 @@ namespace HieuGLLite.Apps
 		private static string ConfigFile => Path.Combine(RootFolder, "installed_apps.json");
 		private static string SettingsFile => Path.Combine(RootFolder, "launcher_settings.json");
 		private static string TempFolder => Path.Combine(RootFolder, "Temp");
+		private static string LogsFolder => Path.Combine(RootFolder, "Logs");
 
 		private Dictionary<string, AppProgressState> appRunningStates = new Dictionary<string, AppProgressState>();
 
@@ -134,12 +137,24 @@ namespace HieuGLLite.Apps
 		[DllImport("psapi.dll")]
 		public static extern int EmptyWorkingSet(IntPtr hwProc);
 
+		[DllImport("wininet.dll")]
+		private extern static bool InternetGetConnectedState(out int description, int reservedValue);
+
 		public Main()
 		{
 			SetCurrentProcessExplicitAppUserModelID("HieuGLLite.Launcher.v1");
 			InitializeComponent();
+			FontManager.LoadCustomFont();
 			ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
 			LoadSettings();
+
+			// Đăng ký các sự kiện
+			webView21.CoreWebView2InitializationCompleted += WebView21_CoreWebView2InitializationCompleted;
+			webView21.WebMessageReceived += WebView_WebMessageReceived;
+			webView21.NavigationCompleted += webview21_NavigationCompleted;
+			SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+
+			SetupWakeUpListener();
 			this.Resize += Main_Resize;
 
 			// Đổi màu nền dựa theo file JSON
@@ -182,6 +197,68 @@ namespace HieuGLLite.Apps
 
 			base.WndProc(ref m);
 		}
+
+		// Khai báo 2 biến này ở trên cùng
+		private EventWaitHandle wakeUpHandle;
+		private Thread wakeUpThread;
+
+		// Thêm hàm này vào bất kỳ đâu trong class Main
+		private void SetupWakeUpListener()
+		{
+			// Tạo một cái chuông dùng chung mã GUID với Program.cs
+			string AppGuid = "69ba7d1a-d023-476b-86e2-7652abebb84d";
+			wakeUpHandle = new EventWaitHandle(false, EventResetMode.AutoReset, AppGuid + "_WakeUp");
+
+			wakeUpThread = new Thread(() =>
+			{
+				while (true)
+				{
+					wakeUpHandle.WaitOne(); // Đứng im chờ người ta bấm chuông
+
+					this.Invoke((MethodInvoker)delegate
+					{
+						ShowApp(); // Khi có chuông -> Gọi hàm đánh thức App dậy!
+					});
+				}
+			});
+			wakeUpThread.IsBackground = true;
+			wakeUpThread.Start();
+		}
+
+		// ==========================================
+		// HỆ THỐNG GHI NHẬT KÝ HOẠT ĐỘNG (LOGGING)
+		// ==========================================
+		public static void WriteLog(string level, string message, Exception ex = null)
+		{
+			try
+			{
+				// 1. Tạo thư mục Logs nếu chưa có
+				if (!Directory.Exists(LogsFolder)) Directory.CreateDirectory(LogsFolder);
+
+				// 2. Đặt tên file log theo ngày hiện tại
+				string logFile = Path.Combine(LogsFolder, $"Log_{DateTime.Now:yyyy-MM-dd}.txt");
+
+				// 3. Mở file và ghi thêm vào dòng cuối (Append)
+				using (StreamWriter writer = new StreamWriter(logFile, true, Encoding.UTF8))
+				{
+					// Ghi nội dung chính: [Giờ:Phút:Giây] [MỨC ĐỘ] Thông báo
+					writer.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{level}] {message}");
+
+					// Nếu có mã lỗi hệ thống (Exception), ghi chi tiết ra để dev dễ rà soát
+					if (ex != null)
+					{
+						writer.WriteLine($"[CHI TIẾT LỖI]: {ex.Message}");
+						writer.WriteLine($"[VỊ TRÍ DÒNG CODE]: {ex.StackTrace}");
+						writer.WriteLine(new string('-', 50)); // Kẻ ngang phân cách
+					}
+				}
+			}
+			catch
+			{
+				// Bắt buộc phải nuốt lỗi ở đây. 
+				// Vì nếu bản thân hàm Ghi Log bị lỗi (ví dụ: ổ cứng đầy) mà văng Exception thì app sẽ crash luôn.
+			}
+		}
 		private async void Main_Load(object sender, EventArgs e)
 		{
 			AppName = isDevMode ? "Hieu GL Lite (Developer mode)" : "Hieu GL Lite (Public Beta)";
@@ -200,10 +277,7 @@ namespace HieuGLLite.Apps
 			webView21.DefaultBackgroundColor = isDarkTheme ? Color.FromArgb(18, 18, 18) : Color.White;
 			webView21.ZoomFactor = 0.8;
 
-			// Đăng ký các sự kiện
-			webView21.CoreWebView2InitializationCompleted += WebView21_CoreWebView2InitializationCompleted;
-			webView21.WebMessageReceived += WebView_WebMessageReceived;
-			webView21.NavigationCompleted += webview21_NavigationCompleted;
+
 
 			// 4. Khởi tạo môi trường dữ liệu người dùng
 			var env = await CoreWebView2Environment.CreateAsync(null, RootFolder);
@@ -216,7 +290,25 @@ namespace HieuGLLite.Apps
 			CoreWebView2HostResourceAccessKind.Allow
 			);
 
-			webView21.Source = new Uri(isDevMode ? "http://localhost:5173" : hostURL);
+			int desc;
+			if (InternetGetConnectedState(out desc, 0))
+			{
+				// CÓ MẠNG: Vào web bình thường
+				webView21.Source = new Uri(isDevMode ? "http://localhost:5173" : hostURL);
+			}
+			else
+			{
+				// MẤT MẠNG: Chặn ngay từ vòng gửi xe, ép hiển thị file offline.html
+				string offlineFilePath = Path.Combine(Application.StartupPath, "Assets", "offline.html");
+				if (System.IO.File.Exists(offlineFilePath))
+				{
+					webView21.Source = new Uri("file:///" + offlineFilePath.Replace("\\", "/"));
+				}
+				else
+				{
+					webView21.CoreWebView2.NavigateToString("<body style='background:#121212;color:white;text-align:center;padding-top:20%;font-family:sans-serif'><h1>Mất kết nối mạng!</h1><p>Vui lòng kiểm tra lại Internet của bạn.</p></body>");
+				}
+			}
 		}
 		private void SetupSystemTray()
 		{
@@ -247,18 +339,19 @@ namespace HieuGLLite.Apps
 			if (webView21 == null || webView21.CoreWebView2 == null) return;
 
 			int width = this.ClientSize.Width;
+			int height = this.ClientSize.Height;
 			double newZoom = 1.0;
 
 			// Logic phân cấp theo yêu cầu của bạn
-			if (width <= 1280)
+			if (width <= 1280 || height <= 720)
 			{
 				newZoom = 0.8;
 			}
-			else if (width <= 1800)
+			else if (width <= 1600 || height <= 900)
 			{
 				newZoom = 0.9;
 			}
-			else if (width <= 2560)
+			else if (width <= 2560 || height <= 1440)
 			{
 				newZoom = 1.0;
 			}
@@ -280,6 +373,71 @@ namespace HieuGLLite.Apps
 			UpdateWebViewZoom();
 		}
 
+		// Hàm này sẽ tự động kích hoạt mỗi khi người dùng đổi cài đặt gì đó trên Windows (bao gồm cả đổi Dark/Light mode)
+		private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+		{
+			// Chỉ quan tâm đến các thay đổi chung (General) của hệ thống
+			if (e.Category == UserPreferenceCategory.General)
+			{
+				// CHỈ ĐỔI MÀU NẾU TRONG FILE JSON ĐANG CÀI ĐẶT LÀ "SYSTEM"
+				if (currentTheme == "system")
+				{
+					bool isDark = IsWindowsDarkMode();
+
+					// Ép chạy trên luồng giao diện (UI Thread) để không bị crash
+					this.Invoke((MethodInvoker)delegate
+					{
+						// 1. Cập nhật lại thanh Title bar và nút X/Min/Max của WinForms
+						ApplyTheme(isDark);
+
+						// 2. Cập nhật lại màu lót đáy của WebView2 (để lúc chuyển tab không bị chớp trắng)
+						if (webView21 != null)
+						{
+							webView21.DefaultBackgroundColor = isDark ? Color.FromArgb(18, 18, 18) : Color.White;
+						}
+					});
+				}
+			}
+		}
+
+		// 1. Hàm dùng để hỏi người dùng (Có / Không)
+		private DialogResult XacNhan(string thongBao, string tieuDe)
+		{
+			// Tự định nghĩa nút bấm bằng tiếng Việt
+			var btnCo = new TaskDialogButton("Có");
+			var btnKhong = new TaskDialogButton("Không");
+
+			var page = new TaskDialogPage()
+			{
+				Caption = tieuDe,
+				Heading = thongBao, // Dùng Heading chữ sẽ to và đẹp hơn Text
+				Icon = TaskDialogIcon.Warning,
+				Buttons = { btnCo, btnKhong }
+			};
+
+			// Hiển thị hộp thoại
+			var result = TaskDialog.ShowDialog(this, page);
+
+			// Trả về kết quả chuẩn của WinForms để các code cũ của bạn vẫn chạy đúng
+			return result == btnCo ? DialogResult.Yes : DialogResult.No;
+		}
+
+		// 2. Hàm dùng để thông báo lỗi hoặc thông tin (Chỉ có nút Đóng)
+		private void ThongBao(string thongBao, string tieuDe, bool isError = false)
+		{
+			var btnDong = new TaskDialogButton("Đóng");
+
+			var page = new TaskDialogPage()
+			{
+				Caption = tieuDe,
+				Heading = thongBao,
+				Icon = isError ? TaskDialogIcon.Error : TaskDialogIcon.Information,
+				Buttons = { btnDong }
+			};
+
+			TaskDialog.ShowDialog(this, page);
+		}
+
 		private void WebView21_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
 		{
 			if (e.IsSuccess)
@@ -298,6 +456,8 @@ namespace HieuGLLite.Apps
 				MessageBox.Show("WebView2 initialization failed: " + e.InitializationException);
 			}
 		}
+		private string currentOtp = "";
+		private DateTime otpExpiryTime;
 
 		private void webview21_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
@@ -416,7 +576,7 @@ namespace HieuGLLite.Apps
 					{
 						try
 						{
-							Debug.WriteLine("Đã yêu cầu mở liên kết: "+ url);
+							Debug.WriteLine("Đã yêu cầu mở liên kết: " + url);
 							System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
 							{
 								FileName = url,
@@ -437,7 +597,6 @@ namespace HieuGLLite.Apps
 					{
 						HandleDiscordLogin();
 					});
-					GetData();
 					break;
 
 				case "CHECK_AUTO_LOGIN":
@@ -580,6 +739,7 @@ namespace HieuGLLite.Apps
 						if (app != null && app.runningProcessIds.Count > 0)
 						{
 							var result = MessageBox.Show("Bạn có chắc muốn tắt ứng dụng này?\nTiến trình chơi của bạn có thể sẽ không được lưu lại!", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
 							if (result == DialogResult.Yes)
 							{
 								// Copy danh sách ra một mảng tạm để tránh lỗi khi vòng lặp đang chạy mà sự kiện Exited nhảy vào xóa ID
@@ -723,7 +883,10 @@ namespace HieuGLLite.Apps
 					break;
 
 				case "UNINSTALL":
-					var result = MessageBox.Show("Bạn có muốn gỡ cài đặt ứng dụng này không?\nTất cả ứng dụng và trò chơi được cài đặt trên ứng dụng này sẽ bị gỡ cài đặt!", "Gỡ cài đặt", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+					//var result = MessageBox.Show("Bạn có muốn gỡ cài đặt ứng dụng này không?\nTất cả ứng dụng và trò chơi được cài đặt trên ứng dụng này sẽ bị gỡ cài đặt!", "Gỡ cài đặt", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+					// Mới:
+					//var result = XacNhan("Bạn có muốn gỡ cài đặt ứng dụng này không?\nTất cả dữ liệu sẽ bị xóa!", "Gỡ cài đặt");
+					var result = CustomMessageBox.Show("Bạn có chắc chắn muốn gỡ cài đặt ứng dụng này không?\nTất cả ứng dụng và trò chơi được cài đặt trên ứng dụng này sẽ bị gỡ cài đặt!", "Xác nhận", true);
 					if (result == DialogResult.Yes)
 					{
 						UninstallApp(message["appId"]?.ToString());
@@ -733,7 +896,9 @@ namespace HieuGLLite.Apps
 				case "CLEAR_CACHE":
 					if (!isDownloading)
 					{
-						var dialogresult = MessageBox.Show("Bạn có muốn dọn dẹp hay không?\nDữ liệu tải xuống và dữ liệu tạm sẽ bị xóa!", "Cảnh báo!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+						//var dialogresult = MessageBox.Show("Bạn có muốn dọn dẹp hay không?\nDữ liệu tải xuống và dữ liệu tạm sẽ bị xóa!", "Cảnh báo!", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+						var dialogresult = CustomMessageBox.Show("Bạn có muốn dọn dẹp hay không?\nDữ liệu tải xuống và dữ liệu tạm sẽ bị xóa!", "Cảnh báo!", true);
 						if (dialogresult == DialogResult.Yes)
 						{
 							CleanLauncherInternalFilesAsync();
@@ -810,16 +975,17 @@ namespace HieuGLLite.Apps
 						// 4. GỌI UNINSTALLER NGOÀI (NẾU BẠN MUỐN XÓA LUÔN FILE .EXE CỦA LAUNCHER NÀY)
 						// Lưu ý: 1 phần mềm đang chạy KHÔNG THỂ TỰ XÓA FILE .EXE CỦA CHÍNH NÓ.
 						// Bắt buộc phải mượn tay 1 tool bên ngoài (như Uninstall.exe của Inno Setup)
-						/*
+
 						try
 						{
 							Process process = new Process();
 							process.StartInfo.FileName = Path.Combine(Application.StartupPath, "unins000.exe"); // Tên tool gỡ cài đặt
 							process.StartInfo.UseShellExecute = true;
+							process.StartInfo.Arguments = "/SILENT /SUPPRESSMSGBOXES";
 							process.Start();
 						}
 						catch { }
-						*/
+
 
 						// 5. RÚT ĐIỆN APP
 						Application.Exit();
@@ -830,11 +996,16 @@ namespace HieuGLLite.Apps
 					// Vue yêu cầu lấy Cài đặt lúc vừa khởi động
 					this.Invoke((MethodInvoker)delegate
 					{
+						// Kiểm tra xem máy khách là Win 11 hay Win 10
+						// Windows 11 có Build Number từ 22000 trở lên
+						bool isWin11 = Environment.OSVersion.Version.Build >= 22000;
+
 						webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new
 						{
 							type = "SYNC_SETTINGS",
 							theme = currentTheme,
-							minimizeToTray = minimizeToTrayOnClose
+							minimizeToTray = minimizeToTrayOnClose,
+							isWindows11 = isWin11 // Bơm cờ này xuống cho Vue
 						}));
 					});
 					break;
@@ -937,7 +1108,7 @@ namespace HieuGLLite.Apps
 						Process.Start(new ProcessStartInfo
 						{
 							FileName = installerPath,
-							UseShellExecute = true ,// Cần cấp quyền Admin nếu file cài đặt yêu cầu
+							UseShellExecute = true,// Cần cấp quyền Admin nếu file cài đặt yêu cầu
 							Arguments = "/SILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS"
 						});
 
@@ -949,6 +1120,90 @@ namespace HieuGLLite.Apps
 					{
 						MessageBox.Show("Không tìm thấy file cài đặt, vui lòng tải lại!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
+					break;
+
+				case "SEND_OTP":
+					string emailTo = message["email"]?.ToString();
+					if (string.IsNullOrEmpty(emailTo)) return;
+
+					Task.Run(() =>
+					{
+						try
+						{
+							// 1. Tạo ngẫu nhiên mã OTP 6 số
+							currentOtp = new Random().Next(100000, 999999).ToString();
+							otpExpiryTime = DateTime.Now.AddMinutes(2);
+
+							// 2. Cấu hình máy chủ SMTP của GMAIL
+							var smtpClient = new System.Net.Mail.SmtpClient("smtp.gmail.com")
+							{
+								Port = 587,
+								Credentials = new NetworkCredential("hieugllite@gmail.com", "unxs txfu dmua womq"),
+								EnableSsl = true,
+							};
+
+							// 3. Soạn nội dung Email
+							var mailMessage = new System.Net.Mail.MailMessage
+							{
+								From = new System.Net.Mail.MailAddress("hieugllite@gmail.com", "Hiếu GL Lite's App"),
+								Subject = "[Hiếu GL Lite's App - No Reply] Mã xác minh danh tính (OTP)",
+								Body = $@"
+									<div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
+										<h2 style='color: #EA4335;'>Xác minh bảo mật</h2>
+										<p>Bạn đã yêu cầu cài đặt một ứng dụng cần xác minh danh tính.</p>
+										<p>Mã OTP của bạn là: <b style='font-size: 24px; color: #1a73e8; letter-spacing: 2px;'>{currentOtp}</b></p>
+										<p><i>Mã này sẽ hết hạn sau một thời gian ngắn. Vui lòng không chia sẻ mã này cho bất kỳ ai!</i></p>
+									</div>",
+								IsBodyHtml = true,
+							};
+
+							// Gửi tới email của khách hàng
+							mailMessage.To.Add(emailTo);
+
+							// 4. Bấm nút Gửi
+							smtpClient.Send(mailMessage);
+
+							// 5. Báo cáo thành công cho Vue
+							this.Invoke((MethodInvoker)delegate
+							{
+								webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "OTP_SENT_SUCCESS" }));
+							});
+						}
+						catch (Exception ex)
+						{
+							// Báo lỗi cho Vue nếu không gửi được
+							this.Invoke((MethodInvoker)delegate
+							{
+								webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "OTP_SENT_FAILED", error = ex.Message }));
+							});
+						}
+					});
+					break;
+				case "VERIFY_OTP":
+					string userInputOtp = message["code"]?.ToString();
+
+					this.Invoke((MethodInvoker)delegate
+					{
+						// KIỂM TRA 1: MÃ ĐÃ HẾT HẠN CHƯA?
+						if (DateTime.Now > otpExpiryTime)
+						{
+							currentOtp = ""; // Xóa ngay mã cũ
+							webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "OTP_VERIFY_FAILED" }));
+							return; // Chặn lại, không cho chạy xuống dưới
+						}
+
+						// KIỂM TRA 2: MÃ CÓ TRÙNG KHỚP KHÔNG?
+						if (!string.IsNullOrEmpty(currentOtp) && userInputOtp == currentOtp)
+						{
+							currentOtp = "";
+							isSessionVerified = true;
+							webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "OTP_VERIFY_SUCCESS" }));
+						}
+						else
+						{
+							webView21.CoreWebView2.PostWebMessageAsJson(JsonConvert.SerializeObject(new { type = "OTP_VERIFY_FAILED" }));
+						}
+					});
 					break;
 
 				//case "INSTALL_MULTI":
@@ -1309,7 +1564,7 @@ namespace HieuGLLite.Apps
 			string FolderPath = Path.Combine(Application.StartupPath, "BSTCleaner_native");
 			string fullPath = Path.Combine(FolderPath, "BSTCleaner.exe");
 
-			Debug.WriteLine("Đang yêu cầu gỡ cài đặt: "+oemToClean);
+			Debug.WriteLine("Đang yêu cầu gỡ cài đặt: " + oemToClean);
 
 			if (!System.IO.File.Exists(fullPath))
 			{
@@ -1429,7 +1684,7 @@ namespace HieuGLLite.Apps
 			// ĐỔI REDIRECT URI THÀNH TRANG WEB TRUNG GIAN CỦA BẠN (Phải khớp 100% với trên Discord)
 			string redirectUri = authURL;
 
-			string discordAuthUrl = $"https://discord.com/oauth2/authorize?client_id={clientId}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=identify+guilds.members.read";
+			string discordAuthUrl = $"https://discord.com/oauth2/authorize?client_id={clientId}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=identify+guilds.members.read+email";
 
 			try
 			{
@@ -1721,13 +1976,14 @@ namespace HieuGLLite.Apps
 		{
 			if (isDownloading)
 			{
-				MessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				//MessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				CustomMessageBox.Show("Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.", "Cảnh báo", false);
 				return false;
 			}
 
 			if (isRunning)
 			{
-				MessageBox.Show("Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				CustomMessageBox.Show("Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.", "Cảnh báo", false);
 				return false;
 			}
 
@@ -1743,7 +1999,9 @@ namespace HieuGLLite.Apps
 				trayIcon.Dispose();
 			}
 			discordClient?.Dispose();
+			SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
 		}
+
 
 		// Hàm đánh thức ứng dụng
 		private void ShowApp()
@@ -1766,26 +2024,16 @@ namespace HieuGLLite.Apps
 
 
 		// Hàm vét cạn RAM của TOÀN BỘ HỆ THỐNG (C# và WebView2)
+		// Hàm vét cạn RAM của hệ thống (ĐÃ FIX LỖI CRASH 0x80000003)
 		private void TrimTotalMemory()
 		{
 			try
 			{
-				// 1. ÉP RAM CỦA CHÍNH LAUNCHER C# XUỐNG ĐÁY (Vũ khí bí mật ở đây)
+				// CHỈ ÉP RAM CỦA CHÍNH LAUNCHER C# XUỐNG ĐÁY (Tuyệt đối an toàn)
 				EmptyWorkingSet(System.Diagnostics.Process.GetCurrentProcess().Handle);
 
-				// 2. ÉP RAM CỦA TẤT CẢ TIẾN TRÌNH WEBVIEW2 XUỐNG ĐÁY
-				Process[] wv2Processes = Process.GetProcessesByName("msedgewebview2");
-				foreach (Process p in wv2Processes)
-				{
-					try
-					{
-						EmptyWorkingSet(p.Handle);
-					}
-					catch
-					{
-						// Bỏ qua các tiến trình không có quyền truy cập
-					}
-				}
+				// ĐÃ XÓA VÒNG LẶP ÉP RAM CỦA msedgewebview2
+				// Lý do: Nhân Chromium sẽ tự động dọn RAM an toàn thông qua lệnh TrySuspendAsync()
 			}
 			catch { }
 		}
@@ -1909,7 +2157,22 @@ namespace HieuGLLite.Apps
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show($"Lỗi xử lý Data: {ex.Message}");
+				// Dù là lỗi DNS (No such host) hay lỗi Timeout, cứ rớt mạng là ném ra màn hình Offline
+				this.Invoke((MethodInvoker)delegate
+				{
+					WriteLog("ERROR", "Lỗi mất kết nối khi đang lấy dữ liệu JSON", ex);
+
+					string offlineFilePath = Path.Combine(Application.StartupPath, "Assets", "offline.html");
+					if (System.IO.File.Exists(offlineFilePath) && webView21 != null && webView21.CoreWebView2 != null)
+					{
+						webView21.CoreWebView2.Navigate("file:///" + offlineFilePath.Replace("\\", "/"));
+					}
+					else
+					{
+						CustomMessageBox.Show("Không thể kết nối đến máy chủ, vui lòng kiểm tra lại Internet!", "Lỗi kết nối", false);
+					}
+				});
+
 				return new List<GameApp>();
 			}
 		}
@@ -2112,6 +2375,22 @@ namespace HieuGLLite.Apps
 			var app = globalAppList.FirstOrDefault(a => a.id == appId);
 			if (app == null) return;
 
+			// =======================================================
+			// 🛡️ CHỐT CHẶN BẢO MẬT C#: CHỐNG HACKER BYPASS VUE
+			// =======================================================
+			if (app.isVerifyRequired && !isSessionVerified)
+			{
+				this.Invoke((MethodInvoker)delegate
+				{
+					MessageBox.Show("Phát hiện truy cập trái phép!\nBạn chưa hoàn thành bước xác minh OTP.", "Bảo mật hệ thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				});
+
+				// Hủy ngay lệnh cài đặt
+				SendStatusToVue(appId, "DOWNLOAD_CANCELLED", new { });
+				return;
+			}
+			// =======================================================
+
 			// 2. Xác định đường dẫn cuối cùng để kiểm tra ổ đĩa
 			// Ưu tiên: Đường dẫn vừa chọn > Đường dẫn đã cài cũ > Ổ C mặc định
 			string checkPath = !string.IsNullOrEmpty(selectedPath) ? selectedPath :
@@ -2147,13 +2426,20 @@ namespace HieuGLLite.Apps
 
 					this.Invoke((MethodInvoker)delegate
 					{
-						result = MessageBox.Show(
+						//result = MessageBox.Show(
+						//	$"Bạn đang thực hiện thay đổi phiên bản cho {app.name}.\n\n" +
+						//	"Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu, ứng dụng và cài đặt của phiên bản hiện tại trước khi cài đặt phiên bản mới.\n\n" +
+						//	"Bạn có chắc chắn muốn tiếp tục?",
+						//	"Cảnh báo thay đổi phiên bản",
+						//	MessageBoxButtons.YesNo,
+						//	MessageBoxIcon.Warning
+						//);
+						result = CustomMessageBox.Show(
 							$"Bạn đang thực hiện thay đổi phiên bản cho {app.name}.\n\n" +
 							"Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu, ứng dụng và cài đặt của phiên bản hiện tại trước khi cài đặt phiên bản mới.\n\n" +
 							"Bạn có chắc chắn muốn tiếp tục?",
 							"Cảnh báo thay đổi phiên bản",
-							MessageBoxButtons.YesNo,
-							MessageBoxIcon.Warning
+							true
 						);
 					});
 
@@ -2730,48 +3016,53 @@ namespace HieuGLLite.Apps
 			}
 		}
 
-		private void PatchBstkFile(string engineFolder, string androidCode)
+		//private void PatchBstkFile(string engineFolder, string androidCode)
+		//{
+		//	string bstkPath = Path.Combine(engineFolder, $"{androidCode}.bstk");
+		//	string bstkInPath = Path.Combine(engineFolder, "Android.bstk.in");
+
+		//	// Phải có đủ 2 file mới phẫu thuật được
+		//	if (!System.IO.File.Exists(bstkPath) || !System.IO.File.Exists(bstkInPath)) return;
+
+		//	try
+		//	{
+		//		XDocument docIn = XDocument.Load(bstkInPath);
+		//		XDocument docTarget = XDocument.Load(bstkPath);
+
+		//		var hardDisksIn = docIn.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
+		//		var hardDisksTarget = docTarget.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
+
+		//		// 1. CẬP NHẬT FILE ROOT
+		//		var rootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
+		//		var rootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
+		//		if (rootIn != null && rootTarget != null)
+		//		{
+		//			rootTarget.SetAttributeValue("uuid", rootIn.Attribute("uuid")?.Value);
+		//			rootTarget.SetAttributeValue("location", rootIn.Attribute("location")?.Value);
+		//		}
+
+		//		// 2. CẬP NHẬT FILE FASTBOOT
+		//		var fastbootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
+		//		var fastbootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
+		//		if (fastbootIn != null && fastbootTarget != null)
+		//		{
+		//			fastbootTarget.SetAttributeValue("uuid", fastbootIn.Attribute("uuid")?.Value);
+		//			fastbootTarget.SetAttributeValue("location", fastbootIn.Attribute("location")?.Value);
+		//		}
+
+		//		// 3. LƯU LẠI
+		//		docTarget.Save(bstkPath);
+		//		Debug.WriteLine("Đã Patch thành công file BSTK cho phiên bản mới!");
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		Debug.WriteLine("Lỗi sửa file BSTK: " + ex.Message);
+		//	}
+		//}
+
+		private void webView21_Click(object sender, EventArgs e)
 		{
-			string bstkPath = Path.Combine(engineFolder, $"{androidCode}.bstk");
-			string bstkInPath = Path.Combine(engineFolder, "Android.bstk.in");
 
-			// Phải có đủ 2 file mới phẫu thuật được
-			if (!System.IO.File.Exists(bstkPath) || !System.IO.File.Exists(bstkInPath)) return;
-
-			try
-			{
-				XDocument docIn = XDocument.Load(bstkInPath);
-				XDocument docTarget = XDocument.Load(bstkPath);
-
-				var hardDisksIn = docIn.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
-				var hardDisksTarget = docTarget.Descendants().Where(x => x.Name.LocalName == "HardDisk").ToList();
-
-				// 1. CẬP NHẬT FILE ROOT
-				var rootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
-				var rootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("Root", StringComparison.OrdinalIgnoreCase) == true);
-				if (rootIn != null && rootTarget != null)
-				{
-					rootTarget.SetAttributeValue("uuid", rootIn.Attribute("uuid")?.Value);
-					rootTarget.SetAttributeValue("location", rootIn.Attribute("location")?.Value);
-				}
-
-				// 2. CẬP NHẬT FILE FASTBOOT
-				var fastbootIn = hardDisksIn.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
-				var fastbootTarget = hardDisksTarget.FirstOrDefault(x => x.Attribute("location")?.Value.Contains("fastboot", StringComparison.OrdinalIgnoreCase) == true);
-				if (fastbootIn != null && fastbootTarget != null)
-				{
-					fastbootTarget.SetAttributeValue("uuid", fastbootIn.Attribute("uuid")?.Value);
-					fastbootTarget.SetAttributeValue("location", fastbootIn.Attribute("location")?.Value);
-				}
-
-				// 3. LƯU LẠI
-				docTarget.Save(bstkPath);
-				Debug.WriteLine("Đã Patch thành công file BSTK cho phiên bản mới!");
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine("Lỗi sửa file BSTK: " + ex.Message);
-			}
 		}
 
 

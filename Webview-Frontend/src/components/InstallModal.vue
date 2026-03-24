@@ -10,7 +10,7 @@
     >
       
       <v-card-title class="d-flex align-center mt-3 px-6">
-        <v-avatar size="48" class="mr-4 rounded-lg elevation-4" color="transparent">
+        <v-avatar size="48" class="mr-4 rounded-lg elevation-4 pa-1" color="transparent">
           <v-img :src="app.icon"></v-img>
         </v-avatar>
         <span class="text-h5 font-weight-bold">

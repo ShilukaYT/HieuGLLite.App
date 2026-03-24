@@ -34,8 +34,8 @@
       <div v-if="!isAppLocked">
 
 
-        <Sidebar :apps="apps" :active-id="selectedApp?.id" @change-app="selectedApp = $event"
-          @open-settings="showSettings = true" />
+        <Sidebar :apps="apps" :active-id="selectedApp?.id" :user="user" @change-app="selectedApp = $event"
+          @open-settings="showSettings = true" @logout="user = null" />
 
         <v-main class="h-100 w-100">
           <GamePage v-if="selectedApp && !isMaintenance && !isNotInWebView" :app="selectedApp"
@@ -52,7 +52,7 @@
               @click="selectedApp = apps.find(a => a.id === appId)">
               <v-card-text class="pa-3">
                 <div class="d-flex align-center">
-                  <v-avatar size="32" rounded="sm" class="mr-3">
+                  <v-avatar size="42" rounded="sm" class="mr-3 pa-1">
                     <v-img :src="apps.find(a => a.id === appId)?.icon"></v-img>
                   </v-avatar>
 
@@ -83,8 +83,8 @@
         <InstallModal v-if="showModal && selectedApp" :app="selectedApp" :is-multi-instance="isMultiInstallMode"
           @close="showModal = false" @confirm="handleInstall" />
         <SettingsModal v-if="showSettings" @close="showSettings = false" :app="manifest" :settings="userSettings"
-          @check-update="handleManualUpdateCheck" @get-apps="handleGetApps" @clear-cache="handleClearCache"
-          @uninstall="handleUninstall" />
+          :is-win11="isWin11" @check-update="handleManualUpdateCheck" @get-apps="handleGetApps"
+          @clear-cache="handleClearCache" @uninstall="handleUninstall" />
 
         <v-snackbar v-model="showSnackbar" :timeout="2000" :color="isDark ? '#1e1e1e' : 'white'" location="top"
           rounded="pill" class="mt-4">
@@ -96,12 +96,11 @@
 
 
       </div>
-      <UpdateModal 
-    v-model="showUpdateModal" 
-    :update-data="updateData" 
-    @download="handleDownloadUpdate" 
-    @install="handleInstallUpdate" />
-    <WelcomeModal v-if="showWelcomeModal" @close="showWelcomeModal = false" />
+      <UpdateModal v-model="showUpdateModal" :update-data="updateData" @download="handleDownloadUpdate"
+        @install="handleInstallUpdate" />
+      <WelcomeModal v-if="showWelcomeModal" @close="showWelcomeModal = false" />
+      <OtpModal v-model="showOtpModal" :email="user?.email" :is-loading="otpIsLoading" :error-message="otpErrorMessage"
+        @submit="handleOtpSubmit" @resend="handleOtpResend" @cancel="handleOtpCancel" />
     </div>
   </v-app>
 
@@ -111,6 +110,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useTheme } from 'vuetify';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from './components/Sidebar.vue';
 import GamePage from './components/GamePage.vue';
 import InstallModal from './components/InstallModal.vue';
@@ -120,6 +121,13 @@ import MaintenanceModal from './components/MaintenanceModal.vue';
 import UpdateModal from './components/UpdateModal.vue';
 import RegionBlockModal from './components/RegionBlockModal.vue';
 import WelcomeModal from './components/WelcomeModal.vue';
+import OtpModal from './components/OtpModal.vue'; // Thêm dòng này
+
+// --- BIẾN CHO OTP MODAL ---
+const showOtpModal = ref(false);
+const otpIsLoading = ref(false);     // Thêm dòng này
+const otpErrorMessage = ref("");     // Thêm dòng này
+const pendingAction = ref(null);     // Thêm dòng này
 
 const isRegionBlocked = ref(false); // Thêm cờ quản lý vùng
 const showSettings = ref(false); // Thêm dòng này
@@ -135,10 +143,10 @@ const isAppLocked = computed(() => {
 
 const showModal = ref(false);
 
-import { useTheme } from 'vuetify';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
+
+const user = ref(null); // THÊM DÒNG NÀY
 
 // Overlay sẽ đổi từ đen sang trắng mờ tùy theo theme
 const overlayStyle = computed(() => ({
@@ -169,23 +177,26 @@ const isMaintenance = ref(false);
 const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
 // Đổi thành Object (Dùng ngoặc nhọn {} thôi)
 const manifest = ref({
-  FE_version: '26.3.12 (Public Beta)',
-  FE_versioncode: '260312',
+  FE_version: '26.3.14 (Public Beta)',
+  FE_versioncode: '260314',
   BE_version: null,
   BE_versioncode: null,
-  BE_version_latest: '26.3.12',
-  BE_versioncode_latest: '260312',
-  release_date: '2026-03-20',
-  changelog: 'Để có trải nghiệm tốt nhất, hãy cập nhật lên phiên bản 26.3.12\n\nĐã có thể cập nhật phần mềm (từ phiên bản 26.3.12)\nSửa lỗi thuật toán khi cài ứng dụng\nSửa lỗi ảnh đại diện không hiển thị khi không có\nTiêu đề ứng dụng giờ đã linh hoạt hơn',
+  BE_version_latest: '26.3.14',
+  BE_versioncode_latest: '260314',
+  release_date: '2026-03-24',
+  changelog: 'Yêu cầu phiên bản 26.3.13 để sử dụng!\n\nHotfix 26.3.14: Sửa lỗi không nhận địa chỉ email sau khi đăng nhập\n\nỨng dụng giờ đã có thể thức dậy khi ẩn\nSửa lỗi chế độ sáng/tối không thay đổi theo hệ thống\nMới!! Xác minh danh tính đã có sẵn (Chỉ dành có ở một số trình giả lập)\nThử nghiệm MessageBox mới (Sẽ có đầy đủ ở bản vá sau)\nThử nghiệm tính năng ghi nhật ký (dùng để báo cáo lỗi)\n Nút cập nhật danh sách ứng dụng sẽ cooldown (tránh spam)\nSửa lỗi nội dung bị mờ khi scale trên 125%',
   isMaintenance: false,
-  minRequiredVersionCode: '260311',
-  updateUrl: 'https://github.com/ShilukaYT/HieuGLLite.App/releases/download/260312/mysetup.exe',
-  sha256:"7b82aaed4ce6d12d8b21b77d09d0123bd118e5ec1ca6bd801bfe52c3bf8f819c"
+  minRequiredVersionCode: '260313',
+  updateUrl: 'https://github.com/ShilukaYT/HieuGLLite.App/releases/latest/download/HieuGLLiteAppsSetup.exe',
+  sha256: "c7a812fdad56410aa9c2db1a3b82036b2a9890e3cd5eaba6f45dc0087a8efd61"
 });
 
 const isLoading = ref(true);
 const videoPathDark = ref('http://hieugllite.app/videos/LoadingScreen_dark.mp4');
 const videoPathLight = ref('http://hieugllite.app/videos/LoadingScreen_light.mp4');
+
+const isWin11 = ref(true);
+
 
 onMounted(async () => {
   showWelcomeModal.value = true;
@@ -198,6 +209,10 @@ onMounted(async () => {
 
       switch (res.type) {
         case 'CLIENT_VERSION':
+          if (res?.versioncode == null) {
+            isAppLocked.value = true;
+            isNotInWebView.value = true;
+          }
           manifest.value.BE_version = res.version;
           manifest.value.BE_versioncode = res.versioncode;
           break;
@@ -216,7 +231,7 @@ onMounted(async () => {
           });
 
           isLoading.value = false;
-          
+
           if (!isMaintenance.value && !hasCheckedUpdate.value) {
             checkForUpdates(false);
             hasCheckedUpdate.value = true;
@@ -289,6 +304,7 @@ onMounted(async () => {
           // C# GỬI LÊN -> GÁN NGAY VÀO VUE
           userSettings.value.theme = res.theme;
           userSettings.value.minimizeToTray = res.minimizeToTray;
+          isWin11.value = res.isWindows11;
 
           // Áp dụng Theme cho Vuetify
           let targetTheme = res.theme;
@@ -312,6 +328,47 @@ onMounted(async () => {
           updateData.value.isDownloading = false;
           snackbarText.value = "Tải bản cập nhật thất bại: " + (res.error || "");
           showSnackbar.value = true;
+          break;
+        case 'USER_LOGGED_IN':
+          user.value = res.data;
+          break;
+        // BẮT SỰ KIỆN GỬI MAIL OTP
+        case 'OTP_SENT_SUCCESS':
+          otpIsLoading.value = false;
+          snackbarText.value = "Mã OTP đã được gửi tới email của bạn!";
+          showSnackbar.value = true;
+          break;
+        case 'OTP_SENT_FAILED':
+          otpIsLoading.value = false;
+          otpErrorMessage.value = "Không thể gửi email: " + (res.error || "Lỗi không xác định");
+          break;
+
+        // BẮT SỰ KIỆN NHẬP MÃ OTP
+        case 'OTP_VERIFY_SUCCESS':
+          otpIsLoading.value = false;
+          showOtpModal.value = false;
+
+          snackbarText.value = "Xác minh danh tính thành công! Đang bắt đầu cài đặt...";
+          showSnackbar.value = true;
+
+          // Nếu có gói dữ liệu cài đặt đang chờ -> Bung ra cài luôn
+          if (pendingAction.value && pendingAction.value.appId) {
+            const targetApp = apps.value.find(a => a.id === pendingAction.value.appId);
+            if (targetApp) targetApp.isVerifiedSession = true;
+
+            downloadingApps.value[pendingAction.value.appId] = {
+              percent: 0, status: 'WAITING', speed: '', downloaded: ''
+            };
+
+            if (window.chrome?.webview) {
+              window.chrome.webview.postMessage(pendingAction.value);
+            }
+            pendingAction.value = null; // Xóa trí nhớ
+          }
+          break;
+        case 'OTP_VERIFY_FAILED':
+          otpIsLoading.value = false;
+          otpErrorMessage.value = "Mã OTP không chính xác hoặc đã hết hạn!";
           break;
       }
     });
@@ -454,17 +511,56 @@ const handleOpenInstallModal = () => {
 const handleInstall = (selection) => {
   showModal.value = false;
 
-  // PHÂN LUỒNG TẠI ĐÂY: Quyết định gửi lệnh gì xuống C#
+  // 1. KIỂM TRA CỜ: Chỉ chạy OTP nếu App có cờ isVerifyRequired = true VÀ chưa xác minh
+  if (selectedApp.value?.isVerifyRequired && !selectedApp.value?.isVerifiedSession) {
+
+
+    if (!user.value || !user.value.email) {
+      snackbarText.value = "Bạn cần Đăng nhập Discord để xác minh danh tính khi cài đặt!";
+      showSnackbar.value = true;
+      return;
+    }
+
+    const commandType = isMultiInstallMode.value ? "INSTALL_MULTI" : "INSTALL";
+    const v = selection.versionObj;
+    const a = selection.androidObj;
+
+    // Gói data lại chờ nhập OTP
+    pendingAction.value = {
+      type: commandType,
+      appId: selectedApp.value.id,
+      exeUrl: v.downloadURL,
+      exeName: v.fileName,
+      exeHash: v.SHA256,
+      androidUrl: a.downloadURL,
+      androidName: a.fileName,
+      androidHash: a.SHA256,
+      androidCode: a.code,
+      zipPassword: a.zipPassword,
+      installPath: selection.path
+    };
+
+    otpErrorMessage.value = "";
+    showOtpModal.value = true;
+    otpIsLoading.value = true;
+
+    // Yêu cầu C# gửi Mail
+    if (window.chrome?.webview) {
+      window.chrome.webview.postMessage({ type: "SEND_OTP", email: user.value.email });
+    }
+
+    isMultiInstallMode.value = false;
+    return; // Dừng lại chờ OTP!
+  }
+
+  // =======================================================
+  // 2. NẾU APP KHÔNG CÓ CỜ YÊU CẦU OTP (Hoặc cờ = false) 
+  // NÓ SẼ BỎ QUA ĐOẠN TRÊN VÀ CHẠY THẲNG XUỐNG ĐÂY ĐỂ CÀI LUÔN
+  // =======================================================
   const commandType = isMultiInstallMode.value ? "INSTALL_MULTI" : "INSTALL";
 
-  console.log(`Bắt đầu quy trình ${commandType} cho:`, selectedApp.value.id);
-
-  // Load status waiting
   downloadingApps.value[selectedApp.value.id] = {
-    percent: 0,
-    status: 'WAITING',
-    speed: '',
-    downloaded: ''
+    percent: 0, status: 'WAITING', speed: '', downloaded: ''
   };
 
   if (window.chrome?.webview) {
@@ -472,27 +568,20 @@ const handleInstall = (selection) => {
     const a = selection.androidObj;
 
     window.chrome.webview.postMessage({
-      type: commandType, // Sử dụng biến commandType ở đây
+      type: commandType,
       appId: selectedApp.value.id,
-
-      // Thông tin bộ cài (.exe)
       exeUrl: v.downloadURL,
       exeName: v.fileName,
       exeHash: v.SHA256,
-
-      // Thông tin Android Image (.bin / .zip)
       androidUrl: a.downloadURL,
       androidName: a.fileName,
       androidHash: a.SHA256,
       androidCode: a.code,
-      zipPassword: a.zipPassword, // Gửi luôn pass giải nén xuống
-
-      // Đường dẫn cài đặt
+      zipPassword: a.zipPassword,
       installPath: selection.path
     });
   }
 
-  // QUAN TRỌNG: Reset lại cờ sau khi gửi lệnh để không bị kẹt ở chế độ Multi
   isMultiInstallMode.value = false;
 };
 
@@ -569,14 +658,14 @@ const handleManualUpdateCheck = () => {
 
 const handleDownloadUpdate = () => {
   const currentCode = parseInt(manifest.value.BE_versioncode || "0");
-  
+
   // CHỈ CHO PHÉP TẢI NGẦM NẾU VER >= 260312
   if (currentCode >= 260312) {
     updateData.value.isDownloading = true;
     if (window.chrome?.webview) {
-      window.chrome.webview.postMessage({ 
-        type: "DOWNLOAD_UPDATE", 
-        url: updateData.value.updateUrl ,
+      window.chrome.webview.postMessage({
+        type: "DOWNLOAD_UPDATE",
+        url: updateData.value.updateUrl,
         hash: updateData.value.updateHash
       });
     }
@@ -585,15 +674,14 @@ const handleDownloadUpdate = () => {
     if (window.chrome?.webview) {
       window.chrome.webview.postMessage({ type: "OPEN_URL", url: updateData.value.updateUrl });
     }
-    showUpdateModal.value = false; // Ẩn modal đi
   }
 };
 
 const handleInstallUpdate = () => {
   if (window.chrome?.webview && updateData.value.savedPath) {
-    window.chrome.webview.postMessage({ 
-      type: "INSTALL_UPDATE", 
-      path: updateData.value.savedPath 
+    window.chrome.webview.postMessage({
+      type: "INSTALL_UPDATE",
+      path: updateData.value.savedPath
     });
   }
 };
@@ -773,6 +861,28 @@ const handleUninstall = () => {
     window.chrome.webview.postMessage({ type: "UNINSTALL_APP" })
   }
 }
+
+// --- CÁC HÀM XỬ LÝ OTP MODAL ---
+const handleOtpSubmit = (code) => {
+  otpIsLoading.value = true;
+  otpErrorMessage.value = "";
+  if (window.chrome?.webview) {
+    window.chrome.webview.postMessage({ type: "VERIFY_OTP", code: code });
+  }
+};
+
+const handleOtpResend = () => {
+  if (window.chrome?.webview && user.value?.email) {
+    window.chrome.webview.postMessage({ type: "SEND_OTP", email: user.value.email });
+  }
+};
+
+const handleOtpCancel = () => {
+  pendingAction.value = null;
+  otpIsLoading.value = false;
+  showOtpModal.value = false;
+};
+
 </script>
 
 <style>

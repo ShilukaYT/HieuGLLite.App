@@ -28,9 +28,12 @@ namespace HieuGLLite.Apps
 			// 1. Bắt lỗi ở cấp độ toàn ứng dụng (Global Exception Handler)
 			Application.ThreadException += (s, e) => ShowError(e.Exception);
 			AppDomain.CurrentDomain.UnhandledException += (s, e) => ShowError((Exception)e.ExceptionObject);
+
 			// Kiểm tra xem Mutex đã tồn tại chưa
 			if (mutex.WaitOne(TimeSpan.Zero, true))
 			{
+				// Bắt buộc ứng dụng chạy bằng văn hóa Việt Nam
+				Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 				Application.EnableVisualStyles();
 				Application.SetCompatibleTextRenderingDefault(false);
 				// 1. KIỂM TRA WEBVIEW2 TRƯỚC KHI CHẠY FORM
@@ -66,42 +69,56 @@ namespace HieuGLLite.Apps
 				mutex.ReleaseMutex();
 			}
 			else
-			{
-				// Nếu đã chạy rồi, tìm ứng dụng cũ và đưa nó lên phía trước
-				// Đọc tham số dòng lệnh xem có link Discord không
-				string[] args = Environment.GetCommandLineArgs();
-				string discordUrl = (args.Length > 1) ? args[1] : "";
+			{// Đừng quên thêm: using System.Threading; ở trên cùng file nếu chưa có
 
-				Process current = Process.GetCurrentProcess();
-				foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+
 				{
-					if (process.Id != current.Id)
+					// 1. RUNG CHUÔNG GỌI APP CHÍNH DẬY (Phá vỡ trạng thái Ẩn)
+					try
 					{
-						IntPtr handle = process.MainWindowHandle;
-
-						// 1. Đưa Launcher cũ lên mặt đất (Code của bạn)
-						ShowWindow(handle, 9); // 9 là SW_RESTORE
-						SetForegroundWindow(handle);
-
-						// 2. NẾU CÓ LINK DISCORD -> Ném thẳng sang Launcher cũ
-						if (!string.IsNullOrEmpty(discordUrl) && discordUrl.StartsWith("hieugllite://"))
+						using (EventWaitHandle wakeUpHandle = EventWaitHandle.OpenExisting(appGuid + "_WakeUp"))
 						{
-							// Đặt thông báo ở đây xem App 2 có thực sự chạy không
-							//MessageBox.Show("App 2 đang chuẩn bị ném link: " + discordUrl); 
-
-							COPYDATASTRUCT cds = new COPYDATASTRUCT();
-							cds.dwData = IntPtr.Zero;
-							cds.cbData = (discordUrl.Length + 1) * 2;
-							// Cấp phát vùng nhớ không bị dọn dẹp
-							cds.lpData = Marshal.StringToHGlobalUni(discordUrl);
-
-							// Bắn tín hiệu!
-							SendMessage(handle, WM_COPYDATA, IntPtr.Zero, ref cds);
-
-							// Dọn dẹp RAM sau khi bắn xong
-							Marshal.FreeHGlobal(cds.lpData);
+							wakeUpHandle.Set(); // Bấm chuông!
 						}
-						Environment.Exit(0);
+					}
+					catch { }
+
+					// 2. Chờ 200 mili-giây để App chính hoàn tất việc Show() và tạo lại MainWindowHandle
+					Thread.Sleep(200);
+
+					// 3. Xử lý phần link Discord như cũ
+					string[] args = Environment.GetCommandLineArgs();
+					string discordUrl = (args.Length > 1) ? args[1] : "";
+
+					Process current = Process.GetCurrentProcess();
+					foreach (Process process in Process.GetProcessesByName(current.ProcessName))
+					{
+						if (process.Id != current.Id)
+						{
+							// Bây giờ MainWindowHandle chắc chắn đã có dữ liệu vì App đã hiện lên
+							IntPtr handle = process.MainWindowHandle;
+
+							if (handle != IntPtr.Zero)
+							{
+								// Đưa lên mặt đất
+								ShowWindow(handle, SW_RESTORE);
+								SetForegroundWindow(handle);
+
+								// NẾU CÓ LINK DISCORD -> Ném thẳng sang Launcher cũ
+								if (!string.IsNullOrEmpty(discordUrl) && discordUrl.StartsWith("hieugllite://"))
+								{
+									COPYDATASTRUCT cds = new COPYDATASTRUCT();
+									cds.dwData = IntPtr.Zero;
+									cds.cbData = (discordUrl.Length + 1) * 2;
+									cds.lpData = Marshal.StringToHGlobalUni(discordUrl);
+
+									SendMessage(handle, WM_COPYDATA, IntPtr.Zero, ref cds);
+
+									Marshal.FreeHGlobal(cds.lpData);
+								}
+							}
+							Environment.Exit(0);
+						}
 					}
 				}
 			}
@@ -188,4 +205,3 @@ namespace HieuGLLite.Apps
 
 
 }
-	

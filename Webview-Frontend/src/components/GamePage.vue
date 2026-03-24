@@ -160,8 +160,8 @@
 
                   <v-divider class="my-1"></v-divider>
 
+                  <!-- v-if="props.manifest?.BE_versioncode >= 260310"  -->
                   <v-list-item 
-                    v-if="props.manifest?.BE_versioncode >= 260310" 
                     prepend-icon="mdi-source-branch" 
                     title="Thay đổi phiên bản"
                     class="rounded-lg text-primary" 
