@@ -56,11 +56,11 @@ namespace HieuGLLite.Apps
 
 		private DiscordRpcClient discordClient;
 
-		public bool isDevMode = true;
+		public bool isDevMode = false;
 
 		public string AppName;
 		public string version = "26.4.1 (Public Beta)";
-		public int versioncode = 260314;
+		public int versioncode = 260401;
 
 		public string FE_version;
 
