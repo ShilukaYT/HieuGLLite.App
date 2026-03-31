@@ -1,0 +1,307 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Hiếu GL Lite</value>
+  </data>
+  <data name="TrayOpen" xml:space="preserve">
+    <value>Mở</value>
+  </data>
+  <data name="TrayExit" xml:space="preserve">
+    <value>Thoát</value>
+  </data>
+  <data name="MsgErrInitWebview" xml:space="preserve">
+    <value>Lỗi khởi tạo WebView2: </value>
+  </data>
+  <data name="MsgErrTitle" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="MsgErrOpenLink" xml:space="preserve">
+    <value>Không thể mở liên kết: </value>
+  </data>
+  <data name="MsgErrOpenBrowser" xml:space="preserve">
+    <value>Không thể mở trình duyệt: </value>
+  </data>
+  <data name="MsgErrTokenExchange" xml:space="preserve">
+    <value>Đổi token thất bại: </value>
+  </data>
+  <data name="MsgApiErrorTitle" xml:space="preserve">
+    <value>Lỗi API</value>
+  </data>
+  <data name="MsgNotJoinedServer" xml:space="preserve">
+    <value>Bạn chưa tham gia máy chủ của Hiếu GL Lite
+Tính năng của ứng dụng có thể sẽ bị hạn chế!</value>
+  </data>
+  <data name="MsgNoticeTitle" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="MsgWarnExitInstalling" xml:space="preserve">
+    <value>Ứng dụng hiện đang cài đặt, bạn không thể thoát ngay lúc này.</value>
+  </data>
+  <data name="MsgWarnTitle" xml:space="preserve">
+    <value>Cảnh báo</value>
+  </data>
+  <data name="MsgWarnExitRunning" xml:space="preserve">
+    <value>Một ứng dụng đang chạy, bạn không thể thoát hoàn toàn lúc này.</value>
+  </data>
+  <data name="MsgConfirmCancelInstall" xml:space="preserve">
+    <value>Bạn có chắc muốn hủy tải ứng dụng này?
+Mọi tiến trình và dữ liệu tạm thời sẽ bị xóa sạch!</value>
+  </data>
+  <data name="MsgConfirmTitle" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="MsgConfirmCancelTitle" xml:space="preserve">
+    <value>Xác nhận hủy tải</value>
+  </data>
+  <data name="MsgConfirmUninstall" xml:space="preserve">
+    <value>Bạn có chắc chắn muốn gỡ cài đặt ứng dụng này không?
+Tất cả ứng dụng và trò chơi được cài đặt trên ứng dụng này sẽ bị gỡ cài đặt!</value>
+  </data>
+  <data name="MsgConfirmCleanup" xml:space="preserve">
+    <value>Bạn có muốn dọn dẹp hay không?
+Dữ liệu tải xuống và dữ liệu tạm sẽ bị xóa!</value>
+  </data>
+  <data name="MsgWarnCleanupDownloading" xml:space="preserve">
+    <value>Có tệp đang tải xuống, bạn không thể dọn dẹp ngay lúc này!</value>
+  </data>
+  <data name="MsgWarnCannotCleanupTitle" xml:space="preserve">
+    <value>Không thể dọn dẹp</value>
+  </data>
+  <data name="MsgConfirmUninstallBase" xml:space="preserve">
+    <value>Bạn có muốn gỡ cài đặt ứng dụng này không?
+Một số giả lập sẽ không thể khởi động nếu không có ứng dụng này?</value>
+  </data>
+  <data name="MsgConfirmUninstallBaseTitle" xml:space="preserve">
+    <value>Xác nhận gỡ cài đặt</value>
+  </data>
+  <data name="MsgErrRequireAdmin" xml:space="preserve">
+    <value>Cần quyền Quản trị viên (Run as Administrator) để gỡ bỏ hoàn toàn giao thức hệ thống.</value>
+  </data>
+  <data name="MsgErrMissingPrivilegeTitle" xml:space="preserve">
+    <value>Thiếu quyền</value>
+  </data>
+  <data name="MsgErrRegistry" xml:space="preserve">
+    <value>Lỗi gỡ Registry: </value>
+  </data>
+  <data name="MsgErrUpdateNotFound" xml:space="preserve">
+    <value>Không tìm thấy file cài đặt, vui lòng tải lại!</value>
+  </data>
+  <data name="MsgErrSaveToken" xml:space="preserve">
+    <value>Lỗi lưu token: </value>
+  </data>
+  <data name="MsgErrExecuteFile" xml:space="preserve">
+    <value>Lỗi thực thi: </value>
+  </data>
+  <data name="MsgErrToolNotFound" xml:space="preserve">
+    <value>Không tìm thấy công cụ: </value>
+  </data>
+  <data name="MsgErrMissingInstallFiles" xml:space="preserve">
+    <value>Cài đặt thất bại, không tìm thấy tệp cần cài đặt!</value>
+  </data>
+  <data name="MsgErrInstallFailedTitle" xml:space="preserve">
+    <value>Cài đặt thất bại</value>
+  </data>
+  <data name="MsgErrHashMismatch" xml:space="preserve">
+    <value>Kiểm tra tính toàn vẹn thất bại, vui lòng thử lại sau!
+
+Chi tiết trạng thái tệp:
+- Tệp cài đặt: {0}
+- Tệp hệ điều hành: {1}</value>
+  </data>
+  <data name="MsgHashMismatchTitle" xml:space="preserve">
+    <value>Lỗi xác thực SHA256</value>
+  </data>
+  <data name="FileValid" xml:space="preserve">
+    <value>Hợp lệ</value>
+  </data>
+  <data name="FileCorrupted" xml:space="preserve">
+    <value>Bị lỗi/Hỏng</value>
+  </data>
+  <data name="MsgErrInstallRolledBack" xml:space="preserve">
+    <value>Cài đặt thất bại, trình cài đặt hiện đã hoàn tác thay đổi</value>
+  </data>
+  <data name="MsgWarnAnotherInstalling" xml:space="preserve">
+    <value>Hiện đang có một ứng dụng khác đang được xử lý!</value>
+  </data>
+  <data name="MsgErrUnauthorizedAcess" xml:space="preserve">
+    <value>Phát hiện truy cập trái phép!
+Bạn chưa hoàn thành bước xác minh OTP.</value>
+  </data>
+  <data name="MsgErrSecurityTitle" xml:space="preserve">
+    <value>Bảo mật hệ thống</value>
+  </data>
+  <data name="MsgWarnInsufficientSpace" xml:space="preserve">
+    <value>Ổ đĩa {0} không đủ dung lượng!
+- Cần: {1:F2} GB
+- Hiện có: {2:F2} GB</value>
+  </data>
+  <data name="MsgWarnChangeVersion" xml:space="preserve">
+    <value>Bạn đang thực hiện thay đổi phiên bản cho {0}.
+
+Hành động này sẽ XÓA SẠCH toàn bộ dữ liệu, ứng dụng và cài đặt của phiên bản hiện tại trước khi cài đặt phiên bản mới.
+
+Bạn có chắc chắn muốn tiếp tục?</value>
+  </data>
+  <data name="MsgWarnChangeVersionTitle" xml:space="preserve">
+    <value>Cảnh báo thay đổi phiên bản</value>
+  </data>
+  <data name="MsgWarnConflictFound" xml:space="preserve">
+    <value>Máy bạn đang cài đặt {0} bị xung đột với phiên bản này.
+
+Bạn có muốn gỡ cài đặt nó để tiếp tục cài {1} không?</value>
+  </data>
+  <data name="MsgWarnConflictTitle" xml:space="preserve">
+    <value>Phát hiện xung đột</value>
+  </data>
+  <data name="MsgWarnKillApp" xml:space="preserve">
+    <value>Bạn có chắc muốn tắt ứng dụng này?
+Tiến trình chơi của bạn có thể sẽ không được lưu lại!</value>
+  </data>
+  <data name="btnYes" xml:space="preserve">
+    <value>Có</value>
+  </data>
+  <data name="btnNo" xml:space="preserve">
+    <value>Không</value>
+  </data>
+  <data name="btnGotit" xml:space="preserve">
+    <value>Đã hiểu</value>
+  </data>
+  <data name="btnOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="MsgRestartAfterChangeLanguageTitle" xml:space="preserve">
+    <value>Cần khởi động lại</value>
+  </data>
+  <data name="MsgRestartAfterChangeLanguage" xml:space="preserve">
+    <value>Ngôn ngữ đã được thay đổi. Bạn có muốn khởi động lại ứng dụng ngay bây giờ để áp dụng không?</value>
+  </data>
+  <data name="ToastInstallTitle" xml:space="preserve">
+    <value>Cài đặt hoàn tất</value>
+  </data>
+  <data name="ToastInstallMessage" xml:space="preserve">
+    <value>{0} đã được cài đặt</value>
+  </data>
+  <data name="ToastUninstallMessage" xml:space="preserve">
+    <value>{0} đã được gỡ cài đặt</value>
+  </data>
+  <data name="ToastUninstallTitle" xml:space="preserve">
+    <value>Gỡ cài đặt hoàn tất</value>
+  </data>
+</root>

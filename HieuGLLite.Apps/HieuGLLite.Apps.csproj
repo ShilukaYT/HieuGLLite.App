@@ -95,7 +95,7 @@ Emulator Launcher</Description>
   </Target>
 	<Target Name="SignPublishedFiles" AfterTargets="Publish">
 		<Message Text="=== BẮT ĐẦU KÝ TỆP PUBLISH ===" Importance="high" />
-		<Exec Command='"C:\Users\doanh\Desktop\Modify\SDK\signtool.exe" sign /f "C:\Users\doanh\Desktop\HieuGLLite.pfx" /p HieuGLLite /fd SHA256 /t http://timestamp.digicert.com "$(PublishDir)$(TargetName).exe"' />
+		<Exec Command="&quot;C:\Users\doanh\Desktop\Modify\SDK\signtool.exe&quot; sign /f &quot;C:\Users\doanh\Desktop\HieuGLLite.pfx&quot; /p HieuGLLite /fd SHA256 /t http://timestamp.digicert.com &quot;$(PublishDir)$(TargetName).exe&quot;" />
 	</Target>
 
 </Project>

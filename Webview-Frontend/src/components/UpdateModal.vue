@@ -10,12 +10,12 @@
       <v-icon color="primary" size="80" class="mx-auto mb-3">mdi-package-up</v-icon>
       
       <v-card-title class="text-h5 font-weight-bold text-primary text-wrap pb-0">
-        CẬP NHẬT PHẦN MỀM
+        {{ $t('update_modal.title') }}
       </v-card-title>
       
       <v-card-text class="text-body-1 mt-2 pa-0" style="line-height: 1.6;">
-        Phiên bản mới <b>{{ updateData?.versionName }}</b> đã sẵn sàng!<br>
-        Để có trải nghiệm tốt nhất, vui lòng cập nhật ứng dụng.
+        <span v-html="$t('update_modal.new_version_ready', { version: updateData?.versionName })"></span><br>
+        {{ $t('update_modal.update_prompt') }}
 
         <v-card 
           variant="tonal" 
@@ -26,10 +26,10 @@
           <div class="pa-4" style="max-height: 180px; overflow-y: auto;">
             <div class="font-weight-bold mb-2 d-flex align-center">
               <v-icon icon="mdi-star-four-points" size="small" class="mr-2"></v-icon>
-              Chi tiết thay đổi:
+              {{ $t('update_modal.changelog_title') }}
             </div>
             <div class="text-body-2 pr-2" style="white-space: pre-line; line-height: 1.5;">
-              {{ updateData?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
+              {{ updateData?.changelog || $t('update_modal.no_changelog') }}
             </div>
           </div>
         </v-card>
@@ -37,7 +37,7 @@
         <v-expand-transition>
           <div v-if="updateData?.isDownloading || updateData?.isReady" class="mt-4">
             <div class="d-flex justify-space-between text-caption font-weight-bold mb-1">
-              <span>{{ updateData?.isReady ? 'Tải hoàn tất!' : 'Đang tải bản cập nhật...' }}</span>
+              <span>{{ updateData?.isReady ? $t('update_modal.download_complete') : $t('update_modal.downloading_update') }}</span>
               <span>{{ updateData?.percent || 0 }}%</span>
             </div>
             <v-progress-linear 
@@ -45,7 +45,6 @@
               :color="updateData?.isReady ? 'success' : 'primary'" 
               height="8" 
               rounded 
-         
               :active="true"
             ></v-progress-linear>
           </div>
@@ -63,7 +62,7 @@
           class="font-weight-bold mr-2" 
           @click="$emit('update:modelValue', false)"
         >
-          ĐỂ SAU
+          {{ $t('update_modal.btn_later') }}
         </v-btn>
         
         <v-btn 
@@ -76,7 +75,7 @@
           @click="$emit('download')"
           :loading="updateData?.isDownloading"
         >
-          CẬP NHẬT NGAY
+          {{ $t('update_modal.btn_update_now') }}
         </v-btn>
 
         <v-btn 
@@ -89,7 +88,7 @@
           @click="$emit('install')"
         >
           <v-icon start icon="mdi-restart"></v-icon>
-          KHỞI ĐỘNG LẠI & CÀI ĐẶT
+          {{ $t('update_modal.btn_restart_install') }}
         </v-btn>
       </v-card-actions>
       

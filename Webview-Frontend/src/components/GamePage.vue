@@ -24,7 +24,7 @@
                 style="width: 16px; height: 16px; margin-right: 8px; object-fit: contain; display: block;" />
             </template>
 
-            {{ tag.text }}
+            {{ loc(tag.text) }}
           </v-chip>
         </div>
 
@@ -34,7 +34,7 @@
 
           <a v-if="isDescLong" @click.prevent="showInfoModal = true" style="cursor: pointer"
             class="text-primary text-decoration-none ml-1 font-weight-bold">
-            Xem thêm
+            {{ $t('game_page.read_more') }}
           </a>
         </div>
 
@@ -60,13 +60,13 @@
                     <img v-else :src="tag.icon" class="chip-svg" />
                   </template>
 
-                  <span :class="isDark ? 'text-grey-lighten-2' : 'text-grey-darken-2'">{{ tag.text }}</span>
+                  <span :class="isDark ? 'text-grey-lighten-2' : 'text-grey-darken-2'">{{ loc(tag.text) }}</span>
                 </v-chip>
               </div>
 
               <p class="text-body-1" :class="isDark ? 'text-grey-lighten-1' : 'text-grey-darken-3'"
                 style="white-space: pre-wrap; line-height: 1.7;">
-                {{ app.desc }}
+                {{  localizedDesc }}
               </p>
             </v-card-text>
           </v-card>
@@ -77,7 +77,7 @@
         <div v-if="downloadingApps[app.id]" class="modern-notifier-box w-100">
           <div class="d-flex justify-space-between align-center mb-1">
             <div class="d-flex flex-column">
-              <span class="app-name-label">{{ stageConfig[downloadingApps[app.id].status]?.text || "TẠM DỪNG" }}</span>
+              <span class="app-name-label">{{ stageConfig[downloadingApps[app.id].status]?.text || $t('game_page.paused') }}</span>
             </div>
 
             <div v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)"
@@ -122,7 +122,7 @@
           <div v-if="app.isInstalled && app.isRunning" class="d-flex w-100 align-center" style="gap: 12px;">
             <v-btn color="grey-darken-3" variant="flat" size="x-large" rounded="pill"
               class="flex-grow-1 font-weight-bold" disabled>
-              <v-icon start icon="mdi-loading mdi-spin" class="mr-2"></v-icon> ĐANG MỞ...
+              <v-icon start icon="mdi-loading mdi-spin" class="mr-2"></v-icon> {{ $t('game_page.opening') }}
             </v-btn>
             <v-btn color="error" variant="tonal" size="x-large" icon="mdi-power" @click="$emit('kill-app')"></v-btn>
           </div>
@@ -131,7 +131,7 @@
             <div class="d-flex w-100" style="gap: 12px;">
               <v-btn color="success" variant="flat" size="x-large" rounded="pill" class="flex-grow-1 font-weight-bold"
                 @click="$emit('play')">
-                <v-icon start icon="mdi-play" class="mr-2"></v-icon> MỞ ỨNG DỤNG
+                <v-icon start icon="mdi-play" class="mr-2"></v-icon> {{ $t('game_page.open_app') }}
               </v-btn>
 
               <v-menu location="top end" transition="slide-y-reverse-transition">
@@ -142,38 +142,32 @@
                 </template>
 
                 <v-list class="rounded-xl pa-2 mt-2" :theme="isDark ? 'dark' : 'light'" border elevation="12">
-                  <v-list-item prepend-icon="mdi-layers-triple" title="Trình quản lý đa phiên bản"
+                  <v-list-item prepend-icon="mdi-layers-triple" :title="$t('game_page.multi_instance_manager')"
                     @click="$emit('extra-action', { type: 'OPEN_MULTI', id: app.id })">
                   </v-list-item>
 
-                  <v-list-item prepend-icon="mdi-broom" title="Dọn dẹp bộ nhớ" class="rounded-lg mb-1"
+                  <v-list-item prepend-icon="mdi-broom" :title="$t('game_page.clear_memory')" class="rounded-lg mb-1"
                     @click="$emit('extra-action', { type: 'CLEANUP', id: app.id })">
                   </v-list-item>
 
-                  <v-list-item prepend-icon="mdi-cloud-upload" title="Sao lưu" class="rounded-lg mb-1"
+                  <v-list-item prepend-icon="mdi-cloud-upload" :title="$t('game_page.backup')" class="rounded-lg mb-1"
                     @click="$emit('extra-action', { type: 'BACKUP', id: app.id })">
                   </v-list-item>
 
-                  <v-list-item prepend-icon="mdi-cloud-download" title="Khôi phục" class="rounded-lg mb-1"
+                  <v-list-item prepend-icon="mdi-cloud-download" :title="$t('game_page.restore')" class="rounded-lg mb-1"
                     @click="$emit('extra-action', { type: 'RESTORE', id: app.id })">
                   </v-list-item>
 
                   <v-divider class="my-1"></v-divider>
 
-                  <!-- v-if="props.manifest?.BE_versioncode >= 260310"  -->
                   <v-list-item 
                     prepend-icon="mdi-source-branch" 
-                    title="Thay đổi phiên bản"
+                    :title="$t('game_page.change_version')"
                     class="rounded-lg text-primary" 
                     @click="$emit('extra-action', { type: 'CHANGE_VERSION', id: app.id })"> 
                   </v-list-item>
 
-                  <!-- <v-list-item prepend-icon="mdi-monitor-multiple" title="Tạo Instance mới"
-                    class="rounded-lg text-success"
-                    @click="$emit('extra-action', { type: 'INSTALL_MULTI', id: app.id })">
-                  </v-list-item> -->
-
-                  <v-list-item prepend-icon="mdi-trash-can-outline" title="Gỡ cài đặt" class="rounded-lg text-error"
+                  <v-list-item prepend-icon="mdi-trash-can-outline" :title="$t('game_page.uninstall')" class="rounded-lg text-error"
                     @click="$emit('extra-action', { type: 'UNINSTALL', id: app.id })">
                   </v-list-item>
                 </v-list>
@@ -183,7 +177,7 @@
 
           <v-btn v-else color="primary" variant="flat" size="x-large" rounded="pill" block
             :disabled="isOtherAppDownloading" @click="$emit('open-install')">
-            <v-icon start icon="mdi-download" class="mr-2"></v-icon> CÀI ĐẶT NGAY
+            <v-icon start icon="mdi-download" class="mr-2"></v-icon> {{ $t('game_page.install_now') }}
           </v-btn>
         </template>
       </v-card-actions>
@@ -195,6 +189,9 @@
 <script setup>
 import { ref, computed, onMounted ,watch} from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n'; // Khai báo i18n
+
+const { t, locale } = useI18n(); // Gọi hàm t()
 
 // 1. Gán biến props CỰC KỲ QUAN TRỌNG
 const props = defineProps(['app', 'downloadingApps', 'stageConfig', 'manifest']); // Nhận từ App.vue
@@ -208,6 +205,7 @@ const isOtherAppDownloading = computed(() => {
 
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
+
 // Hàm gửi tiêu đề lên C#
 const updateWindowTitle = (name) => {
   if (window.chrome?.webview && name) {
@@ -217,6 +215,7 @@ const updateWindowTitle = (name) => {
     });
   }
 };
+
 
 onMounted(() => {
   window.chrome.webview.postMessage({ type: "SYNC_DOWNLOAD_STATUS" });
@@ -229,7 +228,6 @@ watch(() => props.app?.name, (newName) => {
   updateWindowTitle(newName);
 }, { immediate: true });
 
-
 // Tạo biến màu overlay dựa trên theme
 const overlayColor = computed(() =>
   isDark.value ? '0, 0, 0' : '255, 255, 255'
@@ -237,21 +235,25 @@ const overlayColor = computed(() =>
 
 const showInfoModal = ref(false);
 
-// Dùng props.app chuẩn xác
+const loc = (text) => {
+  if (!text) return "";
+  const p = text.split('|');
+  // Nếu đang dùng tiếng anh và có dấu | thì lấy phần tử số 1, ngược lại lấy số 0
+  return locale.value.startsWith('en') && p.length > 1 ? p[1].trim() : p[0].trim();
+};
+
+// Cập nhật lại các biến xử lý độ dài mô tả (dùng hàm loc ở trên)
+const localizedDesc = computed(() => loc(props.app?.desc));
+
 const isDescLong = computed(() => {
-  return props.app?.desc && props.app.desc.length > 100;
+  return localizedDesc.value && localizedDesc.value.length > 100;
 });
 
-// Cắt ngắn chuỗi mô tả và thêm dấu "..."
 const shortDesc = computed(() => {
-  if (!props.app?.desc) return "";
-  return props.app.desc.substring(0, 60) + "...";
+  if (!localizedDesc.value) return "";
+  return localizedDesc.value.substring(0, 100) + "...";
 });
-
-
-
 </script>
-
 
 <style scoped>
 .overlay {

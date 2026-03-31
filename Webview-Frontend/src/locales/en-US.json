@@ -1,0 +1,151 @@
+{
+    "settings": {
+        "title": "System Settings",
+        "general": "General",
+        "update": "Update",
+        "apps": "Applications",
+        "about": "About",
+        "theme": "Appearance",
+        "theme_desc": "Toggle between Light and Dark mode",
+        "language": "Display Language",
+        "language_desc": "Change the software interface language",
+        "display_mode": "Display Mode",
+        "light": "Light",
+        "dark": "Dark",
+        "system_sync": "System",
+        "win11_warning": "* Manual customization is only supported on Windows 11. The system is automatically syncing colors according to your Windows.",
+        "system": "System",
+        "close_behavior": "Close Window Behavior",
+        "close_behavior_desc": "When clicking the X button in the top right corner",
+        "tray": "System Tray",
+        "exit": "Exit Completely",
+        "language_block": "Language",
+        "ui_ux_version": "UI/UX Version:",
+        "client_version": "Client Version:",
+        "unknown": "Unknown",
+        "check_update": "Check for Updates",
+        "update_app_list": "Update Application List",
+        "update_app_list_desc": "Reload application data after expanding access permissions",
+        "try_again_later": "Try again later ({time}s)",
+        "update_now": "Update Now",
+        "update_details": "Update Details (Version: {version})",
+        "no_changelog": "No change information recorded.",
+        "app_management": "Application Management",
+        "clear_cache": "Clear Cache",
+        "clear_cache_desc": "Free up temporary data (Will start slower next time)",
+        "btn_clear": "CLEAR",
+        "uninstall": "Uninstall",
+        "uninstall_desc": "Delete all applications and related data",
+        "btn_uninstall": "UNINSTALL",
+        "developed_by": "Application developed by <strong>Hieu GL Lite</strong> with the <strong>Gemini</strong> chatbot",
+        "based_on": "Based on .NET 8, Vue.js and Vuetify 3. Optimizing the application experience at its best.",
+        "settings_title": "Settings"
+    },
+    "common": {
+        "close": "Close",
+        "cancel": "Cancel"
+    },
+    "app": {
+        "messages": {
+            "apps_updated": "Application list updated successfully!",
+            "uninstall_success": "Successfully uninstalled {name}",
+            "cleanup_success": "Cache cleared successfully!",
+            "update_failed": "Update download failed: {error}",
+            "otp_sent": "OTP code has been sent to your email!",
+            "otp_send_failed": "Failed to send email: {error}",
+            "otp_unknown_error": "Unknown error",
+            "otp_verify_success": "Identity verified! Starting installation...",
+            "otp_verify_failed": "Incorrect or expired OTP code!",
+            "error_unknown_play": "Error: Cannot identify the application to start!",
+            "error_unknown_kill": "Error: Cannot identify the application to close!",
+            "require_discord": "You must login with Discord to verify your identity before installing!",
+            "latest_version": "You are using the latest version ({version})!",
+            "app_only": "This feature only works on the actual App!"
+        },
+        "stages": {
+            "waiting": "Pending download...",
+            "downloading_exe": "Downloading 1/2...",
+            "downloading_android": "Downloading 2/2...",
+            "merging": "Finalizing...",
+            "verifying": "Verifying integrity...",
+            "installing": "Installing...",
+            "cleaning_up": "Cleaning up...",
+            "backup_restore": "Initializing backup and restore...",
+            "uninstalling": "Uninstalling..."
+        }
+    },
+    "install_modal": {
+        "title_create_clone": "Create clone",
+        "title_install": "Install",
+        "subtitle_clone": "Select OS for the clone:",
+        "subtitle_install": "Version configuration:",
+        "label_version": "Version",
+        "label_os": "Operating System",
+        "all_integrated": "All versions have been integrated!",
+        "storage_folder": "Storage folder:",
+        "btn_browse": "BROWSE",
+        "btn_cancel": "CANCEL",
+        "btn_integrate_now": "INTEGRATE NOW",
+        "btn_install_now": "INSTALL NOW",
+        "already_integrated": "(Integrated)"
+    },
+    "otp_modal": {
+        "title": "Security Verification",
+        "require_verification": "This application requires identity verification.",
+        "otp_sent_to": "A 6-digit OTP code has been sent to your email:",
+        "not_received": "Haven't received the code? ",
+        "btn_resend": "RESEND"
+    },
+    "sidebar": {
+        "connect": "Connect",
+        "support_me": "Support me",
+        "logout": "Logout",
+        "login_prompt": "Login to sync data",
+        "login_discord": "Login with Discord"
+    },
+    "update_modal": {
+        "title": "SOFTWARE UPDATE",
+        "new_version_ready": "New version <b>{version}</b> is ready!",
+        "update_prompt": "For the best experience, please update the application.",
+        "changelog_title": "Changelog:",
+        "no_changelog": "No change information recorded.",
+        "download_complete": "Download complete!",
+        "downloading_update": "Downloading update...",
+        "btn_later": "LATER",
+        "btn_update_now": "UPDATE NOW",
+        "btn_restart_install": "RESTART & INSTALL"
+    },
+    "warning_modal": {
+        "title": "Invalid Environment!",
+        "message": "The system detected that you are running the application in a different environment. Please install the application for the best experience.",
+        "btn_ignore": "I AM A DEV, IGNORE WARNING"
+    },
+    "welcome_modal": {
+        "title": "WELCOME TO PUBLIC BETA",
+        "message": "Thank you for participating in the <b>Hieu GL Lite</b> Public Beta!<br><br>During this phase, the application is being optimized and may still have some minor bugs. Your contributions will help us improve the product.",
+        "btn_start": "START BETA"
+    },
+    "maintenance_modal": {
+        "title": "System Maintenance",
+        "message_1": "The server is currently paused for system upgrades and performance improvements.",
+        "message_2": "We are working hard to bring everything back online as soon as possible. Please come back later!",
+        "follow_updates": "Follow updates at"
+    },
+    "game_page": {
+        "read_more": "Read more",
+        "paused": "PAUSED",
+        "opening": "OPENING...",
+        "open_app": "OPEN APP",
+        "multi_instance_manager": "Multi-Instance Manager",
+        "clear_memory": "Clear Memory",
+        "backup": "Backup",
+        "restore": "Restore",
+        "change_version": "Change Version",
+        "create_new_instance": "Create New Instance",
+        "uninstall": "Uninstall",
+        "install_now": "INSTALL NOW"
+    },
+    "manifest": {
+        "changelog_current": "Version 26.3.13 is required to use!\n\n- Full MessageBox integration across the app\n- Comprehensive activity logging\n- Added English language\n- Bug fixes"
+    }
+}

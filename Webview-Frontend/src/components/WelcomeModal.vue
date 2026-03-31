@@ -4,19 +4,16 @@
             <v-img src="./assets/images/logo.png" width="150" class="mx-auto"></v-img>
             <br>
             <v-card-title class="text-h5 font-weight-bold text-info text-wrap pb-0">
-                CHÀO MỪNG ĐẾN VỚI PUBLIC BETA
+                {{ $t('welcome_modal.title') }}
             </v-card-title>
 
-            <v-card-text class="text-body-1 mt-3 pa-2" style="line-height: 1.6;">
-                Cảm ơn bạn đã tham gia thử nghiệm <b>Hiếu GL Lite</b> phiên bản Public Beta!<br><br>
-                Trong giai đoạn này, ứng dụng đang được tối ưu hóa và có thể còn một vài thiếu sót nhỏ. Mọi đóng góp của
-                bạn sẽ giúp chúng tôi hoàn thiện sản phẩm tốt hơn.
+            <v-card-text class="text-body-1 mt-3 pa-2" style="line-height: 1.6;" v-html="$t('welcome_modal.message')">
             </v-card-text>
 
             <v-card-actions class="justify-center mt-5 pa-0">
                 <v-btn color="info" variant="flat" rounded="pill" size="large" class="px-8 font-weight-bold"
                     @click="closeModal">
-                    BẮT ĐẦU TRẢI NGHIỆM
+                    {{ $t('welcome_modal.btn_start') }}
                 </v-btn>
             </v-card-actions>
 
@@ -27,6 +24,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n'; // Khai báo i18n
+
+const { t } = useI18n(); // Gọi hàm t()
 
 const emit = defineEmits(['close']);
 const theme = useTheme();

@@ -19,6 +19,7 @@ namespace HieuGLLite.Apps
 
 			// Đường dẫn tới file font của bạn (Sửa lại tên file cho đúng nhé)
 			string fontPath = Path.Combine(Application.StartupPath, "Assets", "Fonts", "GoogleSans-Medium.ttf");
+			Main.WriteLog("INFO", "Loading font");
 
 			if (File.Exists(fontPath))
 			{
@@ -27,6 +28,7 @@ namespace HieuGLLite.Apps
 			}
 			else
 			{
+				Main.WriteLog("WARNING", "Font not found");
 				System.Diagnostics.Debug.WriteLine("Không tìm thấy file font!");
 			}
 		}
@@ -37,10 +39,12 @@ namespace HieuGLLite.Apps
 			// Nếu đã load thành công, trả về Custom Font
 			if (_isLoaded && _pfc.Families.Length > 0)
 			{
+				Main.WriteLog("INFO", "Applying font");
 				return new Font(_pfc.Families[0], size, style);
 			}
 
 			// Nếu lỗi, trả về font mặc định chữa cháy
+			Main.WriteLog("WARNING", "Font not found, returning default font");
 			return new Font("Segoe UI", size, style);
 		}
 	}

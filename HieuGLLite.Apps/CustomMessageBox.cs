@@ -150,12 +150,12 @@ namespace HieuGLLite.Apps
 				// ==========================================
 				if (isQuestion)
 				{
-					msgBox.btnYes.Text = "Có";
-					msgBox.btnNo.Text = "Không";
+					msgBox.btnYes.Text = Lang.btnYes;
+					msgBox.btnNo.Text = Lang.btnNo;
 				}
 				else
 				{
-					msgBox.btnYes.Text = "Đã hiểu";
+					msgBox.btnYes.Text = Lang.btnGotit;
 					msgBox.btnNo.Visible = false;
 					// Nếu chỉ có 1 nút thì dời nó sang sát mép phải
 					msgBox.btnYes.Location = new Point(msgBox.Width - msgBox.btnYes.Width - 30, msgBox.Height - 74);

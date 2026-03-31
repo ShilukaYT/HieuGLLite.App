@@ -14,7 +14,7 @@
           </template>
 
           <v-list :bg-color="isDark ? '#1e1e1e' : 'white'" class="rounded-xl ml-4 pa-2" elevation="12" min-width="180">
-            <v-list-subheader class="text-uppercase font-weight-bold text-caption">Kết nối</v-list-subheader>
+            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.connect') }}</v-list-subheader>
 
             <v-list-item @click="openExternal('https://facebook.com/hieushiluka')" rounded="lg" class="mb-1">
               <template v-slot:prepend>
@@ -39,7 +39,6 @@
               </template>
               <v-list-item-title>TikTok</v-list-item-title>
             </v-list-item>
-            <!-- Discord server -->
             <v-list-item @click="openExternal('https://discord.gg/GnmKM9bqEf')" rounded="lg" class="mb-1">
               <template v-slot:prepend>
                 <v-icon :color="isDark ? 'white' : 'black'">
@@ -58,7 +57,7 @@
 
             <v-divider class="my-2"></v-divider>
 
-            <v-list-subheader class="text-uppercase font-weight-bold text-caption">Ủng hộ tôi</v-list-subheader>
+            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.support_me') }}</v-list-subheader>
 
             <v-list-item @click="openPopup('https://img.vietqr.io/image/MB-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
@@ -166,7 +165,7 @@
                   <v-list-item @click="handleLogout" color="error" rounded="lg" class="px-4 py-1">
                     <div class="d-flex align-center text-error">
                       <v-icon icon="mdi-logout" class="mr-3" size="22"></v-icon>
-                      <span class="text-body-1 font-weight-medium">Đăng xuất</span>
+                      <span class="text-body-1 font-weight-medium">{{ $t('sidebar.logout') }}</span>
                     </div>
                   </v-list-item>
                 </div>
@@ -175,10 +174,10 @@
               <template v-else>
                 <div class="pa-6 text-center">
                   <v-icon icon="mdi-account-circle-outline" size="48" class="mb-2 opacity-20"></v-icon>
-                  <div class="text-body-2 mb-4">Đăng nhập để đồng bộ dữ liệu</div>
+                  <div class="text-body-2 mb-4">{{ $t('sidebar.login_prompt') }}</div>
 
                   <v-btn block color="#5865F2" prepend-icon="mdi-discord" class="rounded-lg" @click="handleLogin">
-                    Đăng nhập với Discord
+                    {{ $t('sidebar.login_discord') }}
                   </v-btn>
                 </div>
               </template>
@@ -193,8 +192,8 @@
 </template>
 
 <script setup>
-const props = defineProps(['apps', 'activeId', 'user']); // Thêm 'user'
-const emit = defineEmits(['change-app', 'open-settings', 'logout']); // Thêm 'logout'
+const props = defineProps(['apps', 'activeId', 'user']);
+const emit = defineEmits(['change-app', 'open-settings', 'logout']);
 import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
@@ -203,10 +202,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faFacebook, faYoutube, faTiktok, faGithub, faDiscord } from '@fortawesome/free-brands-svg-icons'
 
-// Thêm các icon bạn cần vào thư viện
 library.add(faFacebook, faYoutube, faTiktok, faGithub, faDiscord)
-
-// Đăng ký component toàn cục (trước dòng app.mount)
 
 import defaultAvt from '@/assets/images/avtDefault.jpg';
 const updateAppsList = computed(() => {
@@ -244,46 +240,36 @@ const userAvatarUrl = computed(() => {
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 
-
 const openExternal = (url) => {
   if (window.chrome?.webview) {
-    // Gửi yêu cầu mở link ra trình duyệt ngoài lên C#
     const features = 'width=500,height=700,left=100,top=100,menubar=no,status=no';
     window.chrome.webview.postMessage({
       type: "OPEN_URL",
       url: url
     });
   } else {
-    // Nếu chạy trên trình duyệt thường thì vẫn mở tab mới
     window.open(url, '_blank');
   }
-
 };
 
 const openPopup = (url, width, height) => {
-  // Tính toán để cửa sổ hiện ra chính giữa màn hình
   const left = (window.screen.width / 2) - (width / 2);
   const top = (window.screen.height / 2) - (height / 2);
 
-  // Các thuộc tính để ép trình duyệt mở cửa sổ nhỏ (Popup mode)
   const features = `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,resizable=no`;
 
-  // Lệnh mở cửa sổ
   window.open(url, 'HieuGLLitePopup', features);
 };
 
 const handleLogin = () => {
   if (window.chrome?.webview) {
-    // Chỉ việc hét lên cho C# biết: "Ê, ĐĂNG NHẬP ĐI!"
     window.chrome.webview.postMessage({ type: "LOGIN_DISCORD" });
   }
 };
 
-// Hàm gắn vào nút "Đăng xuất"
 const handleLogout = () => {
-  emit('logout'); // Kêu App.vue xóa giao diện user đi
+  emit('logout'); 
   if (window.chrome?.webview) {
-    // Kêu C# xóa file token đi
     window.chrome.webview.postMessage({ type: "LOGOUT_DISCORD" });
   }
 };
@@ -300,7 +286,6 @@ const handleLogout = () => {
 }
 </style>
 <style scoped>
-/* Lệnh quan trọng nhất: Ép tất cả các lớp của Vuetify phải hiện overflow */
 :deep(.v-list-item__content),
 :deep(.v-list-item__spacer),
 .custom-list-item {

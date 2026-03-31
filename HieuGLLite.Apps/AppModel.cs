@@ -121,6 +121,8 @@ namespace HieuGLLite.Apps
 			// Đặt giá trị mặc định luôn ở đây để an toàn tuyệt đối
 			public bool minimizeToTray { get; set; } = true;
 			public string theme { get; set; } = "system";
+
+			public string language { get; set; } = "";
 		}
 	}
 }

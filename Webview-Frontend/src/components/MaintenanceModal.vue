@@ -11,15 +11,15 @@
         </div>
 
         <h2 class="text-h4 font-weight-bold mb-4 text-uppercase ls-1">
-          Hệ thống bảo trì
+          {{ $t('maintenance_modal.title') }}
         </h2>
 
         <div class="text-body-1 text-medium-emphasis mb-8 px-4 font-weight-medium">
           <p class="mb-4">
-            Máy chủ hiện đang tạm dừng để nâng cấp hệ thống và cải thiện hiệu suất.
+            {{ $t('maintenance_modal.message_1') }}
           </p>
           <p class="text-body-2 opacity-70">
-            Chúng tôi đang nỗ lực làm việc để đưa mọi thứ trở lại sớm nhất. Vui lòng quay lại sau!
+            {{ $t('maintenance_modal.message_2') }}
           </p>
         </div>
 
@@ -27,7 +27,7 @@
 
         <div class="d-flex flex-column align-center">
           <span class="text-caption text-medium-emphasis mb-3 text-uppercase font-weight-bold ls-2">
-            Theo dõi cập nhật tại
+            {{ $t('maintenance_modal.follow_updates') }}
           </span>
           <div class="d-flex gap-4">
             <v-btn icon variant="tonal" color="error" class="rounded-lg" size="large">
@@ -42,9 +42,7 @@
           </div>
         </div>
 
-        <!-- Thêm text và nút làm mới trang -->
-          
-      </v-card-text>
+        </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -53,6 +51,9 @@
 import { computed } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
+import { useI18n } from 'vue-i18n'; // Khai báo i18n
+
+const { t } = useI18n(); // Gọi hàm t()
 
 const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);

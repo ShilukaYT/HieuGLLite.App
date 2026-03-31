@@ -21,33 +21,23 @@
       ></v-icon>
 
       <v-card-title class="text-h4 font-weight-bold  mb-2 pb-0">
-        Môi trường không hợp lệ!
+        {{ $t('warning_modal.title') }}
       </v-card-title>
 
       <v-card-text class="text-body-1 text-medium-emphasis px-4 mb-6 pt-2">
-        Hệ thống phát hiện bạn đang chạy ứng dụng trong môi trường khác, 
-        vui lòng cài đặt ứng dụng để có trải nghiệm tốt nhất.
+        {{ $t('warning_modal.message') }}
       </v-card-text>
 
-      <!-- <v-card-actions class="justify-center">
-        <v-btn
-          color="error"
-          variant="outlined"
-          rounded="pill"
-          size="x-large"
-          class="font-weight-bold px-10"
-          @click="$emit('close')"
-        >
-          TÔI LÀ DEV, BỎ QUA CẢNH BÁO
-        </v-btn>
-      </v-card-actions> -->
-    </v-card>
+      </v-card>
   </v-dialog>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n'; // Khai báo i18n
+
+const { t } = useI18n(); // Gọi hàm t()
 
 // Khai báo sự kiện 'close'
 defineEmits(['close']);

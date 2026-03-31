@@ -28,10 +28,16 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(800, 450);
-			this.Text = "CustomMessageBox";
+			SuspendLayout();
+			// 
+			// CustomMessageBox
+			// 
+			AutoScaleMode = AutoScaleMode.Inherit;
+			ClientSize = new Size(1000, 562);
+			Margin = new Padding(4, 4, 4, 4);
+			Name = "CustomMessageBox";
+			Text = "CustomMessageBox";
+			ResumeLayout(false);
 		}
 
 		#endregion

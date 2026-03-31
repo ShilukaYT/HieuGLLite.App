@@ -82,10 +82,19 @@
 
         <InstallModal v-if="showModal && selectedApp" :app="selectedApp" :is-multi-instance="isMultiInstallMode"
           @close="showModal = false" @confirm="handleInstall" />
-        <SettingsModal v-if="showSettings" @close="showSettings = false" :app="manifest" :settings="userSettings"
-          :is-win11="isWin11" @check-update="handleManualUpdateCheck" @get-apps="handleGetApps"
-          @clear-cache="handleClearCache" @uninstall="handleUninstall" />
-
+        <SettingsModal 
+  v-if="showSettings" 
+  @close="showSettings = false" 
+  :app="manifest" 
+  :settings="userSettings" 
+  :is-win11="isWin11"
+  @check-update="handleManualUpdateCheck" 
+  @get-apps="handleGetApps" 
+  @clear-cache="handleClearCache"
+  @uninstall="handleUninstall" 
+  @update-theme="userSettings.theme = $event" 
+  @update-language="val => { userSettings.language = val; locale = val; }"
+/>
         <v-snackbar v-model="showSnackbar" :timeout="2000" :color="isDark ? '#1e1e1e' : 'white'" location="top"
           rounded="pill" class="mt-4">
           <div class="text-body-1 font-weight-medium d-flex align-center" :class="isDark ? 'text-white' : 'text-black'">
@@ -109,9 +118,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted,watch } from 'vue';
 import { useTheme } from 'vuetify';
 import { faL } from '@fortawesome/free-solid-svg-icons';
+import { useI18n } from 'vue-i18n';
+
+// Gọi biến locale ra để điều khiển ngôn ngữ
 import Sidebar from './components/Sidebar.vue';
 import GamePage from './components/GamePage.vue';
 import InstallModal from './components/InstallModal.vue';
@@ -123,6 +135,7 @@ import RegionBlockModal from './components/RegionBlockModal.vue';
 import WelcomeModal from './components/WelcomeModal.vue';
 import OtpModal from './components/OtpModal.vue'; // Thêm dòng này
 
+const { t, locale } = useI18n();
 // --- BIẾN CHO OTP MODAL ---
 const showOtpModal = ref(false);
 const otpIsLoading = ref(false);     // Thêm dòng này
@@ -163,10 +176,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', eve
   if (userSettings.value.theme === 'system') {
     const newColorScheme = event.matches ? "dark" : "light";
     theme.global.name.value = newColorScheme;
-
-    if (window.chrome?.webview) {
-      window.chrome.webview.postMessage({ type: "THEME_CHANGED", mode: "system" });
-    }
   }
 });
 
@@ -175,20 +184,24 @@ const apps = ref([]);
 //json chứa thông tin phiên bản app
 const isMaintenance = ref(false);
 const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
-// Đổi thành Object (Dùng ngoặc nhọn {} thôi)
 const manifest = ref({
-  FE_version: '26.3.14 (Public Beta)',
-  FE_versioncode: '260314',
+  FE_version: '26.4.1 (Public Beta)',
+  FE_versioncode: '260401',
   BE_version: null,
   BE_versioncode: null,
-  BE_version_latest: '26.3.14',
-  BE_versioncode_latest: '260314',
-  release_date: '2026-03-24',
-  changelog: 'Yêu cầu phiên bản 26.3.13 để sử dụng!\n\nHotfix 26.3.14: Sửa lỗi không nhận địa chỉ email sau khi đăng nhập\n\nỨng dụng giờ đã có thể thức dậy khi ẩn\nSửa lỗi chế độ sáng/tối không thay đổi theo hệ thống\nMới!! Xác minh danh tính đã có sẵn (Chỉ dành có ở một số trình giả lập)\nThử nghiệm MessageBox mới (Sẽ có đầy đủ ở bản vá sau)\nThử nghiệm tính năng ghi nhật ký (dùng để báo cáo lỗi)\n Nút cập nhật danh sách ứng dụng sẽ cooldown (tránh spam)\nSửa lỗi nội dung bị mờ khi scale trên 125%',
+  BE_version_latest: '26.4.1',
+  BE_versioncode_latest: '260401',
+  release_date: '2026-04-01',
+  changelog: t('manifest.changelog_current'),
   isMaintenance: false,
   minRequiredVersionCode: '260313',
   updateUrl: 'https://github.com/ShilukaYT/HieuGLLite.App/releases/latest/download/HieuGLLiteAppsSetup.exe',
   sha256: "c7a812fdad56410aa9c2db1a3b82036b2a9890e3cd5eaba6f45dc0087a8efd61"
+});
+
+watch(locale, () => {
+  manifest.value.changelog = t('manifest.changelog_current');
+  updateData.value.changelog = t('manifest.changelog_current'); // Ép đổi chữ luôn cả cho bảng UpdateModal nếu nó đang bật
 });
 
 const isLoading = ref(true);
@@ -215,6 +228,12 @@ onMounted(async () => {
           }
           manifest.value.BE_version = res.version;
           manifest.value.BE_versioncode = res.versioncode;
+          // BỔ SUNG LOGIC ÉP TIẾNG VIỆT CHO BẢN CŨ
+          if (parseInt(res.versioncode) <= 260314) {
+            console.log("Phát hiện Client cũ, ép sử dụng Tiếng Việt!");
+            userSettings.value.language = 'vi-VN';
+            locale.value = 'vi-VN';
+          }
           break;
 
         case 'APPS_DATA':
@@ -222,7 +241,7 @@ onMounted(async () => {
           if (apps.value.length > 0) {
             selectedApp.value = apps.value[0];
           }
-          snackbarText.value = "Danh sách ứng dụng đã được cập nhật!";
+          snackbarText.value = t('app.messages.apps_updated');
           showSnackbar.value = true;
 
           window.chrome.webview.postMessage({
@@ -290,13 +309,13 @@ onMounted(async () => {
             uninstalledApp.isInstalled = false;
             uninstalledApp.programPath = null;
             delete downloadingApps.value[res.appId];
-            snackbarText.value = `Đã gỡ cài đặt thành công ${uninstalledApp.name}`;
+            snackbarText.value = t('app.messages.uninstall_success', { name: uninstalledApp.name });
             showSnackbar.value = true;
           }
           break;
 
         case 'CLEANUP_COMPLETED':
-          snackbarText.value = res.message || "Đã xóa bộ nhớ đệm thành công!";
+         snackbarText.value = res.message || t('app.messages.cleanup_success');
           showSnackbar.value = true;
           break;
 
@@ -305,6 +324,10 @@ onMounted(async () => {
           userSettings.value.theme = res.theme;
           userSettings.value.minimizeToTray = res.minimizeToTray;
           isWin11.value = res.isWindows11;
+          
+          // THÊM 2 DÒNG NÀY VÀO ĐÂY: Nhận ngôn ngữ và lật từ điển
+          userSettings.value.language = res.language || 'vi-VN';
+          locale.value = userSettings.value.language;
 
           // Áp dụng Theme cho Vuetify
           let targetTheme = res.theme;
@@ -326,7 +349,7 @@ onMounted(async () => {
 
         case 'UPDATE_FAILED':
           updateData.value.isDownloading = false;
-          snackbarText.value = "Tải bản cập nhật thất bại: " + (res.error || "");
+          snackbarText.value = t('app.messages.update_failed', { error: res.error || "" });
           showSnackbar.value = true;
           break;
         case 'USER_LOGGED_IN':
@@ -335,12 +358,12 @@ onMounted(async () => {
         // BẮT SỰ KIỆN GỬI MAIL OTP
         case 'OTP_SENT_SUCCESS':
           otpIsLoading.value = false;
-          snackbarText.value = "Mã OTP đã được gửi tới email của bạn!";
+          snackbarText.value = t('app.messages.otp_sent');
           showSnackbar.value = true;
           break;
         case 'OTP_SENT_FAILED':
           otpIsLoading.value = false;
-          otpErrorMessage.value = "Không thể gửi email: " + (res.error || "Lỗi không xác định");
+          otpErrorMessage.value = t('app.messages.otp_send_failed', { error: res.error || t('app.messages.otp_unknown_error') });
           break;
 
         // BẮT SỰ KIỆN NHẬP MÃ OTP
@@ -348,7 +371,7 @@ onMounted(async () => {
           otpIsLoading.value = false;
           showOtpModal.value = false;
 
-          snackbarText.value = "Xác minh danh tính thành công! Đang bắt đầu cài đặt...";
+          snackbarText.value = t('app.messages.otp_verify_success');
           showSnackbar.value = true;
 
           // Nếu có gói dữ liệu cài đặt đang chờ -> Bung ra cài luôn
@@ -370,6 +393,7 @@ onMounted(async () => {
           otpIsLoading.value = false;
           otpErrorMessage.value = "Mã OTP không chính xác hoặc đã hết hạn!";
           break;
+        
       }
     });
 
@@ -516,7 +540,7 @@ const handleInstall = (selection) => {
 
 
     if (!user.value || !user.value.email) {
-      snackbarText.value = "Bạn cần Đăng nhập Discord để xác minh danh tính khi cài đặt!";
+      snackbarText.value = t('app.messages.require_discord');
       showSnackbar.value = true;
       return;
     }
@@ -647,7 +671,7 @@ const checkForUpdates = (isManual = false) => {
     showUpdateModal.value = true;
   } else if (isManual) {
     // ...
-    snackbarText.value = `Bạn đang sử dụng phiên bản mới nhất (${appInfo.BE_version_latest})!`;
+    snackbarText.value = t('app.messages.latest_version', { version: appInfo.BE_version_latest });
     showSnackbar.value = true;
   }
 };
@@ -712,18 +736,17 @@ const userSettings = ref({
 
 // App.vue
 const downloadingApps = ref({});
-
-const stageConfig = {
-  'WAITING': { text: 'Đang chờ tải xuống...', color: 'amber', loading: true },
-  'DOWNLOADING_EXE': { text: 'Đang tải xuống 1/2...', color: 'blue', loading: false },
-  'DOWNLOADING_ANDROID': { text: 'Đang tải xuống 2/2...', color: 'cyan', loading: false },
-  'MERGING': { text: 'Đang hoàn tất...', color: 'deep-purple', loading: true },
-  'VERIFYING': { text: 'Đang kiểm tra tính toàn vẹn...', color: 'teal', loading: true },
-  'INSTALLING': { text: 'Đang cài đặt...', color: 'orange', loading: true },
-  'CLEANINGUP': { text: 'Đang dọn dẹp...', color: 'grey', loading: true },
-  'BACKUP_RESTORE': { text: 'Đang khởi tạo trình sao lưu và khôi phục...', color: 'indigo', loading: true },
-  'UNINSTALLING': { text: 'Đang gỡ cài đặt...', color: 'red', loading: true },
-};
+const stageConfig = computed(() => ({
+  'WAITING': { text: t('app.stages.waiting'), color: 'amber', loading: true },
+  'DOWNLOADING_EXE': { text: t('app.stages.downloading_exe'), color: 'blue', loading: false },
+  'DOWNLOADING_ANDROID': { text: t('app.stages.downloading_android'), color: 'cyan', loading: false },
+  'MERGING': { text: t('app.stages.merging'), color: 'deep-purple', loading: true },
+  'VERIFYING': { text: t('app.stages.verifying'), color: 'teal', loading: true },
+  'INSTALLING': { text: t('app.stages.installing'), color: 'orange', loading: true },
+  'CLEANINGUP': { text: t('app.stages.cleaning_up'), color: 'grey', loading: true },
+  'BACKUP_RESTORE': { text: t('app.stages.backup_restore'), color: 'indigo', loading: true },
+  'UNINSTALLING': { text: t('app.stages.uninstalling'), color: 'red', loading: true },
+}));
 
 
 const handleGetApps = () => {
@@ -849,7 +872,7 @@ const handleClearCache = () => {
     // Chữa cháy nếu chạy trên trình duyệt web thường để test
     setTimeout(() => {
       isCleaningCache.value = false;
-      snackbarText.value = "Chỉ hoạt động trên App thực tế!";
+      snackbarText.value = t('app.messages.app_only');
       showSnackbar.value = true;
     }, 1000);
   }

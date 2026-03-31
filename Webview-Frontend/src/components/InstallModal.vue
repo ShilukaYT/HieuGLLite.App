@@ -14,7 +14,7 @@
           <v-img :src="app.icon"></v-img>
         </v-avatar>
         <span class="text-h5 font-weight-bold">
-          {{ isMultiInstance ? 'Tạo bản sao' : 'Cài đặt' }} {{ app.name }}
+          {{ isMultiInstance ? $t('install_modal.title_create_clone') : $t('install_modal.title_install') }} {{ app.name }}
         </span>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" size="small" @click="closeModal"></v-btn>
@@ -22,7 +22,7 @@
 
       <v-card-text class="px-6 py-4">
         <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2">
-          {{ isMultiInstance ? 'Chọn hệ điều hành cho bản sao:' : 'Cấu hình phiên bản:' }}
+          {{ isMultiInstance ? $t('install_modal.subtitle_clone') : $t('install_modal.subtitle_install') }}
         </div>
         
         <v-row class="mb-2">
@@ -32,7 +32,7 @@
               :items="app.versions"
               item-title="ver"
               return-object
-              label="Phiên bản"
+              :label="$t('install_modal.label_version')"
               variant="solo-filled"
               :bg-color="isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
               density="comfortable"
@@ -48,7 +48,7 @@
               :items="availableAndroids"
               item-title="displayName"
               return-object
-              label="Hệ điều hành"
+              :label="$t('install_modal.label_os')"
               variant="solo-filled"
               :bg-color="isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'"
               density="comfortable"
@@ -58,14 +58,18 @@
               :item-props="item => ({ disabled: item.isDisabled })"
             >
               <template v-slot:no-data>
-                <div class="pa-3 text-caption text-center text-grey">Tất cả phiên bản đều đã được tích hợp!</div>
+                <div class="pa-3 text-caption text-center text-grey">
+                  {{ $t('install_modal.all_integrated') }}
+                </div>
               </template>
             </v-select>
           </v-col>
         </v-row>
 
         <template v-if="!isMultiInstance">
-          <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2 mt-4">Thư mục lưu trữ:</div>
+          <div class="text-subtitle-1 font-weight-medium text-medium-emphasis mb-2 mt-4">
+            {{ $t('install_modal.storage_folder') }}
+          </div>
           <v-text-field
             v-model="emulatorPath"
             readonly
@@ -77,7 +81,7 @@
           >
             <template v-slot:append-inner>
               <v-btn color="blue" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
-                DUYỆT
+                {{ $t('install_modal.btn_browse') }}
               </v-btn>
             </template>
           </v-text-field>
@@ -86,7 +90,7 @@
 
       <v-card-actions class="px-6 pb-6 pt-0">
         <v-spacer></v-spacer>
-        <v-btn variant="text" class="px-6 font-weight-bold" @click="closeModal">HỦY BỎ</v-btn>
+        <v-btn variant="text" class="px-6 font-weight-bold" @click="closeModal">{{ $t('install_modal.btn_cancel') }}</v-btn>
         <v-btn 
           color="blue" 
           variant="elevated" 
@@ -97,7 +101,7 @@
           @click="confirmInstall"
         >
           <v-icon icon="mdi-monitor-arrow-down-variant" class="mr-2"></v-icon> 
-          {{ isMultiInstance ? 'TÍCH HỢP NGAY' : 'CÀI ĐẶT NGAY' }}
+          {{ isMultiInstance ? $t('install_modal.btn_integrate_now') : $t('install_modal.btn_install_now') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -107,6 +111,9 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n'; // Kéo thư viện dịch thuật vào
+
+const { t } = useI18n(); // Khởi tạo biến t để dùng trong JS
 
 const props = defineProps({
   app: Object,
@@ -135,8 +142,8 @@ const availableAndroids = computed(() => {
 
     return {
       ...a,
-      // Đổi tên hiển thị cho trực quan
-      displayName: isAlreadyInstalled ? `${a.name} (Đã tích hợp)` : a.name,
+      // ĐA NGÔN NGỮ: Dịch chữ (Đã tích hợp)
+      displayName: isAlreadyInstalled ? `${a.name} ${t('install_modal.already_integrated')}` : a.name,
       // Gắn cờ khóa
       isDisabled: isAlreadyInstalled 
     };

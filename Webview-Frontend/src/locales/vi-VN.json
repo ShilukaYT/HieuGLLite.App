@@ -1,0 +1,151 @@
+{
+    "settings": {
+        "title": "Cài đặt hệ thống",
+        "general": "Chung",
+        "update": "Cập nhật",
+        "apps": "Ứng dụng",
+        "about": "Giới thiệu",
+        "theme": "Giao diện",
+        "theme_desc": "Thay đổi giữa giao diện Sáng và Tối",
+        "language": "Ngôn ngữ hiển thị",
+        "language_desc": "Thay đổi ngôn ngữ cho giao diện phần mềm",
+        "display_mode": "Chế độ hiển thị",
+        "light": "Sáng",
+        "dark": "Tối",
+        "system_sync": "Hệ thống",
+        "win11_warning": "* Tính năng tùy chỉnh thủ công chỉ hỗ trợ trên Windows 11. Hệ thống đang tự động đồng bộ màu theo Windows của bạn.",
+        "system": "Hệ thống",
+        "close_behavior": "Hành vi đóng cửa sổ",
+        "close_behavior_desc": "Khi nhấn nút X ở góc phải màn hình",
+        "tray": "Khay hệ thống",
+        "exit": "Thoát hẳn",
+        "language_block": "Ngôn ngữ",
+        "ui_ux_version": "Phiên bản UI/UX:",
+        "client_version": "Phiên bản Client:",
+        "unknown": "Không xác định",
+        "check_update": "Kiểm tra cập nhật",
+        "update_app_list": "Cập nhật danh sách ứng dụng",
+        "update_app_list_desc": "Tải lại dữ liệu ứng dụng sau khi mở rộng quyền truy cập",
+        "try_again_later": "Thử lại sau ({time}s)",
+        "update_now": "Cập nhật ngay",
+        "update_details": "Chi tiết bản cập nhật (Phiên bản: {version})",
+        "no_changelog": "Không có thông tin thay đổi nào được ghi nhận.",
+        "app_management": "Quản lý ứng dụng",
+        "clear_cache": "Dọn dẹp bộ nhớ đệm",
+        "clear_cache_desc": "Giải phóng dữ liệu tạm (Sẽ khởi động chậm hơn vào lần sau)",
+        "btn_clear": "DỌN DẸP",
+        "uninstall": "Gỡ cài đặt",
+        "uninstall_desc": "Xóa toàn bộ ứng dụng và dữ liệu liên quan",
+        "btn_uninstall": "GỠ BỎ",
+        "developed_by": "Ứng dụng được phát triển bởi <strong>Hiếu GL Lite</strong> cùng với chatbot <strong>Gemini</strong>",
+        "based_on": "Dựa trên nền tảng .NET 8, Vue.js và Vuetify 3. Tối ưu hóa trải nghiệm ứng dụng một cách tốt nhất.",
+        "settings_title": "Cài đặt"
+    },
+    "common": {
+        "close": "Đóng",
+        "cancel": "Hủy"
+    },
+    "app": {
+        "messages": {
+            "apps_updated": "Danh sách ứng dụng đã được cập nhật!",
+            "uninstall_success": "Đã gỡ cài đặt thành công {name}",
+            "cleanup_success": "Đã xóa bộ nhớ đệm thành công!",
+            "update_failed": "Tải bản cập nhật thất bại: {error}",
+            "otp_sent": "Mã OTP đã được gửi tới email của bạn!",
+            "otp_send_failed": "Không thể gửi email: {error}",
+            "otp_unknown_error": "Lỗi không xác định",
+            "otp_verify_success": "Xác minh danh tính thành công! Đang bắt đầu cài đặt...",
+            "otp_verify_failed": "Mã OTP không chính xác hoặc đã hết hạn!",
+            "error_unknown_play": "Lỗi: Không xác định được ứng dụng cần mở!",
+            "error_unknown_kill": "Lỗi: Không xác định được ứng dụng cần đóng!",
+            "require_discord": "Bạn cần Đăng nhập Discord để xác minh danh tính khi cài đặt!",
+            "latest_version": "Bạn đang sử dụng phiên bản mới nhất ({version})!",
+            "app_only": "Chỉ hoạt động trên App thực tế!"
+        },
+        "stages": {
+            "waiting": "Đang chờ tải xuống...",
+            "downloading_exe": "Đang tải xuống 1/2...",
+            "downloading_android": "Đang tải xuống 2/2...",
+            "merging": "Đang hoàn tất...",
+            "verifying": "Đang kiểm tra tính toàn vẹn...",
+            "installing": "Đang cài đặt...",
+            "cleaning_up": "Đang dọn dẹp...",
+            "backup_restore": "Đang khởi tạo trình sao lưu và khôi phục...",
+            "uninstalling": "Đang gỡ cài đặt..."
+        }
+    },
+    "install_modal": {
+        "title_create_clone": "Tạo bản sao",
+        "title_install": "Cài đặt",
+        "subtitle_clone": "Chọn hệ điều hành cho bản sao:",
+        "subtitle_install": "Cấu hình phiên bản:",
+        "label_version": "Phiên bản",
+        "label_os": "Hệ điều hành",
+        "all_integrated": "Tất cả phiên bản đều đã được tích hợp!",
+        "storage_folder": "Thư mục lưu trữ:",
+        "btn_browse": "DUYỆT",
+        "btn_cancel": "HỦY BỎ",
+        "btn_integrate_now": "TÍCH HỢP NGAY",
+        "btn_install_now": "CÀI ĐẶT NGAY",
+        "already_integrated": "(Đã tích hợp)"
+    },
+    "otp_modal": {
+        "title": "Xác Minh Bảo Mật",
+        "require_verification": "Ứng dụng này yêu cầu xác minh danh tính.",
+        "otp_sent_to": "Mã OTP gồm 6 chữ số đã được gửi tới email:",
+        "not_received": "Chưa nhận được mã? ",
+        "btn_resend": "GỬI LẠI"
+    },
+    "sidebar": {
+        "connect": "Kết nối",
+        "support_me": "Ủng hộ tôi",
+        "logout": "Đăng xuất",
+        "login_prompt": "Đăng nhập để đồng bộ dữ liệu",
+        "login_discord": "Đăng nhập với Discord"
+    },
+    "update_modal": {
+        "title": "CẬP NHẬT PHẦN MỀM",
+        "new_version_ready": "Phiên bản mới <b>{version}</b> đã sẵn sàng!",
+        "update_prompt": "Để có trải nghiệm tốt nhất, vui lòng cập nhật ứng dụng.",
+        "changelog_title": "Chi tiết thay đổi:",
+        "no_changelog": "Không có thông tin thay đổi nào được ghi nhận.",
+        "download_complete": "Tải hoàn tất!",
+        "downloading_update": "Đang tải bản cập nhật...",
+        "btn_later": "ĐỂ SAU",
+        "btn_update_now": "CẬP NHẬT NGAY",
+        "btn_restart_install": "KHỞI ĐỘNG LẠI & CÀI ĐẶT"
+    },
+    "warning_modal": {
+        "title": "Môi trường không hợp lệ!",
+        "message": "Hệ thống phát hiện bạn đang chạy ứng dụng trong môi trường khác, vui lòng cài đặt ứng dụng để có trải nghiệm tốt nhất.",
+        "btn_ignore": "TÔI LÀ DEV, BỎ QUA CẢNH BÁO"
+    },
+    "welcome_modal": {
+        "title": "CHÀO MỪNG ĐẾN VỚI PUBLIC BETA",
+        "message": "Cảm ơn bạn đã tham gia thử nghiệm <b>Hiếu GL Lite</b> phiên bản Public Beta!<br><br>Trong giai đoạn này, ứng dụng đang được tối ưu hóa và có thể còn một vài thiếu sót nhỏ. Mọi đóng góp của bạn sẽ giúp chúng tôi hoàn thiện sản phẩm tốt hơn.",
+        "btn_start": "BẮT ĐẦU TRẢI NGHIỆM"
+    },
+    "maintenance_modal": {
+        "title": "Hệ thống bảo trì",
+        "message_1": "Máy chủ hiện đang tạm dừng để nâng cấp hệ thống và cải thiện hiệu suất.",
+        "message_2": "Chúng tôi đang nỗ lực làm việc để đưa mọi thứ trở lại sớm nhất. Vui lòng quay lại sau!",
+        "follow_updates": "Theo dõi cập nhật tại"
+    },
+    "game_page": {
+        "read_more": "Xem thêm",
+        "paused": "TẠM DỪNG",
+        "opening": "ĐANG MỞ...",
+        "open_app": "MỞ ỨNG DỤNG",
+        "multi_instance_manager": "Trình quản lý đa phiên bản",
+        "clear_memory": "Dọn dẹp bộ nhớ",
+        "backup": "Sao lưu",
+        "restore": "Khôi phục",
+        "change_version": "Thay đổi phiên bản",
+        "create_new_instance": "Tạo Instance mới",
+        "uninstall": "Gỡ cài đặt",
+        "install_now": "CÀI ĐẶT NGAY"
+    },
+    "manifest": {
+    "changelog_current": "Yêu cầu phiên bản 26.3.13 để sử dụng\n\n- Cập nhật đầy đủ MessageBox cho toàn ứng dụng\n- Cập nhật đầy đủ cho nhật ký hoạt động\n- Thêm ngôn ngữ Tiếng Anh\n- Sửa một số lỗi"
+  }
+}

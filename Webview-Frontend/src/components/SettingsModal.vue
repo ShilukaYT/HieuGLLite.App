@@ -7,8 +7,12 @@
     }">
 
       <v-toolbar color="transparent" flat class="px-4 mt-2">
-        <v-toolbar-title class="text-h5 font-weight-bold"><v-icon icon="mdi-cog-outline"></v-icon> Cài đặt hệ
-          thống</v-toolbar-title>
+        <v-toolbar-title class="text-h5 font-weight-bold">
+          <div class="d-flex align-center">
+            <v-icon icon="mdi-cog-outline" class="mr-2"></v-icon>
+            <span>{{ $t('settings.title') }}</span>
+          </div>
+        </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" @click="closeModal"></v-btn>
       </v-toolbar>
@@ -16,14 +20,18 @@
       <div class="d-flex flex-row h-100" style="min-height: 400px;">
 
         <v-tabs v-model="tab" direction="vertical" color="warning" class="px-2" style="width: 180px;">
-          <v-tab value="general" class="justify-start rounded-lg mb-1"><v-icon start icon="mdi-cog-outline"></v-icon>
-            Chung</v-tab>
-          <v-tab value="update" class="justify-start rounded-lg"><v-icon start icon="mdi-update"></v-icon>Cập
-            nhật</v-tab>
-          <v-tab value="application" class="justify-start round-lg"><v-icon start icon="mdi-application"></v-icon>Ứng
-            dụng</v-tab>
-          <v-tab value="about" class="justify-start rounded-lg"><v-icon start icon="mdi-information-outline"></v-icon>
-            Giới thiệu</v-tab>
+          <v-tab value="general" class="justify-start rounded-lg mb-1">
+            <v-icon start icon="mdi-cog-outline"></v-icon>{{ $t('settings.general') }}
+          </v-tab>
+          <v-tab value="update" class="justify-start rounded-lg">
+            <v-icon start icon="mdi-update"></v-icon>{{ $t('settings.update') }}
+          </v-tab>
+          <v-tab value="application" class="justify-start round-lg">
+            <v-icon start icon="mdi-application"></v-icon>{{ $t('settings.apps') }}
+          </v-tab>
+          <v-tab value="about" class="justify-start rounded-lg">
+            <v-icon start icon="mdi-information-outline"></v-icon>{{ $t('settings.about') }}
+          </v-tab>
         </v-tabs>
 
         <div class="border-end h-100 mx-1" :class="isDark ? 'border-white-50' : 'border-black-25'"></div>
@@ -31,59 +39,83 @@
         <v-window v-model="tab" class="flex-grow-1 pa-6">
           <v-window-item value="general">
 
-            <div class="text-h6 font-weight-bold mb-4"><v-icon icon="mdi-palette-outline"></v-icon> Giao diện</div>
-           <v-list bg-transparent class="pa-0">
-  <v-list-item class="px-0">
-    <v-list-item-title class="text-medium-emphasis">Chế độ hiển thị</v-list-item-title>
-    <v-list-item-subtitle>Thay đổi giữa giao diện Sáng và Tối</v-list-item-subtitle>
-    
-    <template v-slot:append>
-      <v-btn-toggle 
-        v-model="themePreference" 
-        mandatory 
-        color="warning" 
-        variant="tonal" 
-        rounded="pill"
-        :disabled="!isWin11"
-        @update:model-value="applyThemePreference"
-      >
-        <v-btn value="light" size="small">
-          <v-icon icon="mdi-white-balance-sunny" class="mr-1"></v-icon> Sáng
-        </v-btn>
-        <v-btn value="dark" size="small">
-          <v-icon icon="mdi-moon-waning-crescent" class="mr-1"></v-icon> Tối
-        </v-btn>
-        <v-btn value="system" size="small">
-          <v-icon icon="mdi-monitor" class="mr-1"></v-icon> Hệ thống
-        </v-btn>
-      </v-btn-toggle>
-    </template>
-  </v-list-item>
+            <div class="d-flex align-center text-h6 font-weight-bold mb-4">
+              <v-icon icon="mdi-palette-outline" class="mr-2"></v-icon> {{ $t('settings.theme') }}
+            </div>
+            <v-list bg-transparent class="pa-0">
+              <v-list-item class="px-0">
+                <v-list-item-title class="text-medium-emphasis">{{ $t('settings.display_mode') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('settings.theme_desc') }}</v-list-item-subtitle>
 
-  <v-expand-transition>
-    <div v-if="!isWin11" class="text-caption text-error mt-2 px-0 font-italic">
-      * Tính năng tùy chỉnh thủ công chỉ hỗ trợ trên Windows 11. Hệ thống đang tự động đồng bộ màu theo Windows của bạn.
-    </div>
-  </v-expand-transition>
-</v-list>
+                <template v-slot:append>
+                  <v-btn-toggle v-model="themePreference" mandatory color="warning" variant="tonal" rounded="pill"
+                    :disabled="!isWin11" @update:model-value="applyThemePreference">
+                    <v-btn value="light" size="small">
+                      <v-icon icon="mdi-white-balance-sunny" class="mr-1"></v-icon> {{ $t('settings.light') }}
+                    </v-btn>
+                    <v-btn value="dark" size="small">
+                      <v-icon icon="mdi-moon-waning-crescent" class="mr-1"></v-icon> {{ $t('settings.dark') }}
+                    </v-btn>
+                    <v-btn value="system" size="small">
+                      <v-icon icon="mdi-monitor" class="mr-1"></v-icon> {{ $t('settings.system_sync') }}
+                    </v-btn>
+                  </v-btn-toggle>
+                </template>
+              </v-list-item>
+
+              <v-expand-transition>
+                <div v-if="!isWin11" class="text-caption text-error mt-2 px-0 font-italic">
+                  {{ $t('settings.win11_warning') }}
+                </div>
+              </v-expand-transition>
+            </v-list>
 
             <v-divider class="my-6 border-opacity-25"></v-divider>
 
-            <div class="text-h6 font-weight-bold mb-4"><v-icon icon="mdi-window-close"></v-icon> Hệ thống</div>
+            <div class="d-flex align-center text-h6 font-weight-bold mb-4">
+              <v-icon icon="mdi-window-close" class="mr-2"></v-icon> {{ $t('settings.system') }}
+            </div>
             <v-list bg-transparent class="pa-0">
               <v-list-item class="px-0">
-                <v-list-item-title class="text-medium-emphasis">Hành vi đóng cửa sổ</v-list-item-title>
-                <v-list-item-subtitle>Khi nhấn nút X ở góc phải màn hình</v-list-item-subtitle>
+                <v-list-item-title class="text-medium-emphasis">{{ $t('settings.close_behavior') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ $t('settings.close_behavior_desc') }}</v-list-item-subtitle>
                 <template v-slot:append>
                   <v-btn-toggle v-model="closeBehavior" mandatory color="primary" variant="tonal" rounded="pill"
                     @update:model-value="applyCloseBehavior">
-                    <v-btn value="tray" size="small"><v-icon icon="mdi-tray-arrow-down" class="mr-1"></v-icon> Khay hệ
-                      thống</v-btn>
-                    <v-btn value="exit" size="small"><v-icon icon="mdi-power" class="mr-1"></v-icon> Thoát hẳn</v-btn>
+                    <v-btn value="tray" size="small"><v-icon icon="mdi-tray-arrow-down" class="mr-1"></v-icon> {{
+                      $t('settings.tray') }}</v-btn>
+                    <v-btn value="exit" size="small"><v-icon icon="mdi-power" class="mr-1"></v-icon> {{
+                      $t('settings.exit') }}</v-btn>
                   </v-btn-toggle>
                 </template>
               </v-list-item>
             </v-list>
+            <template v-if="!isUnsupportedLanguage">
+              <v-divider class="my-6 border-opacity-25"></v-divider>
+
+              <div class="d-flex align-center text-h6 font-weight-bold mb-4">
+                <v-icon icon="mdi-earth" class="mr-2"></v-icon> {{ $t('settings.language_block') }}
+              </div> 
+              <v-list bg-transparent class="pa-0">
+                <v-list-item class="px-0">
+                  <v-list-item-title class="text-medium-emphasis">{{ $t('settings.language') }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ $t('settings.language_desc') }}</v-list-item-subtitle>
+
+                  <template v-slot:append>
+                    <div style="width: 160px;">
+                      <v-select v-model="languagePreference" :items="[
+                        { title: 'Tiếng Việt', value: 'vi-VN' },
+                        { title: 'English', value: 'en-US' }
+                      ]" item-title="title" item-value="value" variant="solo-filled" flat rounded="pill"
+                        density="compact" hide-details color="primary" class="text-center" bg-color="#2a2a2a"
+                        menu-props="{ rounded: 'xl', elevation: 4 }" @update:model-value="applyLanguagePreference">
+                      </v-select>
+                    </div>
+                  </template>
+
+                </v-list-item>
+              </v-list>
+            </template>
 
           </v-window-item>
 
@@ -92,51 +124,43 @@
               <div class="d-flex align-center justify-space-between mb-6 px-2">
                 <div>
                   <div class="text-subtitle-2 text-grey mb-1">
-                    Phiên bản UI/UX: <span class="font-weight-bold ml-1"
-                      :class="isDark ? 'text-white' : 'text-black'">{{
-                        props.app?.FE_version }}</span>
+                    {{ $t('settings.ui_ux_version') }} <span class="font-weight-bold ml-1"
+                      :class="isDark ? 'text-white' : 'text-black'">{{ props.app?.FE_version }}</span>
                   </div>
                   <div class="text-subtitle-2 text-grey">
-                    Phiên bản Client: <span class="font-weight-bold ml-1"
-                      :class="isDark ? 'text-white' : 'text-black'">{{
-                        props.app?.BE_version || 'Không xác định' }}</span>
+                    {{ $t('settings.client_version') }} <span class="font-weight-bold ml-1"
+                      :class="isDark ? 'text-white' : 'text-black'">{{ props.app?.BE_version || $t('settings.unknown')
+                      }}</span>
                   </div>
                 </div>
                 <v-btn color="primary" variant="tonal" class="rounded-lg update-btn px-5" height="48"
                   @click="$emit('check-update')">
-                  <v-icon start icon="mdi-refresh" size="24" class="update-icon"></v-icon>Kiểm tra cập nhật
+                  <v-icon start icon="mdi-refresh" size="24" class="update-icon"></v-icon>{{ $t('settings.check_update')
+                  }}
                 </v-btn>
               </div>
               <v-divider class="mb-5 opacity-20"></v-divider>
               <div class="d-flex align-center justify-space-between mb-6">
                 <div>
-                  <div class="text-subtitle-1 font-weight-bold mb-0">Cập nhật danh sách ứng dụng</div>
-                  <div class="text-caption text-medium-emphasis">Tải lại dữ liệu ứng dụng sau khi mở rộng quyền truy cập
-                  </div>
+                  <div class="text-subtitle-1 font-weight-bold mb-0">{{ $t('settings.update_app_list') }}</div>
+                  <div class="text-caption text-medium-emphasis">{{ $t('settings.update_app_list_desc') }}</div>
                 </div>
-                <v-btn 
-                  color="primary" 
-                  variant="tonal" 
-                  class="rounded-lg px-5" 
-                  :class="{ 'update-btn': !isCooldown }"
-                  height="48" 
-                  :disabled="isCooldown"
-                  @click="handleGetApps"
-                >
+                <v-btn color="primary" variant="tonal" class="rounded-lg px-5" :class="{ 'update-btn': !isCooldown }"
+                  height="48" :disabled="isCooldown" @click="handleGetApps">
                   <v-icon start icon="mdi-refresh" size="24" :class="{ 'update-icon': !isCooldown }"></v-icon>
-                  {{ isCooldown ? `Thử lại sau (${cooldownTime}s)` : 'Cập nhật ngay' }}
+                  {{ isCooldown ? $t('settings.try_again_later', { time: cooldownTime }) : $t('settings.update_now') }}
                 </v-btn>
               </div>
               <v-divider class="mb-5 opacity-20"></v-divider>
               <div class="px-2 mb-4">
                 <div class="text-body-1 font-weight-bold mb-3 d-flex align-center">
                   <v-icon icon="mdi-text-box-outline" start color="primary" size="small"></v-icon>
-                  Chi tiết bản cập nhật (Phiên bản: {{ props.app?.FE_version }})
+                  {{ $t('settings.update_details', { version: props.app?.BE_version_latest }) }}
                 </div>
                 <v-card variant="flat" :color="isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'"
                   :class="isDark ? 'pa-4 rounded-lg text-body-2 text-grey-lighten-1' : 'pa-4 rounded-lg text-body-2 text-grey-darken-2'"
                   style="white-space: pre-line; max-height: 220px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05);">
-                  {{ props.app?.changelog || 'Không có thông tin thay đổi nào được ghi nhận.' }}
+                  {{ props.app?.changelog || $t('settings.no_changelog') }}
                 </v-card>
               </div>
             </div>
@@ -146,19 +170,17 @@
             <div class="mt-4 px-2">
               <div class="px-2 pb-4">
                 <div class="text-h6 font-weight-bold mb-4"><v-icon icon="mdi-wrench-outline" start color="primary"
-                    size="small"></v-icon> Quản lý ứng dụng</div>
+                    size="small"></v-icon> {{ $t('settings.app_management') }}</div>
                 <v-row>
                   <v-col cols="12" class="py-2">
                     <div
                       class="d-flex align-center justify-space-between bg-surface-variant-light pa-3 rounded-lg border">
                       <div>
-                        <div class="text-body-2 font-weight-bold">Dọn dẹp bộ nhớ đệm</div>
-                        <div class="text-caption text-medium-emphasis">Giải phóng dữ liệu tạm (Sẽ khởi động chậm hơn vào
-                          lần sau)
-                        </div>
+                        <div class="text-body-2 font-weight-bold">{{ $t('settings.clear_cache') }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ $t('settings.clear_cache_desc') }}</div>
                       </div>
                       <v-btn color="success" variant="tonal" class="rounded-lg px-4" @click="$emit('clear-cache')">
-                        <v-icon start icon="mdi-broom" size="18"></v-icon>DỌN DẸP
+                        <v-icon start icon="mdi-broom" size="18"></v-icon>{{ $t('settings.btn_clear') }}
                       </v-btn>
                     </div>
                   </v-col>
@@ -166,11 +188,11 @@
                     <div
                       class="d-flex align-center justify-space-between bg-surface-variant-light pa-3 rounded-lg border">
                       <div>
-                        <div class="text-body-2 font-weight-bold text-error">Gỡ cài đặt</div>
-                        <div class="text-caption text-medium-emphasis">Xóa toàn bộ ứng dụng và dữ liệu liên quan</div>
+                        <div class="text-body-2 font-weight-bold text-error">{{ $t('settings.uninstall') }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ $t('settings.uninstall_desc') }}</div>
                       </div>
                       <v-btn color="error" variant="tonal" class="rounded-lg px-4" @click="$emit('uninstall')">
-                        <v-icon start icon="mdi-delete-outline" size="18"></v-icon>GỠ BỎ
+                        <v-icon start icon="mdi-delete-outline" size="18"></v-icon>{{ $t('settings.btn_uninstall') }}
                       </v-btn>
                     </div>
                   </v-col>
@@ -186,13 +208,8 @@
               </v-avatar>
               <div class="text-h4 font-weight-black mb-2">Hieu GL Lite</div>
               <v-card variant="tonal" :color="isDark ? 'grey' : 'primary'" class="mt-8 pa-4 rounded-lg text-left">
-                <div class="text-body-2 mb-1">Ứng dụng được phát triển bởi <strong>Hiếu GL Lite</strong> cùng với
-                  chatbot
-                  <strong>Gemini</strong>
-                </div>
-                <div class="text-body-2 text-medium-emphasis">Dựa trên nền tảng .NET 8, Vue.js và Vuetify 3. Tối ưu hóa
-                  trải
-                  nghiệm ứng dụng một cách tốt nhất.</div>
+                <div class="text-body-2 mb-1" v-html="$t('settings.developed_by')"></div>
+                <div class="text-body-2 text-medium-emphasis">{{ $t('settings.based_on') }}</div>
               </v-card>
             </div>
           </v-window-item>
@@ -206,10 +223,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
+import { useI18n } from 'vue-i18n'; // Khai báo thư viện dịch thuật
 
-// Nhận biến 'settings' từ App.vue gửi sang
+const { t } = useI18n(); // Gọi biến t để xài trong JS
+
 const props = defineProps(['app', 'settings', 'isWin11']);
-const emit = defineEmits(['close', 'check-update', 'get-apps', 'clear-cache', 'uninstall']);
+const emit = defineEmits(['close', 'check-update', 'get-apps', 'clear-cache', 'uninstall', 'update-theme', 'update-language']);
 const theme = useTheme();
 
 const isDark = computed(() => theme.global.current.value.dark);
@@ -225,22 +244,27 @@ const GetClientVersion = () => {
 onMounted(() => {
   GetClientVersion();
   if (window.chrome?.webview) {
-    window.chrome.webview.postMessage({ type: "CHANGE_TITLE", title: "Cài đặt" });
+    // Dùng biến t() để dịch chữ Cài đặt báo lên cho thanh tiêu đề C#
+    window.chrome.webview.postMessage({ type: "CHANGE_TITLE", title: t('settings.settings_title') });
   }
+});
+const isUnsupportedLanguage = computed(() => {
+  return parseInt(props.app?.BE_versioncode || '0') <= 260314;
 });
 
 const closeModal = () => {
   isOpen.value = false;
-  clearInterval(cooldownTimer); // <--- THÊM DÒNG NÀY ĐỂ HỦY ĐỒNG HỒ
-  
+  clearInterval(cooldownTimer);
+
   setTimeout(() => emit('close'), 300);
   if (window.chrome?.webview) {
     window.chrome.webview.postMessage({ type: "CHANGE_TITLE" })
   }
 };
-// ĐÃ KHAI TỬ LOCALSTORAGE - LẤY DATA JSON TỪ PROPS
+
 const themePreference = ref(props.settings?.theme || 'system');
 const closeBehavior = ref(props.settings?.minimizeToTray ? 'tray' : 'exit');
+const languagePreference = ref(props.settings?.language || 'vi-VN');
 
 const applyThemePreference = (val) => {
   let targetTheme = val;
@@ -252,6 +276,7 @@ const applyThemePreference = (val) => {
   if (window.chrome?.webview) {
     window.chrome.webview.postMessage({ type: "THEME_CHANGED", mode: val });
   }
+  emit('update-theme', val);
 };
 
 const applyCloseBehavior = (val) => {
@@ -263,26 +288,28 @@ const applyCloseBehavior = (val) => {
   }
 };
 
+const applyLanguagePreference = (val) => {
+  if (window.chrome?.webview) {
+    window.chrome.webview.postMessage({ type: "CHANGE_LANGUAGE", lang: val });
+  }
+  emit('update-language', val);
+};
+
 // --- BIẾN CHO TÍNH NĂNG COOLDOWN ---
-const isCooldown = ref(false); // Trạng thái có đang bị khóa hay không
-const cooldownTime = ref(0);   // Số giây đếm ngược
-let cooldownTimer = null;      // Bộ đếm thời gian
+const isCooldown = ref(false);
+const cooldownTime = ref(0);
+let cooldownTimer = null;
 
 const handleGetApps = () => {
-  if (isCooldown.value) return; // Chặn mọi click nếu đang khóa
+  if (isCooldown.value) return;
 
-  // 1. Phát sự kiện cập nhật lên C#
   emit('get-apps');
 
-  // 2. Bắt đầu khóa nút và đặt thời gian chờ (Ví dụ: 15 giây)
   isCooldown.value = true;
   cooldownTime.value = 15;
 
-  // 3. Cho đồng hồ chạy lùi mỗi giây
   cooldownTimer = setInterval(() => {
     cooldownTime.value--;
-    
-    // Khi đếm về 0 thì mở khóa nút và dọn dẹp đồng hồ
     if (cooldownTime.value <= 0) {
       clearInterval(cooldownTimer);
       isCooldown.value = false;
