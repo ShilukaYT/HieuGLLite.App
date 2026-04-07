@@ -1,5 +1,6 @@
 {
     "settings": {
+        "AppName": "Hiếu GL Lite",
         "title": "Cài đặt hệ thống",
         "general": "Chung",
         "update": "Cập nhật",
@@ -23,13 +24,14 @@
         "ui_ux_version": "Phiên bản UI/UX:",
         "client_version": "Phiên bản Client:",
         "unknown": "Không xác định",
-        "check_update": "Kiểm tra cập nhật",
+        "check_update": "Cập nhật ngay",
         "update_app_list": "Cập nhật danh sách ứng dụng",
         "update_app_list_desc": "Tải lại dữ liệu ứng dụng sau khi mở rộng quyền truy cập",
         "try_again_later": "Thử lại sau ({time}s)",
         "update_now": "Cập nhật ngay",
         "update_details": "Chi tiết bản cập nhật (Phiên bản: {version})",
         "no_changelog": "Không có thông tin thay đổi nào được ghi nhận.",
+        "latest_version": "Đã là bản mới nhất",
         "app_management": "Quản lý ứng dụng",
         "clear_cache": "Dọn dẹp bộ nhớ đệm",
         "clear_cache_desc": "Giải phóng dữ liệu tạm (Sẽ khởi động chậm hơn vào lần sau)",
@@ -71,7 +73,8 @@
             "installing": "Đang cài đặt...",
             "cleaning_up": "Đang dọn dẹp...",
             "backup_restore": "Đang khởi tạo trình sao lưu và khôi phục...",
-            "uninstalling": "Đang gỡ cài đặt..."
+            "uninstalling": "Đang gỡ cài đặt...",
+            "pause": "Đã tạm dừng"
         }
     },
     "install_modal": {
@@ -86,7 +89,7 @@
         "btn_browse": "DUYỆT",
         "btn_cancel": "HỦY BỎ",
         "btn_integrate_now": "TÍCH HỢP NGAY",
-        "btn_install_now": "CÀI ĐẶT NGAY",
+        "btn_install_now": "CÀI ĐẶT",
         "already_integrated": "(Đã tích hợp)"
     },
     "otp_modal": {
@@ -134,10 +137,10 @@
     "game_page": {
         "read_more": "Xem thêm",
         "paused": "TẠM DỪNG",
-        "opening": "ĐANG MỞ...",
-        "open_app": "MỞ ỨNG DỤNG",
+        "opening": "ĐANG CHẠY...",
+        "open_app": "CHƠI",
         "multi_instance_manager": "Trình quản lý đa phiên bản",
-        "clear_memory": "Dọn dẹp bộ nhớ",
+        "clear_memory": "Giải phóng dung lượng",
         "backup": "Sao lưu",
         "restore": "Khôi phục",
         "change_version": "Thay đổi phiên bản",
@@ -146,6 +149,6 @@
         "install_now": "CÀI ĐẶT NGAY"
     },
     "manifest": {
-    "changelog_current": "Yêu cầu phiên bản 26.3.13 để sử dụng\n\n- Cập nhật đầy đủ MessageBox cho toàn ứng dụng\n- Cập nhật đầy đủ cho nhật ký hoạt động\n- Thêm ngôn ngữ Tiếng Anh\n- Sửa một số lỗi"
+    "changelog_current": "Yêu cầu phiên bản 26.3.13 để sử dụng\n\nCập nhật 26.4.2: Bổ sung thêm phiên bản 5.20.0 (Android 7), 5.21.120 (Android 7) và 5.21.660 (Android 7, Android 9) cho BlueStacks 5\n- Ứng dụng hiện đã mở rộng phạm vi thử nghiệm toàn cầu.\n- Cập nhật đầy đủ MessageBox cho toàn ứng dụng\n- Cập nhật đầy đủ cho nhật ký hoạt động\n- Thêm ngôn ngữ Tiếng Anh\n- Sửa một số lỗi"
   }
 }

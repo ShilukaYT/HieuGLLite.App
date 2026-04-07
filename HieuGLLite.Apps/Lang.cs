@@ -1,5 +1,6 @@
 using System;
 using System.Resources;
+using System.Security;
 
 namespace HieuGLLite.Apps
 {
@@ -81,7 +82,18 @@ namespace HieuGLLite.Apps
     public static string ToastUninstallMessage => Get("ToastUninstallMessage", "{0} has been uninstalled");
     public static string ToastUninstallTitle => Get("ToastUninstallTitle", "Uninstallation complete");
 
+		public static string EmailOtpSubject => Get("EmailOtpSubject", "[Hieu GL Lite's App - No Reply] Identity Verification Code (OTP)");
 
+        public static string EmailOtpBody => Get("EmailOtpBody", "<div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>\r\n<h2 style='color: #EA4335;'>Security Verification</h2>\r\n<p>You have requested to install an application that requires identity verification.</p>\r\n<p>Your OTP code is: <b style='font-size: 24px; color: #1a73e8; letter-spacing: 2px;'>{0}</b></p>\r\n<p><i>This code will expire shortly. Please do not share this code with anyone!</i></p>\r\n</div>");
+        
+        public static string MsgErrSpaceSameDrive => Get("MsgErrSpaceSameDrive", "Drive {0} does not have enough space. Minimum {1:F2}GB required (includes {2:F2}GB for installation + 5.0GB cache), but only {3:F2}GB is available.");
+        public static string MsgErrSpaceInstallDrive => Get("MsgErrSpaceInstallDrive", "Installation drive {0} does not have enough space. {1:F2}GB required, but only {2:F2}GB is available.");
+        public static string MsgErrSpaceTempDrive => Get("MsgErrSpaceTempDrive", "System drive {0} does not have enough space for cache. Minimum 5.00GB required, but only {1:F2}GB is available.");
+        public static string DialogSelectFolder => Get("MsgSelectFolder", "Please select a folder");
+
+        public static string AnotherEmulator => Get("AnotherEmulator", "another emulator version (with the same system core)");
+
+        public static string MsgConfirmLogout => Get("MsgConfirmLogout", "Do you want to log out of your account?\r\n\r\nThe list of apps will be refreshed!");
 
 
 		// Fallback accessor

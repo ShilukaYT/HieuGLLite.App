@@ -304,4 +304,34 @@ Your game progress might not be saved!</value>
   <data name="ToastUninstallTitle" xml:space="preserve">
     <value>Uninstallation complete</value>
   </data>
+  <data name="EmailOtpSubject" xml:space="preserve">
+    <value>[Hieu GL Lite's App - No Reply] Identity Verification Code (OTP)</value>
+  </data>
+  <data name="EmailOtpBody" xml:space="preserve">
+    <value>&lt;div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'&gt;
+&lt;h2 style='color: #EA4335;'&gt;Security Verification&lt;/h2&gt;
+&lt;p&gt;You have requested to install an application that requires identity verification.&lt;/p&gt;
+&lt;p&gt;Your OTP code is: &lt;b style='font-size: 24px; color: #1a73e8; letter-spacing: 2px;'&gt;{0}&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;This code will expire shortly. Please do not share this code with anyone!&lt;/i&gt;&lt;/p&gt;
+&lt;/div&gt;</value>
+  </data>
+  <data name="MsgErrSpaceSameDrive" xml:space="preserve">
+    <value>Drive {0} does not have enough space. Minimum {1:F2}GB required (includes {2:F2}GB for installation + 5.0GB cache), but only {3:F2}GB is available.</value>
+  </data>
+  <data name="MsgErrSpaceInstallDrive" xml:space="preserve">
+    <value>Installation drive {0} does not have enough space. {1:F2}GB required, but only {2:F2}GB is available.</value>
+  </data>
+  <data name="MsgErrSpaceTempDrive" xml:space="preserve">
+    <value>System drive {0} does not have enough space for cache. Minimum 5.00GB required, but only {1:F2}GB is available.</value>
+  </data>
+  <data name="DialogSelectFolder" xml:space="preserve">
+    <value>Select folder to install app!</value>
+  </data>
+  <data name="AnotherEmulator" xml:space="preserve">
+    <value>another emulator version (with the same system core)</value>
+  </data>
+  <data name="MsgConfirmLogout" xml:space="preserve">
+    <value>Do you want to sign out of your account?
+The list of apps will be refreshed!</value>
+  </data>
 </root>

@@ -5,16 +5,17 @@
     <div class="d-flex flex-column h-100 py-4">
 
       <div class="d-flex justify-center mb-6">
-        <v-menu location="right center" transition="slide-x-transition">
+        <v-menu location="right center" transition="slide-x-transition" open-on-hover :close-delay="500">
           <template v-slot:activator="{ props }">
-            <v-avatar size="60" variant="tonal" v-bind="props" class="cursor-pointer logo-btn"
+            <v-avatar size="60" variant="" v-bind="props" class="cursor-pointer logo-btn"
               style="transition: transform 0.3s ease;">
               <img src="../assets/images/logo.png" style="width: 100%; height: 100%; object-fit: contain;">
             </v-avatar>
           </template>
 
           <v-list :bg-color="isDark ? '#1e1e1e' : 'white'" class="rounded-xl ml-4 pa-2" elevation="12" min-width="180">
-            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.connect') }}</v-list-subheader>
+            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.connect')
+            }}</v-list-subheader>
 
             <v-list-item @click="openExternal('https://facebook.com/hieushiluka')" rounded="lg" class="mb-1">
               <template v-slot:prepend>
@@ -57,7 +58,8 @@
 
             <v-divider class="my-2"></v-divider>
 
-            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.support_me') }}</v-list-subheader>
+            <v-list-subheader class="text-uppercase font-weight-bold text-caption">{{ $t('sidebar.support_me')
+            }}</v-list-subheader>
 
             <v-list-item @click="openPopup('https://img.vietqr.io/image/MB-0967420947-compact.jpg', 540, 540)"
               rounded="lg" base-color="warning">
@@ -84,22 +86,127 @@
 
       <v-list density="compact" class="flex-grow-1 bg-transparent px-2 overflow-y-auto hide-scrollbar" nav>
         <v-list-item v-for="app in apps" :key="app.id" :value="app.id" class="mb-3 rounded-xl py-2 custom-list-item"
-          @click="$emit('change-app', app)" :active="activeId === app.id">
-          <template v-slot:default>
-            <div class="d-flex justify-center w-100 position-relative" style="overflow: visible !important;">
+          @click="$emit('change-app', app)" @contextmenu.prevent="onContextMenu(app)" :active="activeId === app.id">
 
+          <template v-slot:default>
+
+            <div :id="'context-anchor-' + app.id"
+              style="position: absolute; right: 0; top: 50%; width: 1px; height: 1px; pointer-events: none;"></div>
+
+            <div class="d-flex justify-center w-100 position-relative" style="overflow: visible !important;">
               <div class="position-relative" style="overflow: visible !important;">
                 <v-avatar size="52" class="pa-1 elevation-2" rounded="lg">
                   <v-img :src="app.icon"></v-img>
                 </v-avatar>
-
                 <img v-if="app.badge" :src="app.badge" class="app-badge-icon" />
               </div>
-
             </div>
+
           </template>
         </v-list-item>
       </v-list>
+
+      <v-menu v-model="showContextMenu"
+        :activator="selectedContextApp ? '#context-anchor-' + selectedContextApp.id : null" location="right center"
+        transition="slide-x-transition">
+
+        <v-list :bg-color="isDark ? '#1a1a1a' : 'white'" class="rounded-xl ml-4 pa-2 menu-context-box" elevation="12"
+          min-width="170">
+          <template v-if="selectedContextApp">
+            <div class="d-flex align-center px-4 pt-2 pb-3 mb-3" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                
+                <div class="position-relative mr-3" style="overflow: visible !important;">
+                  <v-avatar size="44" class="pa-1 elevation-2" rounded="lg">
+                    <v-img :src="selectedContextApp.icon"></v-img>
+                  </v-avatar>
+                  
+                  <img v-if="selectedContextApp.badge" :src="selectedContextApp.badge" class="app-badge-icon" style="width: 20px; height: 20px; bottom: -4px; right: -4px;" />
+                </div>
+
+                <div class="d-flex flex-column">
+                  <span class="font-weight-black text-subtitle-2 text-uppercase" style="letter-spacing: 0.5px; line-height: 1.2;">{{ selectedContextApp.name }}</span>
+                  </div>
+              </div>
+
+            <v-list-item v-if="!selectedContextApp.isInstalled" @click="handleContextInstall"
+              :disabled="isAnyAppDownloading" class="custom-context-item rounded-lg mb-1" ripple="false">
+              <div class="d-flex align-center justify-start w-100 pa-1">
+                <v-icon :icon="isThisAppDownloading ? 'mdi-loading mdi-spin' : 'mdi-download'" color="info" size="24"
+                  class="mr-4"></v-icon>
+
+                <span class="font-weight-bold text-body-2 text-uppercase" style="letter-spacing: 0.5px;">
+                  {{ isThisAppDownloading ? ($t('app.stages.installing') || 'ĐANG CÀI ĐẶT') :
+                    ($t('game_page.install_now') || 'CÀI ĐẶT') }}
+                </span>
+              </div>
+            </v-list-item>
+
+            <template v-else>
+
+              
+
+              <v-list-item @click="handleContextPlay" class="custom-context-item rounded-lg mb-2" ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-play" color="success" size="28" class="mr-3" style="margin-left: -2px;"></v-icon>
+                  <span class="font-weight-black text-body-2 text-uppercase" style="letter-spacing: 0.5px;">{{
+                    $t('game_page.open_app') || 'CHƠI' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-divider class="my-1 border-opacity-25"></v-divider>
+
+              <v-list-item @click="handleExtra('OPEN_MULTI')" class="custom-context-item rounded-lg mb-1"
+                ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-layers-triple" size="20" class="mr-4 text-medium-emphasis"></v-icon>
+                  <span class="font-weight-bold text-body-2">{{ $t('game_page.multi_instance_manager') || 'Trình quản lý đa phiên bản' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item @click="handleExtra('CLEANUP')" class="custom-context-item rounded-lg mb-1" ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-broom" size="20" class="mr-4 text-medium-emphasis"></v-icon>
+                  <span class="font-weight-bold text-body-2">{{ $t('game_page.clear_memory') || 'Giải phóng dung lượng'
+                    }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item @click="handleExtra('BACKUP')" class="custom-context-item rounded-lg mb-1" ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-cloud-upload" size="20" class="mr-4 text-medium-emphasis"></v-icon>
+                  <span class="font-weight-bold text-body-2">{{ $t('game_page.backup') || 'Sao lưu' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item @click="handleExtra('RESTORE')" class="custom-context-item rounded-lg mb-1" ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-cloud-download" size="20" class="mr-4 text-medium-emphasis"></v-icon>
+                  <span class="font-weight-bold text-body-2">{{ $t('game_page.restore') || 'Khôi phục' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-divider class="my-1 border-opacity-25"></v-divider>
+
+              <v-list-item @click="handleExtra('CHANGE_VERSION')" class="custom-context-item rounded-lg mb-1"
+                ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-source-branch" color="info" size="20" class="mr-4"></v-icon>
+                  <span class="font-weight-bold text-body-2 text-info">{{ $t('game_page.change_version') || 'Thay đổi phiên bản' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item @click="handleExtra('UNINSTALL')" class="custom-context-item-error rounded-lg"
+                ripple="false">
+                <div class="d-flex align-center justify-start w-100 pa-1">
+                  <v-icon icon="mdi-trash-can-outline" color="#ff5252" size="20" class="mr-4"></v-icon>
+                  <span class="font-weight-bold text-body-2" style="color: #ff5252;">{{ $t('game_page.uninstall') || 'Gỡ cài đặt' }}</span>
+                </div>
+              </v-list-item>
+            </template>
+
+          </template>
+        </v-list>
+      </v-menu>
 
       <div class="d-flex flex-column align-center mt-auto">
         <v-btn icon="mdi-cog" variant="text" :color="isDark ? 'grey-lighten-1' : 'grey-darken-1'" size="large"
@@ -107,7 +214,8 @@
 
         <div class="d-flex flex-column align-center mt-auto pb-4">
 
-          <v-menu location="right bottom" transition="slide-x-transition" :close-on-content-click="false">
+          <v-menu location="right bottom" transition="slide-x-transition" open-on-hover :close-delay="500"
+            :close-on-content-click="false">
 
             <template v-slot:activator="{ props }">
 
@@ -192,8 +300,8 @@
 </template>
 
 <script setup>
-const props = defineProps(['apps', 'activeId', 'user']);
-const emit = defineEmits(['change-app', 'open-settings', 'logout']);
+const props = defineProps(['apps', 'activeId', 'user', 'downloadingApps']);
+const emit = defineEmits(['change-app', 'open-settings', 'open-install', 'extra-action']);
 import { ref, computed, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 import { Icon } from '@iconify/vue';
@@ -268,10 +376,60 @@ const handleLogin = () => {
 };
 
 const handleLogout = () => {
-  emit('logout'); 
   if (window.chrome?.webview) {
     window.chrome.webview.postMessage({ type: "LOGOUT_DISCORD" });
   }
+};
+
+// ==========================================
+// LOGIC CHO MENU CHUỘT PHẢI (ĐÃ TỐI ƯU)
+// ==========================================
+const showContextMenu = ref(false);
+const selectedContextApp = ref(null);
+
+const onContextMenu = (app) => {
+  showContextMenu.value = false;
+  selectedContextApp.value = app;
+
+  setTimeout(() => {
+    showContextMenu.value = true;
+  }, 50);
+};
+
+const handleContextInstall = () => {
+  emit('change-app', selectedContextApp.value);
+  setTimeout(() => { emit('open-install'); }, 100);
+};
+
+const handleContextPlay = () => {
+  if (window.chrome?.webview) window.chrome.webview.postMessage({ type: "PLAY", appId: selectedContextApp.value.id });
+};
+
+const handleContextUninstall = () => {
+  if (window.chrome?.webview) window.chrome.webview.postMessage({ type: "UNINSTALL", appId: selectedContextApp.value.id });
+};
+
+// 1. Kiểm tra xem CÓ BẤT KỲ app nào đang tải không (Khóa tổng thể)
+const isAnyAppDownloading = computed(() => {
+  return props.downloadingApps && Object.keys(props.downloadingApps).length > 0;
+});
+
+// 2. Kiểm tra xem app ĐANG CLICK CHUỘT PHẢI có phải là app đang tải không
+const isThisAppDownloading = computed(() => {
+  if (!selectedContextApp.value || !props.downloadingApps) return false;
+  return !!props.downloadingApps[selectedContextApp.value.id];
+});
+// Hàm xử lý các tác vụ quản lý nâng cao (Đồng bộ với GamePage)
+const handleExtra = (actionType) => {
+  showContextMenu.value = false; // Tắt menu
+
+  // Tùy chọn: Chuyển màn hình sang game đó luôn để người dùng dễ nhìn
+  emit('change-app', selectedContextApp.value);
+
+  // Gửi lệnh ra ngoài App.vue để nó tự xử lý (Mở Modal hoặc gọi C#)
+  setTimeout(() => {
+    emit('extra-action', { type: actionType, id: selectedContextApp.value.id });
+  }, 50);
 };
 </script>
 
@@ -302,5 +460,32 @@ const handleLogout = () => {
   object-fit: contain;
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8));
   pointer-events: none;
+}
+
+/* Tút lại viền và bóng đổ cho Box Menu */
+.menu-context-box {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ép chiều cao tối thiểu và hiệu ứng mượt */
+.custom-context-item,
+.custom-context-item-error {
+  min-height: 48px !important;
+  padding: 0 12px !important;
+  transition: all 0.2s ease;
+}
+
+/* Nền xám nhạt mờ khi Hover vào nút CHƠI / CÀI ĐẶT */
+.custom-context-item:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* --- ĐẶC BIỆT CHO NÚT GỠ CÀI ĐẶT --- */
+/* Màu nền xám/đỏ nhạt mặc định giống y chang trong ảnh của bạn */
+
+/* Khi hover vào sẽ ửng đỏ lên một chút cho nguy hiểm */
+.custom-context-item-error:hover {
+  background-color: rgba(255, 82, 82, 0.12) !important;
 }
 </style>

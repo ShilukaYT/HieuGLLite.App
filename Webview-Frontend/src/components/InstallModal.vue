@@ -39,6 +39,7 @@
               hide-details
               prepend-inner-icon="mdi-application-cog"
               class="rounded-lg"
+              :menu-props="{ maxHeight: 150 }"
             ></v-select>
           </v-col>
           
@@ -56,6 +57,7 @@
               prepend-inner-icon="mdi-android"
               class="rounded-lg"
               :item-props="item => ({ disabled: item.isDisabled })"
+              :menu-props="{ maxHeight: 150 }"
             >
               <template v-slot:no-data>
                 <div class="pa-3 text-caption text-center text-grey">
@@ -80,7 +82,7 @@
             prepend-inner-icon="mdi-folder-open"
           >
             <template v-slot:append-inner>
-              <v-btn color="blue" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
+              <v-btn color="isDark ? 'grey' : 'light-blue'" variant="tonal" size="small" class="rounded-lg font-weight-bold px-4" @click="browseFolder">
                 {{ $t('install_modal.btn_browse') }}
               </v-btn>
             </template>
@@ -92,17 +94,17 @@
         <v-spacer></v-spacer>
         <v-btn variant="text" class="px-6 font-weight-bold" @click="closeModal">{{ $t('install_modal.btn_cancel') }}</v-btn>
         <v-btn 
-          color="blue" 
-          variant="elevated" 
-          class="px-8 font-weight-bold text-white" 
-          rounded="pill" 
-          elevation="6"
-          :disabled="!selectedAndroidObj"
-          @click="confirmInstall"
-        >
-          <v-icon icon="mdi-monitor-arrow-down-variant" class="mr-2"></v-icon> 
-          {{ isMultiInstance ? $t('install_modal.btn_integrate_now') : $t('install_modal.btn_install_now') }}
-        </v-btn>
+  color="blue" 
+  variant="elevated" 
+  class="px-8 font-weight-bold text-white" 
+  rounded="pill" 
+  elevation="6"
+  prepend-icon="mdi-download" 
+  :disabled="!selectedAndroidObj"
+  @click="confirmInstall"
+>
+  {{ isMultiInstance ? $t('install_modal.btn_integrate_now') : $t('install_modal.btn_install_now') }}
+</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

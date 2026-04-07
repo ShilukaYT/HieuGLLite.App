@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "Hieu GL Lite"
-#define MyAppVersion "26.3.14"
+#define MyAppVersion "26.4.3"
 #define MyAppPublisher "Hieu GL Lite"
 #define MyAppURL "https://sites.google.com/view/hieugllite"
 #define MyAppExeName "HieuGLLite.Apps.exe"

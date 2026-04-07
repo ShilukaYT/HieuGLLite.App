@@ -304,4 +304,34 @@ Tiến trình chơi của bạn có thể sẽ không được lưu lại!</valu
   <data name="ToastUninstallTitle" xml:space="preserve">
     <value>Gỡ cài đặt hoàn tất</value>
   </data>
+  <data name="EmailOtpSubject" xml:space="preserve">
+    <value>[Hiếu GL Lite's App - No Reply] Mã xác minh danh tính (OTP)</value>
+  </data>
+  <data name="EmailOtpBody" xml:space="preserve">
+    <value>&lt;div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'&gt;
+    &lt;h2 style='color: #EA4335;'&gt;Xác minh bảo mật&lt;/h2&gt;
+    &lt;p&gt;Bạn đã yêu cầu cài đặt một ứng dụng cần xác minh danh tính.&lt;/p&gt;
+    &lt;p&gt;Mã OTP của bạn là: &lt;b style='font-size: 24px; color: #1a73e8; letter-spacing: 2px;'&gt;{0}&lt;/b&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;i&gt;Mã này sẽ hết hạn sau một thời gian ngắn. Vui lòng không chia sẻ mã này cho bất kỳ ai!&lt;/i&gt;&lt;/p&gt;
+&lt;/div&gt;</value>
+  </data>
+  <data name="MsgErrSpaceSameDrive" xml:space="preserve">
+    <value>Ổ đĩa {0} không đủ dung lượng. Cần tối thiểu {1:F2}GB (bao gồm {2:F2}GB cài đặt + 5.0GB bộ đệm), nhưng chỉ còn {3:F2}GB.</value>
+  </data>
+  <data name="MsgErrSpaceInstallDrive" xml:space="preserve">
+    <value>Ổ đĩa cài đặt {0} không đủ dung lượng. Cần {1:F2}GB, nhưng chỉ còn {2:F2}GB.</value>
+  </data>
+  <data name="MsgErrSpaceTempDrive" xml:space="preserve">
+    <value>Ổ đĩa hệ thống {0} không đủ để lưu trữ bộ nhớ đệm tải xuống. Cần tối thiểu 5.00GB trống, nhưng chỉ còn {1:F2}GB.</value>
+  </data>
+  <data name="DialogSelectFolder" xml:space="preserve">
+    <value>Chọn thư mục cài đặt ứng dụng!</value>
+  </data>
+  <data name="AnotherEmulator" xml:space="preserve">
+    <value>một phiên bản giả lập khác (cùng lõi hệ thống)</value>
+  </data>
+  <data name="MsgConfirmLogout" xml:space="preserve">
+    <value>Bạn có muốn đăng xuất tài khoản không?
+Danh sách ứng dụng sẽ được làm mới!</value>
+  </data>
 </root>

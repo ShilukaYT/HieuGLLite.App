@@ -25,13 +25,15 @@
        <b class="text-primary">{{ maskedEmail }}</b>
         
         <div class="mt-6 mb-2">
-          <v-otp-input
-            v-model="otpCode"
-            :length="6"
-            :disabled="isLoading"
-            focus-all
-            @finish="submitOtp"
-          ></v-otp-input>
+         <v-otp-input
+          v-model="otpCode"
+          :length="6"
+          type="text" 
+          inputmode="numeric" pattern="[0-9]*"
+          :disabled="isLoading"
+          focus-all
+          @finish="submitOtp"
+        ></v-otp-input>
         </div>
         
         <div class="text-caption text-error font-weight-bold" v-if="errorMessage" style="min-height: 20px;">

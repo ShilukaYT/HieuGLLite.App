@@ -34,9 +34,17 @@
       <div v-if="!isAppLocked">
 
 
-        <Sidebar :apps="apps" :active-id="selectedApp?.id" :user="user" @change-app="selectedApp = $event"
-          @open-settings="showSettings = true" @logout="user = null" />
-
+       <Sidebar 
+          :apps="apps" 
+          :active-id="selectedApp?.id" 
+          :user="user" 
+          :downloading-apps="downloadingApps" 
+          @change-app="selectedApp = $event"
+          @open-settings="showSettings = true" 
+          @logout="user = null" 
+          @open-install="handleOpenInstallModal" 
+          @extra-action="handleExtraAction" 
+        />
         <v-main class="h-100 w-100">
           <GamePage v-if="selectedApp && !isMaintenance && !isNotInWebView" :app="selectedApp"
             :downloading-apps="downloadingApps" :stage-config="stageConfig" @play="handlePlayApp(selectedApp)"
@@ -185,18 +193,18 @@ const apps = ref([]);
 const isMaintenance = ref(false);
 const hasCheckedUpdate = ref(false); // Biến đánh dấu đã check update chưa
 const manifest = ref({
-  FE_version: '26.4.1 (Public Beta)',
-  FE_versioncode: '260401',
+  FE_version: '26.4.3 (Public Beta)',
+  FE_versioncode: '260403',
   BE_version: null,
   BE_versioncode: null,
-  BE_version_latest: '26.4.1',
-  BE_versioncode_latest: '260401',
-  release_date: '2026-04-01',
+  BE_version_latest: '26.4.3',
+  BE_versioncode_latest: '260403',
+  release_date: '2026-04-07',
   changelog: t('manifest.changelog_current'),
   isMaintenance: false,
-  minRequiredVersionCode: '260313',
+  minRequiredVersionCode: '260403',
   updateUrl: 'https://github.com/ShilukaYT/HieuGLLite.App/releases/latest/download/HieuGLLiteAppsSetup.exe',
-  sha256: "c7a812fdad56410aa9c2db1a3b82036b2a9890e3cd5eaba6f45dc0087a8efd61"
+  sha256: "0B2CCA3E6DEE58CA0E8399FB99A404D2741AE2A52AF3C75E92AC2F9D514ED944"
 });
 
 watch(locale, () => {
@@ -212,7 +220,9 @@ const isWin11 = ref(true);
 
 
 onMounted(async () => {
-  showWelcomeModal.value = true;
+  if (!isAppLocked.value) {
+    showWelcomeModal.value = true;
+  }
   // =======================================================
   // BƯỚC 1: ĐEO TAI NGHE TRƯỚC KHI LÀM BẤT CỨ VIỆC GÌ
   // =======================================================
@@ -228,18 +238,17 @@ onMounted(async () => {
           }
           manifest.value.BE_version = res.version;
           manifest.value.BE_versioncode = res.versioncode;
-          // BỔ SUNG LOGIC ÉP TIẾNG VIỆT CHO BẢN CŨ
-          if (parseInt(res.versioncode) <= 260314) {
-            console.log("Phát hiện Client cũ, ép sử dụng Tiếng Việt!");
-            userSettings.value.language = 'vi-VN';
-            locale.value = 'vi-VN';
-          }
           break;
 
         case 'APPS_DATA':
           apps.value = res.data;
           if (apps.value.length > 0) {
-            selectedApp.value = apps.value[0];
+            // NẾU ĐÃ CHỌN APP TỪ TRƯỚC -> TÌM VÀ GIỮ NGUYÊN. NẾU CHƯA -> CHỌN APP ĐẦU TIÊN
+            if (selectedApp.value) {
+              selectedApp.value = apps.value.find(a => a.id === selectedApp.value.id) || apps.value[0];
+            } else {
+              selectedApp.value = apps.value[0];
+            }
           }
           snackbarText.value = t('app.messages.apps_updated');
           showSnackbar.value = true;
@@ -393,7 +402,10 @@ onMounted(async () => {
           otpIsLoading.value = false;
           otpErrorMessage.value = "Mã OTP không chính xác hoặc đã hết hạn!";
           break;
-        
+
+        case 'LOGOUT_SUCCESS':
+          user.value = null;
+          break;
       }
     });
 
@@ -403,20 +415,20 @@ onMounted(async () => {
     window.chrome.webview.postMessage({ type: "GET_SETTINGS" });
   }
 
-  // =======================================================
-  // BƯỚC 3: CHECK IP (Sẽ làm Vue bị delay một lát)
-  // =======================================================
-  try {
-    const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
-    const ipData = await ipRes.json();
+  // // =======================================================
+  // // BƯỚC 3: CHECK IP (Sẽ làm Vue bị delay một lát)
+  // // =======================================================
+  // try {
+  //   const ipRes = await fetch('https://cloud.bluestacks.com/api/getcountryforip');
+  //   const ipData = await ipRes.json();
 
-    if (ipData && ipData.country && ipData.country !== 'VN') {
-      isRegionBlocked.value = true;
-      console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
-    }
-  } catch (error) {
-    console.log("Không thể kiểm tra vùng, tạm thời bỏ qua.");
-  }
+  //   if (ipData && ipData.country && ipData.country !== 'VN') {
+  //     isRegionBlocked.value = true;
+  //     console.warn(`Đã chặn truy cập từ quốc gia: ${ipData.country}`);
+  //   }
+  // } catch (error) {
+  //   console.log("Không thể kiểm tra vùng, tạm thời bỏ qua.");
+  // }
 
   isMaintenance.value = manifest.value.isMaintenance;
 
@@ -737,7 +749,7 @@ const userSettings = ref({
 // App.vue
 const downloadingApps = ref({});
 const stageConfig = computed(() => ({
-  'WAITING': { text: t('app.stages.waiting'), color: 'amber', loading: true },
+  'WAITING': { text: t('app.stages.waiting'), color: 'warning', loading: true },
   'DOWNLOADING_EXE': { text: t('app.stages.downloading_exe'), color: 'blue', loading: false },
   'DOWNLOADING_ANDROID': { text: t('app.stages.downloading_android'), color: 'cyan', loading: false },
   'MERGING': { text: t('app.stages.merging'), color: 'deep-purple', loading: true },
@@ -1094,17 +1106,25 @@ img {
   }
 }
 
-/* Ẩn thanh cuộn cho toàn bộ trang */
-html,
-body {
-  overflow: hidden !important;
-  /* Ngăn chặn cuộn */
-  height: 100%;
-  margin: 0;
+/* 1. Chỉ ẩn thanh cuộn của khung trang chính (để app giống launcher native) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#app-container::-webkit-scrollbar {
+  display: none;
 }
 
-/* Ẩn thanh cuộn nhưng vẫn cho phép cuộn bằng chuột (nếu cần) */
+/* 2. Hiển thị thanh cuộn bo góc mờ mờ cho các thành phần con (như Dropdown, Modal) */
 ::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
 }
 </style>

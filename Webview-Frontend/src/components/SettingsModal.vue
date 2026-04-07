@@ -44,11 +44,15 @@
             </div>
             <v-list bg-transparent class="pa-0">
               <v-list-item class="px-0">
-                <v-list-item-title class="text-medium-emphasis">{{ $t('settings.display_mode') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ $t('settings.theme_desc') }}</v-list-item-subtitle>
+                <v-list-item-title class="text-high-emphasis font-weight-medium">
+                  {{ $t('settings.display_mode') }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-high-emphasis font-weight-medium mt-1">
+                  {{ $t('settings.theme_desc') }}
+                </v-list-item-subtitle>
 
                 <template v-slot:append>
-                  <v-btn-toggle v-model="themePreference" mandatory color="warning" variant="tonal" rounded="pill"
+                  <v-btn-toggle v-model="themePreference" mandatory color="gray" variant="tonal" rounded="pill"
                     :disabled="!isWin11" @update:model-value="applyThemePreference">
                     <v-btn value="light" size="small">
                       <v-icon icon="mdi-white-balance-sunny" class="mr-1"></v-icon> {{ $t('settings.light') }}
@@ -77,10 +81,14 @@
             </div>
             <v-list bg-transparent class="pa-0">
               <v-list-item class="px-0">
-                <v-list-item-title class="text-medium-emphasis">{{ $t('settings.close_behavior') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ $t('settings.close_behavior_desc') }}</v-list-item-subtitle>
+                <v-list-item-title class="text-high-emphasis font-weight-medium">
+                  {{ $t('settings.close_behavior') }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="text-medium-emphasis mt-1">
+                  {{ $t('settings.close_behavior_desc') }}
+                </v-list-item-subtitle>
                 <template v-slot:append>
-                  <v-btn-toggle v-model="closeBehavior" mandatory color="primary" variant="tonal" rounded="pill"
+                  <v-btn-toggle v-model="closeBehavior" mandatory color="" variant="tonal" rounded="pill"
                     @update:model-value="applyCloseBehavior">
                     <v-btn value="tray" size="small"><v-icon icon="mdi-tray-arrow-down" class="mr-1"></v-icon> {{
                       $t('settings.tray') }}</v-btn>
@@ -95,19 +103,24 @@
 
               <div class="d-flex align-center text-h6 font-weight-bold mb-4">
                 <v-icon icon="mdi-earth" class="mr-2"></v-icon> {{ $t('settings.language_block') }}
-              </div> 
+              </div>
               <v-list bg-transparent class="pa-0">
                 <v-list-item class="px-0">
-                  <v-list-item-title class="text-medium-emphasis">{{ $t('settings.language') }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ $t('settings.language_desc') }}</v-list-item-subtitle>
+                  <v-list-item-title class="text-high-emphasis font-weight-medium">
+                    {{ $t('settings.language') }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="text-medium-emphasis mt-1">
+                    {{ $t('settings.language_desc') }}
+                  </v-list-item-subtitle>
 
                   <template v-slot:append>
                     <div style="width: 160px;">
                       <v-select v-model="languagePreference" :items="[
                         { title: 'Tiếng Việt', value: 'vi-VN' },
                         { title: 'English', value: 'en-US' }
-                      ]" item-title="title" item-value="value" variant="solo-filled" flat rounded="pill"
-                        density="compact" hide-details color="primary" class="text-center" bg-color="#2a2a2a"
+                      ]" item-title="title" item-value="value" variant="solo-filled" flat rounded="lg "
+                        density="compact" hide-details :color="isDark ? 'white' : 'black'" class="text-center"
+                        :bg-color="isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)'"
                         menu-props="{ rounded: 'xl', elevation: 4 }" @update:model-value="applyLanguagePreference">
                       </v-select>
                     </div>
@@ -133,10 +146,12 @@
                       }}</span>
                   </div>
                 </div>
-                <v-btn color="primary" variant="tonal" class="rounded-lg update-btn px-5" height="48"
+                <v-btn :color="hasUpdate ? 'success' : (isDark ? 'white' : 'black')" variant="tonal"
+                  class="rounded-lg px-5" :class="{ 'update-btn': hasUpdate }" height="48" :disabled="!hasUpdate"
                   @click="$emit('check-update')">
-                  <v-icon start icon="mdi-refresh" size="24" class="update-icon"></v-icon>{{ $t('settings.check_update')
-                  }}
+                  <v-icon start :icon="hasUpdate ? 'mdi-download-circle' : 'mdi-check-circle'" size="24"
+                    :class="{ 'update-icon': hasUpdate }"></v-icon>
+                  {{ hasUpdate ? $t('settings.check_update') : $t('settings.latest_version') }}
                 </v-btn>
               </div>
               <v-divider class="mb-5 opacity-20"></v-divider>
@@ -145,8 +160,8 @@
                   <div class="text-subtitle-1 font-weight-bold mb-0">{{ $t('settings.update_app_list') }}</div>
                   <div class="text-caption text-medium-emphasis">{{ $t('settings.update_app_list_desc') }}</div>
                 </div>
-                <v-btn color="primary" variant="tonal" class="rounded-lg px-5" :class="{ 'update-btn': !isCooldown }"
-                  height="48" :disabled="isCooldown" @click="handleGetApps">
+                <v-btn :color="isDark ? 'white' : 'black'" variant="tonal" class="rounded-lg px-5"
+                  :class="{ 'update-btn': !isCooldown }" height="48" :disabled="isCooldown" @click="handleGetApps">
                   <v-icon start icon="mdi-refresh" size="24" :class="{ 'update-icon': !isCooldown }"></v-icon>
                   {{ isCooldown ? $t('settings.try_again_later', { time: cooldownTime }) : $t('settings.update_now') }}
                 </v-btn>
@@ -154,7 +169,7 @@
               <v-divider class="mb-5 opacity-20"></v-divider>
               <div class="px-2 mb-4">
                 <div class="text-body-1 font-weight-bold mb-3 d-flex align-center">
-                  <v-icon icon="mdi-text-box-outline" start color="primary" size="small"></v-icon>
+                  <v-icon icon="mdi-text-box-outline" start :color="isDark ? 'white' : 'black'" size="small"></v-icon>
                   {{ $t('settings.update_details', { version: props.app?.BE_version_latest }) }}
                 </div>
                 <v-card variant="flat" :color="isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'"
@@ -203,11 +218,11 @@
 
           <v-window-item value="about">
             <div class="text-center mt-4">
-              <v-avatar size="100" variant="tonal" class="mb-4">
+              <v-avatar size="100" variant="" class="mb-4">
                 <img src="../assets/images/logo.png" style="width: 100%; height: 100%; object-fit: contain;">
               </v-avatar>
-              <div class="text-h4 font-weight-black mb-2">Hieu GL Lite</div>
-              <v-card variant="tonal" :color="isDark ? 'grey' : 'primary'" class="mt-8 pa-4 rounded-lg text-left">
+              <div class="text-h4 font-weight-bold mb-2">{{ $t('settings.AppName') }}</div>
+              <v-card variant="tonal" :color="isDark ? 'white' : 'black'" class="mt-8 pa-4 rounded-lg text-left">
                 <div class="text-body-2 mb-1" v-html="$t('settings.developed_by')"></div>
                 <div class="text-body-2 text-medium-emphasis">{{ $t('settings.based_on') }}</div>
               </v-card>
@@ -234,6 +249,12 @@ const theme = useTheme();
 const isDark = computed(() => theme.global.current.value.dark);
 const isOpen = ref(true);
 const tab = ref('general');
+
+const hasUpdate = computed(() => {
+  const currentCode = parseInt(props.app?.BE_versioncode || "0");
+  const latestCode = parseInt(props.app?.BE_versioncode_latest || "0");
+  return latestCode > currentCode;
+});
 
 const GetClientVersion = () => {
   if (window.chrome?.webview) {

@@ -59,8 +59,8 @@ namespace HieuGLLite.Apps
 		public bool isDevMode = false;
 
 		public string AppName;
-		public string version = "26.4.1 (Public Beta)";
-		public int versioncode = 260401;
+		public string version = "26.4.3 (Public Beta)";
+		public int versioncode = 260403;
 
 		public string FE_version;
 
@@ -486,6 +486,13 @@ namespace HieuGLLite.Apps
 						Main.WriteLog("INFO", "Requested to open the folder selection dialog box.");
 						using (FolderBrowserDialog fbd = new FolderBrowserDialog())
 						{
+							// --- THÊM DÒNG NÀY ĐỂ HIỆN TIÊU ĐỀ ---
+							fbd.Description = Lang.DialogSelectFolder;
+
+							// 💡 Mẹo: Nếu bạn đang dùng .NET Core hoặc .NET 5/6/7/8 trở lên, 
+							// thêm dòng dưới đây sẽ đẩy chữ lên hẳn thanh Title bar cực đẹp!
+							fbd.UseDescriptionForTitle = true;
+
 							if (fbd.ShowDialog(this) == DialogResult.OK)
 							{
 								string selectedPath = fbd.SelectedPath;
@@ -576,12 +583,19 @@ namespace HieuGLLite.Apps
 					break;
 
 				case "LOGOUT_DISCORD":
-					if (System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HieuGLLite.Apps", "accounts_encryption_key.dat")))
+					var LogOutResult = CustomMessageBox.Show(Lang.MsgConfirmLogout, Lang.MsgConfirmTitle, true);
+					if (LogOutResult == DialogResult.Yes)
 					{
-						System.IO.File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HieuGLLite.Apps", "accounts_encryption_key.dat"));
+						if (System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HieuGLLite.Apps", "accounts_encryption_key.dat")))
+						{
+							System.IO.File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HieuGLLite.Apps", "accounts_encryption_key.dat"));
+						}
+						currentUserRoles = new List<string>();
+						webView21.CoreWebView2.PostWebMessageAsJson($@"{{
+							""type"": ""LOGOUT_SUCCESS""
+						}}");
+						GetData();
 					}
-					currentUserRoles = new List<string>();
-					GetData();
 					break;
 
 				case "GET_APPS":
@@ -1077,15 +1091,9 @@ namespace HieuGLLite.Apps
 
 							var mailMessage = new System.Net.Mail.MailMessage
 							{
-								From = new System.Net.Mail.MailAddress("hieugllite@gmail.com", "Hiếu GL Lite's App"),
-								Subject = "[Hiếu GL Lite's App - No Reply] Mã xác minh danh tính (OTP)",
-								Body = $@"
-									<div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
-										<h2 style='color: #EA4335;'>Xác minh bảo mật</h2>
-										<p>Bạn đã yêu cầu cài đặt một ứng dụng cần xác minh danh tính.</p>
-										<p>Mã OTP của bạn là: <b style='font-size: 24px; color: #1a73e8; letter-spacing: 2px;'>{currentOtp}</b></p>
-										<p><i>Mã này sẽ hết hạn sau một thời gian ngắn. Vui lòng không chia sẻ mã này cho bất kỳ ai!</i></p>
-									</div>",
+								From = new System.Net.Mail.MailAddress("hieugllite@gmail.com", "Hieu GL Lite's App"),
+								Subject = Lang.EmailOtpSubject,
+								Body = string.Format(Lang.EmailOtpBody, currentOtp),
 								IsBodyHtml = true,
 							};
 
@@ -1283,12 +1291,18 @@ namespace HieuGLLite.Apps
 						app.programPath = "";
 						app.dataPath = "";
 
+						foreach (var a in globalAppList)
+						{
+							CheckAppInstallation(a);
+						}
+
 						WriteLog("INFO", $"Updating app location");
 						SaveAppListToDisk();
 
 						SendStatusToVue(appId, "APP_UNINSTALLED", new { });
 						ShowToastWithIconAsync(app.id, Lang.ToastUninstallTitle, string.Format(Lang.ToastUninstallMessage, app.name), app.icon);
 						SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
+						GetData();
 					}
 				}
 				catch (Exception ex)
@@ -1342,7 +1356,13 @@ namespace HieuGLLite.Apps
 					app.conflictAppID = "";
 					app.conflictAppName = "";
 
+					foreach (var a in globalAppList)
+					{
+						CheckAppInstallation(a);
+					}
+
 					SetTaskbarState(TaskbarProgressBarStatus.NoProgress);
+					GetData();
 					return true;
 				}
 			}
@@ -2095,20 +2115,54 @@ namespace HieuGLLite.Apps
 
 			string checkPath = !string.IsNullOrEmpty(selectedPath) ? selectedPath :
 							  (!string.IsNullOrEmpty(app.programPath) ? app.programPath : @"C:\");
-			Main.WriteLog("INFO", "Checking free space for the " + checkPath + " folder.");
+
+			// Lấy chính xác tên ổ đĩa (VD: "C:\", "D:\")
+			string installDrive = Path.GetPathRoot(Path.GetFullPath(checkPath));
+			string tempDrive = Path.GetPathRoot(Path.GetFullPath(DownloadFolder)); // Mặc định ở AppData (Thường là ổ C)
 
 			double requiredGB = (double)app.requiredSize / (1024 * 1024 * 1024);
-			double freeGB = GetFreeSpaceGB(checkPath);
+			double installFreeGB = GetFreeSpaceGB(installDrive);
+			double tempFreeGB = GetFreeSpaceGB(tempDrive);
 
-			if (freeGB < requiredGB)
+			Main.WriteLog("INFO", $"Checking space. Install Drive ({installDrive}): {installFreeGB:F2}GB free. Temp Drive ({tempDrive}): {tempFreeGB:F2}GB free.");
+
+			bool hasEnoughSpace = true;
+			string errorMsg = "";
+
+			// 1. Nếu cài thẳng vào ổ chứa thư mục Temp (Thường là ổ C) -> Cần cộng dồn dung lượng
+			if (string.Equals(installDrive, tempDrive, StringComparison.OrdinalIgnoreCase))
 			{
-				Main.WriteLog("WARNING", $"Insufficient space for installation, requires {requiredGB:F2}GB, currently has {freeGB:F2}GB.");
+				double totalRequiredGB = requiredGB + 5.0; // Dung lượng cài + 5GB bộ đệm
+				if (installFreeGB < totalRequiredGB)
+				{
+					hasEnoughSpace = false;
+					errorMsg = string.Format(Lang.MsgErrSpaceSameDrive, installDrive, totalRequiredGB, requiredGB, installFreeGB);
+				}
+			}
+			// 2. Nếu cài sang ổ khác (VD: Cài game sang D, tải tạm ở C) -> Check riêng 2 ổ
+			else
+			{
+				if (installFreeGB < requiredGB)
+				{
+					hasEnoughSpace = false;
+					errorMsg = string.Format(Lang.MsgErrSpaceInstallDrive, installDrive, requiredGB, installFreeGB);
+				}
+				else if (tempFreeGB < 5.0)
+				{
+					hasEnoughSpace = false;
+					errorMsg = string.Format(Lang.MsgErrSpaceTempDrive, tempDrive, tempFreeGB);
+				}
+			}
 
+			// Nếu không đủ dung lượng thì chặn lại luôn
+			if (!hasEnoughSpace)
+			{
+				Main.WriteLog("WARNING", $"Insufficient space: {errorMsg}");
 				SetTaskbarState(TaskbarProgressBarStatus.Error);
+
 				this.Invoke((MethodInvoker)delegate
 				{
-					string msg = string.Format(Lang.MsgWarnInsufficientSpace, Path.GetPathRoot(checkPath), requiredGB, freeGB);
-					CustomMessageBox.Show(msg, Lang.MsgWarnTitle, false);
+					CustomMessageBox.Show(errorMsg, Lang.MsgWarnTitle, false);
 				});
 
 				Main.WriteLog("WARNING", "The installer has been cancelled.");
@@ -2161,7 +2215,7 @@ namespace HieuGLLite.Apps
 					Main.WriteLog("INFO", "Request to remove conflicting applications.");
 
 					DialogResult result = DialogResult.None;
-					string conflictName = !string.IsNullOrEmpty(app.conflictAppName) ? app.conflictAppName : "một phiên bản giả lập khác (cùng lõi hệ thống)";
+					string conflictName = !string.IsNullOrEmpty(app.conflictAppName) ? app.conflictAppName : Lang.AnotherEmulator;
 
 					this.Invoke((MethodInvoker)delegate
 					{
@@ -2391,6 +2445,14 @@ namespace HieuGLLite.Apps
 						if (System.IO.File.Exists(stateFile)) System.IO.File.Delete(stateFile);
 
 						WriteLog("INFO", $"Updating the application's path.");
+
+						// --- BẮT BUỘC QUÉT LẠI TOÀN BỘ DANH SÁCH ---
+						// Để cập nhật đường dẫn (location) chuẩn xác và gắn cờ xung đột cho app khác
+						foreach (var a in globalAppList)
+						{
+							CheckAppInstallation(a);
+						}
+
 						app.dataPath = installPath;
 						SaveAppListToDisk();
 
@@ -2398,6 +2460,7 @@ namespace HieuGLLite.Apps
 
 						SendStatusToVue(appid, "DOWNLOAD_COMPLETED", new { savedPath = app.programPath });
 						ShowToastWithIconAsync(appid, Lang.ToastInstallTitle, string.Format(Lang.ToastInstallMessage, app.name), app.icon);
+						GetData();
 					}
 					else
 					{

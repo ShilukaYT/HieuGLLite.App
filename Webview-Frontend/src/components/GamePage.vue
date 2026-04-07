@@ -66,7 +66,7 @@
 
               <p class="text-body-1" :class="isDark ? 'text-grey-lighten-1' : 'text-grey-darken-3'"
                 style="white-space: pre-wrap; line-height: 1.7;">
-                {{  localizedDesc }}
+                {{ localizedDesc }}
               </p>
             </v-card-text>
           </v-card>
@@ -74,48 +74,60 @@
       </v-card-item>
 
       <v-card-actions class="mt-6 px-4 pb-4 flex-column align-stretch">
-        <div v-if="downloadingApps[app.id]" class="modern-notifier-box w-100">
-          <div class="d-flex justify-space-between align-center mb-1">
-            <div class="d-flex flex-column">
-              <span class="app-name-label">{{ stageConfig[downloadingApps[app.id].status]?.text || $t('game_page.paused') }}</span>
-            </div>
-
-            <div v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)"
-              class="d-flex align-center">
-
-              <v-btn icon variant="text" size="small" density="compact" class="mr-1"
-                :color="downloadingApps[app.id].status === 'PAUSED' ? 'success' : 'warning'"
-                @click.stop="$emit('toggle-pause', app.id)">
-                <v-icon size="20">
-                  {{ downloadingApps[app.id].status === 'PAUSED' ? 'mdi-play-circle' : 'mdi-pause-circle' }}
-                </v-icon>
-              </v-btn>
-
-              <v-btn icon variant="text" size="small" density="compact" color="error" class="mr-3"
-                @click.stop="$emit('confirm-cancel', app.id)">
-                <v-icon size="20">mdi-close-circle</v-icon>
-              </v-btn>
-
-              <span class="huge-percent">{{ Math.ceil(downloadingApps[app.id].percent) }}<small>%</small></span>
-            </div>
-          </div>
+        <div v-if="downloadingApps[app.id]" class="w-100 d-flex align-stretch mb-2" style="gap: 12px; height: 68px;">
 
           <v-progress-linear :model-value="downloadingApps[app.id].percent"
-            :color="stageConfig[downloadingApps[app.id].status]?.color" height="6" rounded
-            :indeterminate="stageConfig[downloadingApps[app.id].status]?.loading"></v-progress-linear>
+            :color="stageConfig[downloadingApps[app.id].status]?.color || 'primary'"
+             height="68" rounded="xl" class="flex-grow-1 custom-bar position-relative overflow-hidden"
+            :indeterminate="stageConfig[downloadingApps[app.id].status]?.loading"
+            :style="{ border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(0, 0, 0, 0.15)' }"
+            :bg-color="isDark ? '#121212' : '#333333'" 
+            :bg-opacity="0.9" >
+            <div class="w-100 d-flex align-center px-4" style="height: 100%; z-index: 2;">
+              
+              <div v-if="!stageConfig[downloadingApps[app.id].status]?.loading" 
+                   class="d-flex align-baseline mr-5" 
+                   :class="'text-white'">
+                <span class="font-weight-regular" style="font-size: 36px; font-family: 'Google Sans', sans-serif;">
+                  {{ Math.ceil(downloadingApps[app.id].percent || 0) }}
+                </span>
+                <span class="font-weight-regular" style="font-size: 20px; font-family: 'Google Sans', sans-serif;">%</span>
+              </div>
 
+              <div class="d-flex flex-column justify-center" 
+                   :class="'text-white'">
+                 <span class="font-weight-regular" style="font-size: 26px; font-family: 'Google Sans', sans-serif;">
+                   {{ 
+                     ['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID'].includes(downloadingApps[app.id].status) 
+                       ? (downloadingApps[app.id].speed || '0 MB/s') 
+                       : (stageConfig[downloadingApps[app.id].status]?.text || $t('app.stages.pause')) 
+                   }}
+                 </span>
+                 <span v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)" 
+                       style="font-size: 14px; opacity: 0.9; font-family: 'Google Sans', sans-serif;">
+                   {{ downloadingApps[app.id].downloaded  }}
+                 </span>
+              </div>
+            </div>
+          </v-progress-linear>
 
-          <div v-if="downloadingApps[app.id].downloaded || downloadingApps[app.id].speed"
-            class="d-flex justify-space-between mt-1 metrics-footer">
-            <span class="mono-font">
-              <v-icon size="10" class="mr-1">mdi-harddisk</v-icon>
-              {{ downloadingApps[app.id].downloaded }}
-            </span>
-            <span class="mono-font speed-highlight">
-              <v-icon size="10" class="mr-1" color="primary">mdi-wifi</v-icon>
-              {{ downloadingApps[app.id].speed }}
-            </span>
-          </div>
+          <template v-if="!stageConfig[downloadingApps[app.id].status]?.loading">
+
+            <v-btn v-if="['DOWNLOADING_EXE', 'DOWNLOADING_ANDROID', 'PAUSED'].includes(downloadingApps[app.id].status)"
+              :color="downloadingApps[app.id].status === 'PAUSED' ? 'success' : 'warning'"
+              class="rounded-xl fill-height" style="min-width: 68px; padding: 0;" variant="flat" elevation="0"
+              @click.stop="$emit('toggle-pause', app.id)">
+              <v-icon size="36" color="white">{{ downloadingApps[app.id].status === 'PAUSED' ? 'mdi-play' : 'mdi-pause'
+                }}</v-icon>
+            </v-btn>
+
+            <v-btn color="#ff4b4b" class="rounded-xl fill-height" style="min-width: 68px; padding: 0;" variant="flat"
+              elevation="0" @click.stop="$emit('confirm-cancel', app.id)">
+              <v-icon size="36" color="white">mdi-close</v-icon>
+            </v-btn>
+
+          </template>
+
         </div>
 
         <template v-else>
@@ -134,7 +146,7 @@
                 <v-icon start icon="mdi-play" class="mr-2"></v-icon> {{ $t('game_page.open_app') }}
               </v-btn>
 
-              <v-menu location="top end" transition="slide-y-reverse-transition">
+              <v-menu location="top end" transition="slide-y-reverse-transition" >
                 <template v-slot:activator="{ props }">
                   <v-btn v-bind="props" color="success" variant="tonal" size="x-medium" style="gap: 8px;" icon="mdi-cog"
                     rounded="pill">
@@ -154,21 +166,19 @@
                     @click="$emit('extra-action', { type: 'BACKUP', id: app.id })">
                   </v-list-item>
 
-                  <v-list-item prepend-icon="mdi-cloud-download" :title="$t('game_page.restore')" class="rounded-lg mb-1"
-                    @click="$emit('extra-action', { type: 'RESTORE', id: app.id })">
+                  <v-list-item prepend-icon="mdi-cloud-download" :title="$t('game_page.restore')"
+                    class="rounded-lg mb-1" @click="$emit('extra-action', { type: 'RESTORE', id: app.id })">
                   </v-list-item>
 
                   <v-divider class="my-1"></v-divider>
 
-                  <v-list-item 
-                    prepend-icon="mdi-source-branch" 
-                    :title="$t('game_page.change_version')"
-                    class="rounded-lg text-primary" 
-                    @click="$emit('extra-action', { type: 'CHANGE_VERSION', id: app.id })"> 
+                  <v-list-item prepend-icon="mdi-source-branch" :title="$t('game_page.change_version')"
+                    class="rounded-lg text-primary"
+                    @click="$emit('extra-action', { type: 'CHANGE_VERSION', id: app.id })">
                   </v-list-item>
 
-                  <v-list-item prepend-icon="mdi-trash-can-outline" :title="$t('game_page.uninstall')" class="rounded-lg text-error"
-                    @click="$emit('extra-action', { type: 'UNINSTALL', id: app.id })">
+                  <v-list-item prepend-icon="mdi-trash-can-outline" :title="$t('game_page.uninstall')"
+                    class="rounded-lg text-error" @click="$emit('extra-action', { type: 'UNINSTALL', id: app.id })">
                   </v-list-item>
                 </v-list>
               </v-menu>
@@ -187,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted ,watch} from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import { useI18n } from 'vue-i18n'; // Khai báo i18n
 
@@ -209,9 +219,9 @@ const isDark = computed(() => theme.global.current.value.dark);
 // Hàm gửi tiêu đề lên C#
 const updateWindowTitle = (name) => {
   if (window.chrome?.webview && name) {
-    window.chrome.webview.postMessage({ 
-      type: "CHANGE_TITLE", 
-      title: name 
+    window.chrome.webview.postMessage({
+      type: "CHANGE_TITLE",
+      title: name
     });
   }
 };
@@ -220,7 +230,7 @@ const updateWindowTitle = (name) => {
 onMounted(() => {
   window.chrome.webview.postMessage({ type: "SYNC_DOWNLOAD_STATUS" });
 
-updateWindowTitle(props.app?.name);
+  updateWindowTitle(props.app?.name);
 });
 
 // 2. Cập nhật ngay lập tức nếu dữ liệu app thay đổi (Chuyển game)
@@ -338,5 +348,37 @@ const shortDesc = computed(() => {
 
 .custom-bar {
   background: rgba(255, 255, 255, 0.05);
+}
+
+.loading-stripes::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Tăng độ sáng (opacity) từ 0.08 lên 0.15 để nhìn rõ hơn */
+  background-image: linear-gradient(-45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent);
+  background-size: 40px 40px;
+  animation: strip-move 1s linear infinite;
+  pointer-events: none;
+  /* Không cản trở click chuột */
+}
+
+@keyframes strip-move {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 40px 0;
+  }
 }
 </style>
