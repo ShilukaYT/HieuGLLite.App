@@ -149,6 +149,6 @@
         "install_now": "INSTALL NOW"
     },
     "manifest": {
-        "changelog_current": "Version 26.3.13 is required to use!\n\nUpdate 26.4.2: Added versions 5.20.0 (Android 7), 5.21.120 (Android 7), and 5.21.660 (Android 7, Android 9) to BlueStacks 5.\n- The app has now expanded its global testing.\n- Full MessageBox integration across the app\n- Comprehensive activity logging\n- Added English language\n- Bug fixes"
+        "changelog_current": "Version 26.4.3 is required to use!\n\n- Added a right-click menu when clicking on the emulator in the sidebar.\n- Upgraded UI with a new Progress Bar, enhancing user experience.\n- In addition to checking storage for the installation location, it will also check the C:\\ drive to avoid out-of-space errors during installation (Minimum 5GB for C:\\ drive).\n- Logging out of your account will now require confirmation.\n- Fixed application sync issues after installation/uninstallation.\n- Fixed inconsistent language sync issues (Navigation page will use the browser's language).\n- Fixed application sync issues after installation/uninstallation.\n- Fixed inconsistent language sync issues (Navigation page will use the browser's language)."
     }
 }

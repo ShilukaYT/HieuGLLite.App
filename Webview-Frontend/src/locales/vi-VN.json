@@ -149,6 +149,6 @@
         "install_now": "CÀI ĐẶT NGAY"
     },
     "manifest": {
-    "changelog_current": "Yêu cầu phiên bản 26.3.13 để sử dụng\n\nCập nhật 26.4.2: Bổ sung thêm phiên bản 5.20.0 (Android 7), 5.21.120 (Android 7) và 5.21.660 (Android 7, Android 9) cho BlueStacks 5\n- Ứng dụng hiện đã mở rộng phạm vi thử nghiệm toàn cầu.\n- Cập nhật đầy đủ MessageBox cho toàn ứng dụng\n- Cập nhật đầy đủ cho nhật ký hoạt động\n- Thêm ngôn ngữ Tiếng Anh\n- Sửa một số lỗi"
+    "changelog_current": "Yêu cầu phiên bản 26.4.3 để sử dụng\n\n- Thêm Menu chuột phải khi click vào giả lập ở Sidebar\n- Nâng cấp UI với Progress Bar mới, tăng trải nghiệm người dùng\n- Ngoài việc kiểm tra lưu trữ cho vị trí cài đặt, sẽ kiểm tra cả bên ổ C:\\ để tránh lỗi hết dung lượng lưu trữ khi cài đặt (Tối thiểu 5GB cho ổ C:\\)\n- Đăng xuất tài khoản giờ sẽ cần phải xác nhận\n- Sửa lỗi ứng dụng chưa đồng bộ sau khi cài đặt/gỡ cài đặt\n- Sửa lỗi ngôn ngữ chưa đồng bộ đồng đều (Riêng trang điều hướng sẽ sử dụng ngôn ngữ của trình duyệt)"
   }
 }
