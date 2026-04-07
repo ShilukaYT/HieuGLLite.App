@@ -149,6 +149,6 @@
         "install_now": "CÀI ĐẶT NGAY"
     },
     "manifest": {
-    "changelog_current": "Yêu cầu phiên bản 26.4.3 để sử dụng\n\n- Thêm Menu chuột phải khi click vào giả lập ở Sidebar\n- Nâng cấp UI với Progress Bar mới, tăng trải nghiệm người dùng\n- Ngoài việc kiểm tra lưu trữ cho vị trí cài đặt, sẽ kiểm tra cả bên ổ C:\\ để tránh lỗi hết dung lượng lưu trữ khi cài đặt (Tối thiểu 5GB cho ổ C:\\)\n- Đăng xuất tài khoản giờ sẽ cần phải xác nhận\n- Sửa lỗi ứng dụng chưa đồng bộ sau khi cài đặt/gỡ cài đặt\n- Sửa lỗi ngôn ngữ chưa đồng bộ đồng đều (Riêng trang điều hướng sẽ sử dụng ngôn ngữ của trình duyệt)"
-  }
+        "changelog_current": "Yêu cầu phiên bản 26.4.3 để sử dụng\n\n- Thêm Menu chuột phải khi click vào giả lập ở Sidebar\n- Nâng cấp UI với Progress Bar mới, tăng trải nghiệm người dùng\n- Ngoài việc kiểm tra lưu trữ cho vị trí cài đặt, sẽ kiểm tra cả bên ổ C:\\ để tránh lỗi hết dung lượng lưu trữ khi cài đặt (Tối thiểu 5GB cho ổ C:\\)\n- Đăng xuất tài khoản giờ sẽ cần phải xác nhận\n- Sửa lỗi ứng dụng chưa đồng bộ sau khi cài đặt/gỡ cài đặt\n- Sửa lỗi ngôn ngữ chưa đồng bộ đồng đều (Riêng trang điều hướng sẽ sử dụng ngôn ngữ của trình duyệt)"
+    }
 }
